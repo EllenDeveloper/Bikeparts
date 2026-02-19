@@ -1,5 +1,6 @@
 package com.bikeparts.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -22,10 +23,12 @@ public class CartItem {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cart_id", nullable = false)
+    @JsonIgnore  // ← Verhindert zirkuläre Serialisierung
     private Cart cart;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bikepart_id")
+    @JsonIgnore  // ← Verhindert zirkuläre Serialisierung
     private Bikepart bikepart; // nullable - kann auch manuell eingetragen sein
 
     @Column(length = 200)

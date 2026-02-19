@@ -26,11 +26,11 @@ ACCOUNT (Admin) (1) ──< (N) ADMIN_PARTNER_SHOP
 
 in cygwin: 
 Account erzeugen
-curl -X POST http://localhost:8080/api/accounts -H "Content-Type: application/json"  -d '{    "firstname": "Max", "lastname": "Mustermann","email": "max@example.com"}'
+curl -X POST http://localhost:8080/api/accounts -H "Content-Type: application/json"  -d '{    "firstName": "Max", "lastName": "Mustermann","email": "max@example.com"}'
 
 Account mit bike erzeugen  (bei @ManyToOne beziehung ist @JsonIgnore gesetzt!)
-curl -X POST http://localhost:8080/api/accounts  -H "Content-Type: application/json"  -d '{    "firstname": "Marion", "lastname": "Mayer","email": "marion@example.com","bikes": [{"name": "bike1","type": "MTB"}]}'
+curl -X POST http://localhost:8080/api/accounts  -H "Content-Type: application/json"  -d '{    "firstName": "Marion", "lastName": "Mayer","email": "marion@example.com","bikes": [{"name": "bike1","type": "MTB"}]}'
 
 Account mit bike und Bikepart erzeugen  (bei @ManyToOne beziehung ist @JsonIgnore gesetzt!)
-curl -X POST http://localhost:8080/api/accounts  -H "Content-Type: application/json"  -d '{    "firstname": "Marion", "lastname": "Mayer","email": "marion@example.com","bikes": [{"name": "bike1","type": "MTB", "bikeparts": [{"name": "bikepart1","type": "CHAIN" }] }]}'
+curl -X POST http://localhost:8080/api/accounts  -H "Content-Type: application/json"  -d '{    "firstName": "Marion", "lastName": "Mayer","email": "marion@example.com","bikes": [{"name": "bike1","type": "MTB", "bikeparts": [{"name": "bikepart1","type": "CHAIN" }] }]}'
 
