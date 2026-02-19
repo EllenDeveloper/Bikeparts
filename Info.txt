@@ -1,0 +1,36 @@
+
+Basis https://www.java-developer.online/tag-2-spring-data-jpa-basics/
+https://www.java-developer.online/tag-3-jpa-relationships-and-queries/
+Mein Referenzprojekt nur mit JPA
+
+## Entity-Relationship-Diagramm (Textform)
+
+```
+ACCOUNT (1) ──────< (N) BIKE
+BIKE    (1) ──────< (N) BIKEPART
+ACCOUNT (1) ──────< (N) CART
+CART    (1) ──────< (N) CART_ITEM
+BIKEPART (N) ──< (N) CART_ITEM (über bikepartId)
+CART    (1) ──────< (N) SEARCH_RESULT
+CART_ITEM (1) ────< (N) PRODUCT_OFFER
+
+Das hier kommt später
+ACCOUNT (1) ──────< (N) SEARCH_RESULT
+SEARCH_RESULT (1) ──< (N) PRODUCT_OFFER
+ACCOUNT (1) ──────< (N) FAVORITE_SHOP
+ACCOUNT (1) ──────< (N) BLACKLISTED_SHOP
+ACCOUNT (1) ──────< (N) SEARCH_PRIORITY
+ACCOUNT (Admin) (1) ──< (N) ADMIN_PARTNER_SHOP
+```
+
+
+in cygwin: 
+Account erzeugen
+curl -X POST http://localhost:8080/api/accounts -H "Content-Type: application/json"  -d '{    "firstname": "Max", "lastname": "Mustermann","email": "max@example.com"}'
+
+Account mit bike erzeugen  (bei @ManyToOne beziehung ist @JsonIgnore gesetzt!)
+curl -X POST http://localhost:8080/api/accounts  -H "Content-Type: application/json"  -d '{    "firstname": "Marion", "lastname": "Mayer","email": "marion@example.com","bikes": [{"name": "bike1","type": "MTB"}]}'
+
+Account mit bike und Bikepart erzeugen  (bei @ManyToOne beziehung ist @JsonIgnore gesetzt!)
+curl -X POST http://localhost:8080/api/accounts  -H "Content-Type: application/json"  -d '{    "firstname": "Marion", "lastname": "Mayer","email": "marion@example.com","bikes": [{"name": "bike1","type": "MTB", "bikeparts": [{"name": "bikepart1","type": "CHAIN" }] }]}'
+
