@@ -12,5 +12,7 @@ public enum BikepartType {
     BRAKE_V_BRAKE,
     TIRE_29,
     TIRE_27,
-    GEAR_SHIFT  // Schaltung
+    GEAR_SHIFT,     // Schaltung
+    PEDAL,          // Pedale
+    INNER_TUBE      // Fahrradschlauch
 }

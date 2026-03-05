@@ -24,7 +24,7 @@ public class Bikepart {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bike_id", nullable = false)
-    @JsonIgnore  // ← Verhindert zirkuläre Serialisierung
+    @JsonIgnore  // Verhindert zirkuläre Serialisierung
     private Bike bike;
 
     @Enumerated(EnumType.STRING)

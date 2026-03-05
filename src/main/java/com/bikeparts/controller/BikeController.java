@@ -1,11 +1,10 @@
 
 package com.bikeparts.controller;
 
-import com.bikeparts.entity.Account;
-import com.bikeparts.entity.Bike;
-import com.bikeparts.repository.AccountRepository;
-import com.bikeparts.service.BikepartsService;
+import com.bikeparts.entity.*;
+import com.bikeparts.repository.CartItemRepository;
 import com.bikeparts.service.AccountService;
+import com.bikeparts.service.CartService;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
@@ -23,12 +22,16 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/accounts")
-public class AccountController {
+public class BikeController {
     private final AccountService accountService;
+    private final CartItemRepository cartRepository;
+    private final CartService cartService;
 
     @Autowired
-    public AccountController(AccountService accountService) {
+    public BikeController(AccountService accountService, CartItemRepository cartItemRepository, CartService cartService) {
         this.accountService = accountService;
+        this.cartRepository = cartItemRepository;
+        this.cartService = cartService;
     }
 
     @GetMapping
@@ -103,21 +106,36 @@ public class AccountController {
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
-    
-    /**
-     * Adresse zu existierender Person hinzufügen POST
-     * /api/persons/{id}/addresses Body: { "street": "...", "city": "...", ... }
-     */
-//    @PostMapping("/{id}/addresses")
-//    public ResponseEntity<Person> addAddress(
-//            @PathVariable Long id,
-//            @RequestBody Address address) {
-//
-//        return personRepository.findById(id)
-//                .map(person -> {
-//                    person.addAddress(address);  // Helper-Methode synchronisiert!
-//                    return ResponseEntity.ok(personRepository.save(person));
-//                })
-//                .orElse(ResponseEntity.notFound().build());
-//    }
+
+    // Cart zu existierendem Account hinzufügen
+    @PostMapping("/{id}/cart")
+    public ResponseEntity<Account> addCart(
+            @PathVariable Long id,
+            @RequestBody Cart cart) {
+
+        return accountService.findById(id)
+                .map(account -> {
+                    account.addCart(cart);  // Helper-Methode!
+                    return ResponseEntity.ok(accountService.updateAccount(account));
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    // Bikepart zu existierendem Cart eines Accounts hinzufügen
+    @PostMapping("/{id}/cart/bikeparts/{bikepartId}")
+    public ResponseEntity<?> addBikePart(
+            @PathVariable Long id,
+            @PathVariable Long bikepartId) {
+        Account account = accountService.findById(id).orElse(null);
+        if (account == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", "Account " + id + " nicht gefunden"));
+        }
+        if (account.getCart() == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", "Account " + id + " hat keinen Warenkorb"));
+        }
+        cartService.addBikepartToCart(bikepartId, account.getCart().getId());
+        return ResponseEntity.noContent().build();
+    }
 }

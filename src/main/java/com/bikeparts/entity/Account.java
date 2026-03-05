@@ -3,6 +3,7 @@ package com.bikeparts.entity;
 import com.bikeparts.enums.Currency;
 import com.bikeparts.enums.PaymentMethod;
 import com.bikeparts.enums.UserRole;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -26,8 +27,8 @@ public class Account {
     private Long id;
 
     @Column(nullable = false, unique = true, length = 100)
-    @Email(message = "Email muss gültiges Format haben")  // ← Format-Check
-    @NotBlank(message = "Email darf nicht leer sein")  // ← Validierung
+    @Email(message = "Email muss gültiges Format haben") 
+    @NotBlank(message = "Email darf nicht leer sein")  
     private String email;
 
 //    @Column(nullable = false, length = 255)
@@ -42,9 +43,6 @@ public class Account {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private UserRole role = UserRole.USER;
-
-    @Column(nullable = false)
-    private Boolean isActive = true;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
@@ -72,6 +70,9 @@ public class Account {
     private Currency preferredCurrency = Currency.EUR;
 
     @Column(nullable = false)
+    private Boolean isActive = true;
+
+    @Column(nullable = false)
     private Boolean notificationsEnabled = true;
 
     // Relationships
@@ -82,7 +83,7 @@ public class Account {
 //    private void onCreate() {
 //        createdAt = LocalDateTime.now();
 //    }
-    
+
     // Helper-Methoden für bidirectionale Relationship
     public void addBike(Bike bike) {
         bikes.add(bike);
@@ -93,13 +94,27 @@ public class Account {
         bikes.remove(bike);
         bike.setAccount(null);
     }
-    
+
+    // 1:1 – Account ist Owning Side, FK accounts.cart_id → carts.id
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JoinColumn(name = "cart_id")
+    @JsonIgnore
+    private Cart cart;
+
+    public void addCart(Cart cart) {
+        this.cart = cart;
+    }
+
+    public void removeCart() {
+        this.cart = null;
+    }
+
     // Constructors
     public Account() {
     }
 
     public Account(Long id, String email, String password, String firstName, String lastName, 
-                UserRole role, Boolean isActive, LocalDateTime createdAt, LocalDateTime updatedAt, 
+                UserRole role, LocalDateTime createdAt, LocalDateTime updatedAt,
                 LocalDateTime creationDate, LocalDateTime lastLogin, PaymentMethod preferredPaymentMethod, 
                 String language, Currency preferredCurrency, Boolean notificationsEnabled) {
         this.id = id;
@@ -108,7 +123,6 @@ public class Account {
         this.firstName = firstName;
         this.lastName = lastName;
         this.role = role;
-        this.isActive = isActive;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.creationDate = creationDate;
@@ -168,14 +182,6 @@ public class Account {
         this.role = role;
     }
 
-    public Boolean getIsActive() {
-        return isActive;
-    }
-
-    public void setIsActive(Boolean isActive) {
-        this.isActive = isActive;
-    }
-
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -232,12 +238,28 @@ public class Account {
         this.preferredCurrency = preferredCurrency;
     }
 
+    public Boolean getIsActive() {
+        return isActive;
+    }
+
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
+    }
+
     public Boolean getNotificationsEnabled() {
         return notificationsEnabled;
     }
 
     public void setNotificationsEnabled(Boolean notificationsEnabled) {
         this.notificationsEnabled = notificationsEnabled;
+    }
+
+    public Cart getCart() {
+        return cart;
+    }
+
+    public void setCart(Cart cart) {
+        this.cart = cart;
     }
 
     public List<Bike> getBikes() {
@@ -280,7 +302,6 @@ public class Account {
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", role=" + role +
-                ", isActive=" + isActive +
                 ", createdAt=" + createdAt +
                 ", language='" + language + '\'' +
                 '}';

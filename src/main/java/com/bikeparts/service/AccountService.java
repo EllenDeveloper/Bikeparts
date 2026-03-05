@@ -21,27 +21,29 @@ public class AccountService {
 //    @Autowired
 //    private PasswordEncoder passwordEncoder;
 
-        public Account createAccount(Account account) {
-            setAccountRelations(account);
-            setBikePartRelations(account);
-            return accountRepository.save(account);
-        }
+    public Account createAccount(Account account) {
+        setAccountRelations(account);
+        setBikePartRelations(account);
+        return accountRepository.save(account);
+    }
 
-        private void setAccountRelations(Account account) {
-            if (account.getBikes() != null) {
-                account.getBikes().forEach(bike -> bike.setAccount(account));
-            }
+    // TODO: Bidirektionale Beziehung account-bike in unidirektionale ändern!
+//    Bei bike und bikeparts auch
+    private void setAccountRelations(Account account) {
+        if (account.getBikes() != null) {
+            account.getBikes().forEach(bike -> bike.setAccount(account));
         }
+    }
 
-        private void setBikePartRelations(Account account) {
-            if (account.getBikes() != null) {
-                account.getBikes().forEach(bike -> {
-                    if (bike.getBikeparts() != null) {
-                        bike.getBikeparts().forEach(bikepart -> bikepart.setBike(bike));
-                    }
-                });
-            }
+    private void setBikePartRelations(Account account) {
+        if (account.getBikes() != null) {
+            account.getBikes().forEach(bike -> {
+                if (bike.getBikeparts() != null) {
+                    bike.getBikeparts().forEach(bikepart -> bikepart.setBike(bike));
+                }
+            });
         }
+    }
     
 
     public Optional<Account> findById(Long id) {

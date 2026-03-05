@@ -1,0 +1,82 @@
+### POST /api/accounts/{id}/cart/bikeparts/{bikepartId} – Bikepart zum Cart hinzufügen
+POST http://localhost:8080/api/accounts/1/cart/bikeparts/1
+
+###
+
+### POST /api/accounts/{id}/cart – Cart zu Account hinzufügen
+POST http://localhost:8080/api/accounts/1/cart
+Content-Type: application/json
+
+{
+  "name": "Frühjahrs-Wartung 2026"
+}
+
+###
+
+### POST /api/accounts – Account erstellen
+POST http://localhost:8080/api/accounts
+Content-Type: application/json
+
+{
+  "email": "ellen@bikeparts.de",
+  "firstName": "Ellen",
+  "lastName": "Mustermann"
+}
+
+###
+
+@username=dbUser
+@password=password
+GET http://localhost:8080/book
+Authorization: Basic {{username}} {{password}}
+
+
+###
+# falsch: @isbn=978-3826659487
+@isbn=978-3826655487
+GET http://localhost:8080/book/{{isbn}}
+Authorization: Basic {{username}} {{password}}
+
+###
+// Fehler mit Ro, Funktioniert: Robert
+@author=Rob
+GET http://localhost:8080/book?author={{author}}
+Authorization: Basic {{username}} {{password}}
+
+###
+POST http://localhost:8080/book/
+Authorization: Basic {{username}} {{password}}
+Content-Type: application/json
+
+{
+  "isbn": "978-3826655487",
+  "author": "Robert"
+}
+
+
+###
+POST http://localhost:8080/book/createBookWithoutResponseEntity
+Authorization: Basic {{username}} {{password}}
+Content-Type: application/json
+
+{
+  "isbn": "978-3826655487",
+  "author": "Robert"
+}
+
+
+###
+POST http://localhost:8080/book/search
+Authorization: Basic {{username}} {{password}}
+Content-Type: application/json
+
+{
+  "isbn": "978-3826655487",
+  "author": "Robert"
+}
+
+###
+# hier ist falsche isbn angegeben
+@isbnException=978-3826655000
+GET http://localhost:8080/book/isbnException/{{isbnException}}
+Authorization: Basic {{username}} {{password}}

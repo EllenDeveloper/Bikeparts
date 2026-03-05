@@ -20,15 +20,8 @@ public class Cart {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "account_id", nullable = false)
-    private Account account;
-
     @Column(length = 100)
-    private String name; // z.B. "Frühjahrs-Wartung 2026"
-
-    @Column(nullable = false)
-    private Boolean isActive = true; // Nur ein aktiver Cart pro Account
+    private String name;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
@@ -46,12 +39,9 @@ public class Cart {
     public Cart() {
     }
 
-    public Cart(Long id, Account account, String name, Boolean isActive, 
-                LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public Cart(Long id, String name, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
-        this.account = account;
         this.name = name;
-        this.isActive = isActive;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -65,28 +55,12 @@ public class Cart {
         this.id = id;
     }
 
-    public Account getUser() {
-        return account;
-    }
-
-    public void setUser(Account account) {
-        this.account = account;
-    }
-
     public String getName() {
         return name;
     }
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public Boolean getIsActive() {
-        return isActive;
-    }
-
-    public void setIsActive(Boolean isActive) {
-        this.isActive = isActive;
     }
 
     public LocalDateTime getCreatedAt() {
@@ -124,6 +98,14 @@ public class Cart {
         cartItem.setCart(null);
     }
 
+    // TODO: welche cartId?
+    public void addBikepart(Bikepart bikepart) {
+        CartItem cartItem = new CartItem();
+        cartItem.setBikepart(bikepart);
+        cartItem.setNotes(bikepart.getName() + bikepart.getBrand());
+        cartItems.add(cartItem);
+    }
+
     // equals and hashCode
     @Override
     public boolean equals(Object o) {
@@ -144,7 +126,6 @@ public class Cart {
         return "Cart{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", isActive=" + isActive +
                 ", createdAt=" + createdAt +
                 ", itemCount=" + (cartItems != null ? cartItems.size() : 0) +
                 '}';

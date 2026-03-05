@@ -23,12 +23,12 @@ public class CartItem {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cart_id", nullable = false)
-    @JsonIgnore  // ← Verhindert zirkuläre Serialisierung
+    @JsonIgnore  // Verhindert zirkuläre Serialisierung
     private Cart cart;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bikepart_id")
-    @JsonIgnore  // ← Verhindert zirkuläre Serialisierung
+    @JsonIgnore  // Verhindert zirkuläre Serialisierung
     private Bikepart bikepart; // nullable - kann auch manuell eingetragen sein
 
     @Column(length = 200)

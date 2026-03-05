@@ -24,13 +24,41 @@ ACCOUNT (Admin) (1) ──< (N) ADMIN_PARTNER_SHOP
 ```
 
 
-in cygwin: 
+in cygwin:  oder im Bruno
 Account erzeugen
-curl -X POST http://localhost:8080/api/accounts -H "Content-Type: application/json"  -d '{    "firstName": "Max", "lastName": "Mustermann","email": "max@example.com"}'
+ curl -X POST http://localhost:8080/api/accounts \
+    -H "Content-Type: application/json" \
+    -d '{"email": "ellen@bikeparts.de", "firstName": "Ellen", "lastName": "Mustermann"}'
+	
+curl -X POST http://localhost:8080/api/accounts -H "Content-Type: application/json"  \
+  -d '{    "firstName": "Max", "lastName": "Mustermann","email": "max@example.com"}'
 
 Account mit bike erzeugen  (bei @ManyToOne beziehung ist @JsonIgnore gesetzt!)
-curl -X POST http://localhost:8080/api/accounts  -H "Content-Type: application/json"  -d '{    "firstName": "Marion", "lastName": "Mayer","email": "marion@example.com","bikes": [{"name": "bike1","type": "MTB"}]}'
+curl -X POST http://localhost:8080/api/accounts  -H "Content-Type: application/json" \
+  -d '{    "firstName": "Marion", "lastName": "Mayer","email": "marion@example.com", \
+    "bikes": [{"name": "bike1","type": "MTB"}]}'
 
 Account mit bike und Bikepart erzeugen  (bei @ManyToOne beziehung ist @JsonIgnore gesetzt!)
-curl -X POST http://localhost:8080/api/accounts  -H "Content-Type: application/json"  -d '{    "firstName": "Marion", "lastName": "Mayer","email": "marion@example.com","bikes": [{"name": "bike1","type": "MTB", "bikeparts": [{"name": "bikepart1","type": "CHAIN" }] }]}'
+curl -X POST http://localhost:8080/api/accounts  -H "Content-Type: application/json"  \
+  -d '{    "firstName": "Marion", "lastName": "Mayer","email": "marion@example.com",  \
+    "bikes": [{"name": "bike1","type": "MTB", "bikeparts": [{"name": "bikepart1","type": "CHAIN" }] }]}'
 
+Ab dem Zeitpunt an dem security hinzugefügt wurde ist die URL mit https!
+
+Funktioniert: 
+# Username: user
+# Password: Das generierte Passwort aus deiner Console kopieren!
+curl -u user:6fa6c430-971b-44b3-978b-c84f6f22527f \
+  http://localhost:8080/api/accounts       
+  
+Cart erzeugen:
+  curl -X POST http://localhost:8080/api/accounts/1/cart \
+    -H "Content-Type: application/json" \
+    -d '{"name": "Frühjahrs-Wartung 2026"}'
+	
+Bikepart id1 dem cart mit id 1 hinzufügen
+curl -X POST http://localhost:8080/api/accounts/1/cart/bikeparts/1
+  Kein Body nötig — beide IDs sind in der URL.
+  
+  
+  

@@ -27,7 +27,7 @@ public class Bike {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id", nullable = false)
     // for lombok: @ToString.Exclude account will not be included in the toString method
-    @JsonIgnore  // ← Verhindert zirkuläre Serialisierung
+    @JsonIgnore  // Verhindert zirkuläre Serialisierung
     private Account account;
 
     @Enumerated(EnumType.STRING)
