@@ -1,5 +1,6 @@
 package com.bikeparts.service;
 
+import com.bikeparts.annotation.Timed;
 import com.bikeparts.entity.Account;
 import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.security.crypto.password.PasswordEncoder;
@@ -50,6 +51,8 @@ public class AccountService {
         return accountRepository.findById(id);
     }
 
+    // Zeitmessung mit der @Timed-Annotation. Der PerformanceAspect wird aufgerufen
+    @Timed
     public List<Account> findAll() {
         return accountRepository.findAll();
     }
