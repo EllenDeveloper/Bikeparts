@@ -2,14 +2,12 @@
 package com.bikeparts.controller;
 
 import com.bikeparts.entity.*;
-import com.bikeparts.repository.CartItemRepository;
 import com.bikeparts.service.AccountService;
 import com.bikeparts.service.BikeService;
 import com.bikeparts.service.CartService;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

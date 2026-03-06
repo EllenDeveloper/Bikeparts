@@ -36,9 +36,6 @@ class BikeControllerTest {
     private AccountService accountService;
 
     @Mock
-    private CartItemRepository cartItemRepository;
-
-    @Mock
     private CartService cartService;
 
     @InjectMocks
