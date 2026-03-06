@@ -2,6 +2,7 @@ package com.bikeparts.entity;
 
 import com.bikeparts.enums.BikeType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -16,6 +17,7 @@ import java.util.Objects;
 /**
  * Bike entity (Fahrrad)
  */
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Entity
 @Table(name = "bikes")
 public class Bike {
@@ -68,6 +70,7 @@ public class Bike {
 
     // Relationships
     @OneToMany(mappedBy = "bike", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<Bikepart> bikeparts = new ArrayList<>();
 
     // Helper-Methoden für bidirectionale Relationship

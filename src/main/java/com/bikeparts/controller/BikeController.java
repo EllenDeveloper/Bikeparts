@@ -4,10 +4,13 @@ package com.bikeparts.controller;
 import com.bikeparts.entity.*;
 import com.bikeparts.repository.CartItemRepository;
 import com.bikeparts.service.AccountService;
+import com.bikeparts.service.BikeService;
 import com.bikeparts.service.CartService;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,14 +27,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/accounts")
 public class BikeController {
     private final AccountService accountService;
-    private final CartItemRepository cartRepository;
     private final CartService cartService;
+    private final BikeService bikeService;
 
     @Autowired
-    public BikeController(AccountService accountService, CartItemRepository cartItemRepository, CartService cartService) {
+    public BikeController(AccountService accountService, CartService cartService, BikeService bikeService) {
         this.accountService = accountService;
-        this.cartRepository = cartItemRepository;
         this.cartService = cartService;
+        this.bikeService = bikeService;
     }
 
     @GetMapping
@@ -107,6 +110,12 @@ public class BikeController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    // get all bikes
+    @GetMapping("{id}/bikes")
+    public ResponseEntity<List<Bike>> getAllBikes(@PathVariable Long id) {
+        return ResponseEntity.ok(bikeService.getAllBikesByAccountId(id));
+    }
+
     // Cart zu existierendem Account hinzufügen
     @PostMapping("/{id}/cart")
     public ResponseEntity<Account> addCart(
@@ -138,4 +147,14 @@ public class BikeController {
         cartService.addBikepartToCart(bikepartId, account.getCart().getId());
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/{accountId}/bike/{bikeId}")
+    public ResponseEntity<List<Bikepart>> getAllBikeparts(
+            @PathVariable Long accountId,
+            @PathVariable Long bikeId)  {
+        // TODO later: check: "gehört das Bike dem eingeloggten User?". dann muss Account nicht übergeben werden
+        return ResponseEntity.ok(bikeService.getAllBikeparts(accountId, bikeId));
+    }
+
+
 }
