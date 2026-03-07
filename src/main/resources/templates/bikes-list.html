@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Bike-Liste</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<h1>Meine Fahrräder</h1>
+
+<p>Anzahl Fahrräder: <span th:text="${bikes.size()}">0</span></p>
+
+<table border="1">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Typ</th>
+            <th>E-Bike</th>
+            <th>Marke</th>
+            <th>Modell</th>
+            <th>Rahmengröße</th>
+            <th>Notizen</th>
+            <th>Verschleißteile</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr th:each="bike : ${bikes}"
+            th:onclick="|window.location='@{/bikes/{bikeId}(bikeId=${bike.id})}'|"
+            style="cursor: pointer;">
+            <td th:text="${bike.id}"></td>
+            <td th:text="${bike.name}"></td>
+            <td th:text="${bike.type}"></td>
+            <td th:text="${bike.isEbike} ? 'Ja' : 'Nein'"></td>
+            <td th:text="${bike.brand}"></td>
+            <td th:text="${bike.modelName}"></td>
+            <td th:text="${bike.wheelSize} + ' Zoll'"></td>
+            <td th:text="${bike.notes}"></td>
+            <td><a th:href="@{/bikes/{bikeId}/bikeparts(bikeId=${bike.id})}">Teile anzeigen</a></td>
+        </tr>
+    </tbody>
+</table>
+</body>
+</html>

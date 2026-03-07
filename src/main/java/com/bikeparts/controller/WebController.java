@@ -17,11 +17,6 @@ public class WebController {
 //        return "login";
 //    }
 
-    @GetMapping("/accounts")
-    public String persons() {
-        return "accounts";
-    }
-
 //    @GetMapping("/")
 //    public String home() {
 //        return "redirect:/accounts";

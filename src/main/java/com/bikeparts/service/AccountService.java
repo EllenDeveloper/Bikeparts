@@ -28,7 +28,6 @@ public class AccountService {
         return accountRepository.save(account);
     }
 
-    // TODO: Bidirektionale Beziehung account-bike in unidirektionale ändern!
 //    Bei bike und bikeparts auch
     private void setAccountRelations(Account account) {
         if (account.getBikes() != null) {

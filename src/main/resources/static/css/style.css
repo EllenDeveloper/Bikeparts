@@ -7,7 +7,7 @@
 body {
     font-family: Arial, sans-serif;
     padding: 20px;
-    background-color: #f5f5f5;
+    background-color: #ffffff;
 }
 h1 {
     color: #333;
@@ -20,7 +20,7 @@ table {
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 thead {
-    background-color: #4CAF50;
+    background-color: #38a8f6;
     color: white;
 }
 th, td {
@@ -29,7 +29,7 @@ th, td {
     border-bottom: 1px solid #ddd;
 }
 tr:hover {
-    background-color: #f5f5f5;
+    background-color: #81d3ff;
 }
 .odd-row {
     background-color: #f9f9f9;
@@ -38,7 +38,7 @@ tr:hover {
     background-color: white;
 }
 a {
-    color: #4CAF50;
+    color: #5659fb;
     text-decoration: none;
     font-weight: bold;
 }
@@ -63,13 +63,13 @@ a:hover {
 }
 .pagination a {
     padding: 8px 16px;
-    background-color: #4CAF50;
+    background-color: #5659fb;
     color: white;
     border-radius: 4px;
     margin: 0 5px;
 }
 .pagination a:hover {
-    background-color: #45a049;
+    background-color: #5659fb;
 }
 .pagination span {
     padding: 8px 16px;
@@ -88,9 +88,13 @@ a:hover {
     border: 1px solid #ddd;
     border-radius: 4px;
 }
+.cart-cell .cart-hover { display: none; }
+.cart-cell:hover .cart-default { display: none; }
+.cart-cell:hover .cart-hover { display: inline; }
+
 .search-form button {
     padding: 8px 16px;
-    background-color: #4CAF50;
+    background-color: #5659fb;
     color: white;
     border: none;
     border-radius: 4px;

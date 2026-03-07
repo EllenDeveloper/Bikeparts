@@ -68,9 +68,9 @@ INSERT INTO bikes (
 -- 3. FAHRRADTEILE – Merida MTB 29
 -- ============================================================
 
--- 3.1  Fahrradschlauch – Continental MTB 29 | ETRTO 62-622 | Ventil SV42
+-- 3.1  Fahrradschlauch – Continental MTB 29 | 62-622 | Ventil SV42
 -- -----------------------------------------------------------------------
--- ETRTO 62-622: Breite 62 mm, Felgendurchmesser 622 mm (= 29 Zoll)
+-- 62-622: Breite 62 mm, Felgendurchmesser 622 mm (= 29 Zoll)
 -- SV42 = Sclaverand-Ventil (Französisches Ventil / Presta), Länge 42 mm
 -- Passend für Reifenbreiten: 28/29 × 1,75 und 28/29 × 2,5
 INSERT INTO bikeparts (
@@ -88,12 +88,12 @@ INSERT INTO bikeparts (
     (SELECT id FROM bikes WHERE name = 'mtb1'
         AND account_id = (SELECT id FROM accounts WHERE email = 'ellen@bikeparts.de')),
     'INNER_TUBE',
-    'Merida Fahrradschlauch MTB 29',
+    'Fahrradschlauch MTB 29',
     'Continental',
     '62-622',
     'SV42 (Sclaverand / Französisches Ventil, 42 mm); passend für 28/29 × 1,75 bis 28/29 × 2,5',
-    62,
-    'Fahrradschlauch 29 Zoll. ETRTO 62-622. Ventil: SV42.',
+    '1,75 - 2,5',
+    'Fahrradschlauch 29 Zoll. 62-622. Ventil: SV42.',
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP
 );
@@ -129,9 +129,9 @@ INSERT INTO bikeparts (
 );
 
 
--- 3.3  Mantel – Continental X-King 2,4 (29 Zoll / ETRTO 622)
+-- 3.3  Mantel – Continental X-King 2,4 (29 Zoll )
 -- ------------------------------------------------------------
--- Reifenbreite 2,4 Zoll ≈ 61 mm (ETRTO), Felgendurchmesser ETRTO 622
+-- Reifenbreite 2,4 Zoll, Felgendurchmesser
 INSERT INTO bikeparts (
     bike_id,
     type,
@@ -152,9 +152,9 @@ INSERT INTO bikeparts (
     'Continental',
     'X-King 2.4',
     'Performance',
-    'ETRTO 61-622; 29 × 2,4 Zoll',
-    61,
-    'MTB-Mantel Continental X-King 2,4" für 29-Zoll-Felgen (ETRTO 622).',
+    '61-622; 29 × 2,4 Zoll',
+    '2,4',
+    'MTB-Mantel Continental X-King 2,4" für 29-Zoll-Felgen.',
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP
 );
@@ -285,7 +285,7 @@ INSERT INTO cart_items (
     (SELECT id FROM bikeparts WHERE model = '62-622'
         AND bike_id = (SELECT id FROM bikes WHERE name = 'mtb1'
             AND account_id = (SELECT id FROM accounts WHERE email = 'ellen@bikeparts.de'))),
-    'Merida Fahrradschlauch MTB 29',
+    'Fahrradschlauch MTB 29',
     2,
     'Immer 2 Schläuche auf Vorrat',
     CURRENT_TIMESTAMP,

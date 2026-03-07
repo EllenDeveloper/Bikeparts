@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Account-Liste</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<h1>Accounts</h1>
+
+<p>Anzahl Accounts: <span th:text="${accounts.size()}">0</span></p>
+
+<table border="1">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>E-Mail</th>
+            <th>Vorname</th>
+            <th>Nachname</th>
+            <th>Rolle</th>
+            <th>Aktiv</th>
+            <th>Sprache</th>
+            <th>Währung</th>
+            <th>Zahlungsmethode</th>
+            <th>Benachrichtigungen</th>
+            <th>Erstellt am</th>
+            <th>Letzter Login</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr th:each="account : ${accounts}">
+            <td th:text="${account.id}"></td>
+            <td th:text="${account.email}"></td>
+            <td th:text="${account.firstName}"></td>
+            <td th:text="${account.lastName}"></td>
+            <td th:text="${account.role}"></td>
+            <td th:text="${account.isActive} ? 'Ja' : 'Nein'"></td>
+            <td th:text="${account.language}"></td>
+            <td th:text="${account.preferredCurrency}"></td>
+            <td th:text="${account.preferredPaymentMethod}"></td>
+            <td th:text="${account.notificationsEnabled} ? 'Ja' : 'Nein'"></td>
+            <td th:text="${account.createdAt}"></td>
+            <td th:text="${account.lastLogin}"></td>
+        </tr>
+    </tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Fahrradteile-Liste</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+<h1>Fahrradteile</h1>
+
+<p>Anzahl Teile: <span th:text="${bikeparts.size()}">0</span></p>
+
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Typ</th>
+            <th>Marke</th>
+            <th>Modell</th>
+            <th>Qualität</th>
+            <th>Alternative Qualitäten</th>
+            <th>Details</th>
+            <th>Reifenbreite</th>
+            <th>Letzter Kaufpreis</th>
+            <th>Letzter Shop</th>
+            <th>Notizen</th>
+            <th>Warenkorb</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr th:each="bikepart : ${bikeparts}"
+            th:onclick="|window.location='@{/bikes/{bikeId}/bikeparts/{bikepartId}(bikeId=${bike},bikepart=${bikepart.id})}'|"
+            style="cursor: pointer;">
+            <td th:text="${bikepart.id}"></td>
+            <td th:text="${bikepart.name}"></td>
+            <td th:text="${bikepart.type}"></td>
+            <td th:text="${bikepart.brand}"></td>
+            <td th:text="${bikepart.model}"></td>
+            <td th:text="${bikepart.quality}"></td>
+            <td th:text="${bikepart.alternativeQualities}"></td>
+            <td th:text="${bikepart.specificDetails}"></td>
+            <td th:text="${bikepart.tireWidth}"></td>
+            <td th:text="${bikepart.lastPurchasePrice != null} ? ${bikepart.lastPurchasePrice} + ' €' : ''"></td>
+            <td th:text="${bikepart.lastPurchaseShop}"></td>
+            <td th:text="${bikepart.notes}"></td>
+            <td class="cart-cell">
+                <i class="fa-solid fa-cart-shopping cart-default"></i>
+                <i class="fa-solid fa-cart-arrow-down cart-hover"></i>
+            </td>
+        </tr>
+    </tbody>
+</table>
+</body>
+</html>

@@ -1,6 +1,7 @@
 package com.bikeparts.repository;
 
 import com.bikeparts.entity.Bike;
+import com.bikeparts.entity.Bikepart;
 import com.bikeparts.enums.BikeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -29,4 +30,12 @@ public interface BikeRepository extends JpaRepository<Bike, Long> {
     Long countByAccountId(Long accountId);
 
     Bike getBikeById(Long id);
+
+    Bike findBikeByAccountId(Long accountId);
+
+    Bike findBikeById(Long id);
+
+    List<Bike> findByAccountIdOrderByTypeAsc(Long accountId);
+
+    Bikepart findBikepartById(Long id);
 }

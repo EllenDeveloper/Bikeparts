@@ -31,7 +31,7 @@ public class Bikepart {
     @Column(nullable = false, length = 30)
     private BikepartType type;
 
-    @Column(length = 100)
+    @Column(length = 100, nullable = false)
     private String name; // z.B. "Shimano XT CN-HG95"
 
     @Column(length = 50)
@@ -50,7 +50,7 @@ public class Bikepart {
     private String specificDetails; // z.B. "10-fach" bei Kette/Chain
 
     @Column
-    private Integer tireWidth; // Mantelbreite in mm (z.B. 2.25, 2.35)
+    private String tireWidth; // Mantelbreite in mm (z.B. 2.25, 2.35)
 
     @Column(precision = 10, scale = 2)
     private BigDecimal lastPurchasePrice;
@@ -88,9 +88,9 @@ public class Bikepart {
     }
 
     
-    public Bikepart(Long id, Bike bike, BikepartType type, String name, String brand, String model, 
-                    String quality, String alternativeQualities, String specificDetails, Integer tireWidth, 
-                    BigDecimal lastPurchasePrice, LocalDate lastPurchaseDate, String lastPurchaseShop, 
+    public Bikepart(Long id, Bike bike, BikepartType type, String name, String brand, String model,
+                    String quality, String alternativeQualities, String specificDetails, String tireWidth,
+                    BigDecimal lastPurchasePrice, LocalDate lastPurchaseDate, String lastPurchaseShop,
                     LocalDate installationDate, String notes, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.bike = bike;
@@ -184,11 +184,11 @@ public class Bikepart {
         this.specificDetails = specificDetails;
     }
 
-    public Integer getTireWidth() {
+    public String getTireWidth() {
         return tireWidth;
     }
 
-    public void setTireWidth(Integer tireWidth) {
+    public void setTireWidth(String tireWidth) {
         this.tireWidth = tireWidth;
     }
 
