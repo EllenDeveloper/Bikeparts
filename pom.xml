@@ -102,8 +102,8 @@
             <optional>true</optional>
         </dependency>
         <!-- Spring Boot Test -->
-        <!-- Mockito (schon in spring-boot-starter-test) -->
-        <!-- JUnit 5 (schon in spring-boot-starter-test) -->
+        <!-- Mockito (schon in sp.-boot-starter-test) -->
+        <!-- JUnit 5 (schon in sp.-boot-starter-test) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
