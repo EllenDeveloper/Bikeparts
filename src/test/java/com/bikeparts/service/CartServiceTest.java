@@ -1,5 +1,6 @@
 package com.bikeparts.service;
 
+import com.bikeparts.entity.Account;
 import com.bikeparts.entity.Bikepart;
 import com.bikeparts.entity.Cart;
 import com.bikeparts.entity.CartItem;
@@ -7,6 +8,7 @@ import com.bikeparts.repository.BikepartRepository;
 import com.bikeparts.repository.CartItemRepository;
 import com.bikeparts.repository.CartRepository;
 import org.junit.jupiter.api.DisplayName;
+import java.util.Optional;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,6 +33,9 @@ class CartServiceTest {
 
     @Mock
     private BikepartRepository bikepartRepository;
+
+    @Mock
+    private AccountService accountService;
 
     @InjectMocks
     private CartService cartService;
@@ -285,7 +290,9 @@ class CartServiceTest {
         @Test
         @DisplayName("null-bikepartId -> keine Repository-Interaktion")
         void addBikepartToCart_nullId_doesNothing() {
-            cartService.addBikepartToCart(null, 1L);
+            Account account = new Account();
+            when(accountService.findById(any())).thenReturn(Optional.of(account));
+            cartService.addBikepartToCart(null, account.getId(), 1);
 
             verifyNoInteractions(cartRepository);
             verifyNoInteractions(cartItemRepository);
@@ -296,9 +303,10 @@ class CartServiceTest {
         @DisplayName("Repository wirft Exception -> wird weitergeleitet")
         void addBikepartToCart_repositoryThrows_propagatesException() {
             when(bikepartRepository.getById(5L)).thenThrow(new RuntimeException("Bikepart nicht gefunden"));
-
+            Account account = new Account();
+            when(accountService.findById(any())).thenReturn(Optional.of(account));
             RuntimeException ex = assertThrows(RuntimeException.class,
-                    () -> cartService.addBikepartToCart(5L, 1L));
+                    () -> cartService.addBikepartToCart(5L,  account.getId(),1));
 
             assertEquals("Bikepart nicht gefunden", ex.getMessage());
         }
@@ -315,15 +323,16 @@ class CartServiceTest {
             Cart cart = new Cart();
             cart.setId(1L);
 
+            Account account = new Account();
+            account.setCart(cart);
+            when(accountService.findById(any())).thenReturn(Optional.of(account));
             when(bikepartRepository.getById(5L)).thenReturn(bikepart);
             when(cartItemRepository.save(any(CartItem.class))).thenReturn(savedItem);
-            when(cartRepository.getCartById(1L)).thenReturn(List.of(cart));
-
-            cartService.addBikepartToCart(5L, 1L);
+            cartService.addBikepartToCart(5L, account.getId(), 1);
 
             verify(bikepartRepository).getById(5L);
             verify(cartItemRepository).save(any(CartItem.class));
-            verify(cartRepository).getCartById(1L);
+//            verify(cartRepository).getCartById(1L);
             assertEquals(1, cart.getCartItems().size());
         }
     }

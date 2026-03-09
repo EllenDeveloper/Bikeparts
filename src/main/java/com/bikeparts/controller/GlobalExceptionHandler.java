@@ -1,11 +1,11 @@
 package com.bikeparts.controller;
 
 import org.springframework.ui.Model;
+import org.springframework.validation.BindException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.validation.BindException;
 
-@ControllerAdvice
+@ControllerAdvice(assignableTypes = {WebController.class, BikeViewController.class, AccountViewController.class})
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(BindException.class)

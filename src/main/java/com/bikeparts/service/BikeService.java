@@ -11,6 +11,7 @@ import com.bikeparts.repository.BikeRepository;
 import java.util.Comparator;
 import java.util.List;
 
+import com.bikeparts.repository.BikepartRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,12 +22,14 @@ public class BikeService {
     
     private final BikeRepository bikeRepository;
     private final AccountService accountService;
+    private final BikepartRepository bikepartRepository;
 
     // Constructor Injection
     @Autowired
-    public BikeService(BikeRepository bikeRepository, AccountService accountService) {
+    public BikeService(BikeRepository bikeRepository, AccountService accountService, BikepartRepository bikepartRepository) {
         this.bikeRepository = bikeRepository;
         this.accountService = accountService;
+        this.bikepartRepository = bikepartRepository;
     }
 
     @Timed
@@ -46,13 +49,13 @@ public class BikeService {
     }
 
     public Bikepart getBikepartById(Long bikepartId, Long accountId) {
-        Bikepart bikepart = bikeRepository.findBikepartById(bikepartId);
+        Bikepart bikepart = bikepartRepository.findBikepartById(bikepartId);
         if (bikepart == null) {
             throw new RuntimeException("Bikepart nicht gefunden");
         }
         List<Bike> bikesOfAccount = bikeRepository.findByAccountId(accountId);
-        if (bikesOfAccount.contains(bikepart.getBike())) {
-            return bikeRepository.findBikepartById(bikepartId);
+        if (bikesOfAccount.stream().toList().contains(bikepart.getBike())) {
+            return bikepartRepository.findBikepartById(bikepartId);
         } else {
             throw new RuntimeException("Zugriff verweigert");
         }

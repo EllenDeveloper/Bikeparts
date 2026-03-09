@@ -55,6 +55,17 @@ public class CartItem {
     public CartItem() {
     }
 
+    public CartItem(Cart cart, Bikepart bikepart,
+                    Integer quantity) {
+        this.cart = cart;
+        cart.addCartItem(this);
+        this.bikepart = bikepart;
+        this.productName = bikepart.getName();
+        this.quantity = quantity;
+        this.targetPrice = targetPrice;
+        this.notes = bikepart.getNotes();
+    }
+
     public CartItem(Long id, Cart cart, Bikepart bikepart, String productName, 
                     Integer quantity, BigDecimal targetPrice, String notes, 
                     LocalDateTime createdAt, LocalDateTime updatedAt) {

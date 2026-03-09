@@ -2,6 +2,7 @@ package com.bikeparts.controller;
 
 import com.bikeparts.entity.Account;
 import com.bikeparts.entity.Bike;
+import com.bikeparts.entity.Bikepart;
 import com.bikeparts.entity.Cart;
 import com.bikeparts.repository.CartItemRepository;
 import com.bikeparts.service.AccountService;
@@ -362,7 +363,8 @@ class BikeControllerTest {
             mockMvc.perform(post("/api/accounts/1/cart/bikeparts/2"))
                     .andExpect(status().isNoContent());
 
-            verify(cartService).addBikepartToCart(2L, 10L);
+            Bikepart bikepart = new Bikepart();
+            verify(cartService).addBikepartToCart(2L, account.getId(), 1);
         }
 
         @Test
@@ -396,7 +398,7 @@ class BikeControllerTest {
             account.setCart(cart);
             when(accountService.findById(1L)).thenReturn(Optional.of(account));
             doThrow(new RuntimeException("Bikepart nicht gefunden"))
-                    .when(cartService).addBikepartToCart(99L, 10L);
+                    .when(cartService).addBikepartToCart(99L, account.getId(), 1);
 
             assertThrows(Exception.class, () ->
                     mockMvc.perform(post("/api/accounts/1/cart/bikeparts/99")));

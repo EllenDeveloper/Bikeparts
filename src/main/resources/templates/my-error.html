@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Fehler</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<h1>Ein Fehler ist aufgetreten</h1>
+
+<p th:text="${errorMessage}">Unbekannter Fehler</p>
+
+<p><a href="javascript:history.back()">← Zurück</a></p>
+
+</body>
+</html>

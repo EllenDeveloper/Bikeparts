@@ -92,6 +92,30 @@ a:hover {
 .cart-cell:hover .cart-default { display: none; }
 .cart-cell:hover .cart-hover { display: inline; }
 
+.cart-input-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.cart-input-group input[type="number"] {
+    outline: none;
+    width: 3rem;
+    border: 1.5px solid lightblue;
+    border-radius: 4px;
+}
+.cart-input-group input[type="number"]:hover {
+    background-color: lightblue;
+}
+.cart-input-group .cart-btn {
+    background: none;
+    cursor: pointer;
+    border: 1.5px solid lightblue;
+    border-radius: 4px;
+}
+.cart-input-group .cart-btn i {
+    font-size: 1.4rem;
+}
+
 .search-form button {
     padding: 8px 16px;
     background-color: #5659fb;

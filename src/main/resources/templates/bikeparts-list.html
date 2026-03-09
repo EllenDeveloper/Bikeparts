@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" lang="de">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="de">
 <head>
     <meta charset="UTF-8">
     <title>Fahrradteile-Liste</title>
@@ -8,7 +10,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
-<h1>Fahrradteile</h1>
+<div style="display: flex; justify-content: space-between; align-items: center;">
+    <h1>Fahrradteile</h1>
+    <a th:href="@{/cart/{id}(id=${accountId})}" title="Warenkorb">
+        <i class="fa-solid fa-cart-shopping" style="font-size: 1.8rem;"></i>
+    </a>
+</div>
 
 <p>Anzahl Teile: <span th:text="${bikeparts.size()}">0</span></p>
 
@@ -46,9 +53,16 @@
             <td th:text="${bikepart.lastPurchasePrice != null} ? ${bikepart.lastPurchasePrice} + ' €' : ''"></td>
             <td th:text="${bikepart.lastPurchaseShop}"></td>
             <td th:text="${bikepart.notes}"></td>
-            <td class="cart-cell">
-                <i class="fa-solid fa-cart-shopping cart-default"></i>
-                <i class="fa-solid fa-cart-arrow-down cart-hover"></i>
+            <td class="cart-cell" onclick="event.stopPropagation()">
+                <form th:action="@{/bikeparts/{id}/addBikepartToCart(id=${bikepart.id})}" method="post">
+                    <div class="cart-input-group">
+                        <input type="number" name="quantity" value="1" min="1"  style="width: 3rem;height:2rem;" />
+                        <button type="submit" class="cart-btn">
+                            <i class="fa-solid fa-cart-shopping cart-default"></i>
+                            <i class="fa-solid fa-cart-arrow-down cart-hover"></i>
+                        </button>
+                    </div>
+                </form>
             </td>
         </tr>
     </tbody>

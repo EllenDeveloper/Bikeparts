@@ -1,23 +1,35 @@
 package com.bikeparts.controller;
 
+import com.bikeparts.entity.Account;
 import com.bikeparts.entity.Bike;
+import com.bikeparts.entity.Bikepart;
+import com.bikeparts.entity.Cart;
+import com.bikeparts.service.AccountService;
 import com.bikeparts.service.BikeService;
+import com.bikeparts.service.CartService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 public class BikeViewController {
     private final BikeService bikeService;
+    private final CartService cartService;
+    private final AccountService accountService;
 
     @Autowired
-    public BikeViewController(BikeService bikeService) {
+    public BikeViewController(BikeService bikeService, CartService cartService, AccountService accountService) {
         this.bikeService = bikeService;
+        this.cartService = cartService;
+        this.accountService = accountService;
     }
 
     @GetMapping("/accounts/{id}/bikes")
@@ -29,6 +41,7 @@ public class BikeViewController {
         List<Bike> bikes = bikeService.getAllBikesByAccountId(id);
 
         model.addAttribute("bikes", bikes);
+        model.addAttribute("accountId", id);
         return "bikes-list";
     }
 
@@ -53,6 +66,7 @@ public class BikeViewController {
             throw new RuntimeException("Zugriff verweigert");
         }
         model.addAttribute("bikeparts", bikeService.getAllBikeparts(accountId, bikeId));
+        model.addAttribute("accountId", accountId);
         return "bikeparts-list";
     }
 
@@ -64,5 +78,30 @@ public class BikeViewController {
         Long accountId = (Long) session.getAttribute("accountId");
         model.addAttribute("bikepart", bikeService.getBikepartById(id, accountId));
         return "bikepart-details";
+    }
+
+    @PostMapping("/bikeparts/{id}/addBikepartToCart")
+    public String addBikepartToCart(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "1") Integer quantity,
+            HttpSession session,
+            Model model) {
+        // TODO verschieben nach Login und in die Session packen
+        Long accountId = (Long) session.getAttribute("accountId");
+        Bikepart bikepartById = bikeService.getBikepartById(id, accountId);
+        Cart cart = cartService.addBikepartToCart(id, accountId, quantity);
+        model.addAttribute("cart", cart);
+        return "bikepart-details";
+    }
+
+    @GetMapping("/cart/{id}")
+    public String showCart(
+            @PathVariable Long id,
+            HttpSession session,
+            Model model) {
+        Long accountId = (Long) session.getAttribute("accountId");
+        Account account = accountService.findById(accountId).orElseThrow(() -> new RuntimeException("Account nicht gefunden"));
+        model.addAttribute("cart", account.getCart());
+        return "cart-cartItems-list";
     }
 }

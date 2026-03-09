@@ -30,4 +30,6 @@ public interface BikepartRepository extends JpaRepository<Bikepart, Long> {
      */
     @Query("SELECT bp FROM Bikepart bp WHERE bp.bike.account.id = :accountId")
     List<Bikepart> findByAccountId(@Param("accountId") Long accountId);
+
+    Bikepart findBikepartById(Long id);
 }

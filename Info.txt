@@ -60,5 +60,7 @@ Bikepart id1 dem cart mit id 1 hinzufügen
 curl -X POST http://localhost:8080/api/accounts/1/cart/bikeparts/1
   Kein Body nötig — beide IDs sind in der URL.
   
-  
+ erste Seite anzeigen
+ http://localhost:8080/accounts/1/bikes
+ 
   

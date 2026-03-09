@@ -1,4 +1,5 @@
 
+
 package com.bikeparts.controller;
 
 import com.bikeparts.entity.*;
@@ -12,14 +13,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/accounts")
@@ -128,21 +122,25 @@ public class BikeController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+
     // Bikepart zu existierendem Cart eines Accounts hinzufügen
+    // eher cart/addBikepartToCart
     @PostMapping("/{id}/cart/bikeparts/{bikepartId}")
-    public ResponseEntity<?> addBikePart(
-            @PathVariable Long id,
-            @PathVariable Long bikepartId) {
-        Account account = accountService.findById(id).orElse(null);
+    public ResponseEntity<?> addBikePartToCart(
+            @PathVariable Long accountId,
+            @PathVariable Long bikepartId,
+            @RequestParam(defaultValue = "1") Integer quantity) {
+        Account account = accountService.findById(accountId).orElse(null);
         if (account == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("error", "Account " + id + " nicht gefunden"));
+                    .body(Map.of("error", "Account " + accountId + " nicht gefunden"));
         }
-        if (account.getCart() == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("error", "Account " + id + " hat keinen Warenkorb"));
-        }
-        cartService.addBikepartToCart(bikepartId, account.getCart().getId());
+//        if (account.getCart() == null) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+//                    .body(Map.of("error", "Account " + id + " hat keinen Warenkorb"));
+//        }
+        // TODO: Bikepart muss zu dem account gehören
+        cartService.addBikepartToCart(bikepartId, accountId, quantity);
         return ResponseEntity.noContent().build();
     }
 

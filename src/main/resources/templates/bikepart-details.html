@@ -83,6 +83,18 @@
             <th>Aktualisiert am</th>
             <td th:text="${#temporals.format(bikepart.updatedAt, 'dd.MM.yyyy HH:mm')} + ' Uhr'"></td>
         </tr>
+        <tr>
+            <th>In den Warenkorb</th>
+            <td class="cart-cell">
+                <form th:action="@{/bikeparts/{id}/addBikepartToCart(id=${bikepart.id})}" method="post">
+                    <input type="number" id="quantity" name="quantity" value="1" min="1" />
+                    <button type="submit" class="cart-btn">
+                        <i class="fa-solid fa-cart-shopping cart-default"></i>
+                        <i class="fa-solid fa-cart-arrow-down cart-hover"></i>
+                    </button>
+                </form>
+            </td>
+        </tr>
     </tbody>
 </table>
 
