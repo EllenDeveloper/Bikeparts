@@ -4,6 +4,8 @@ import com.bikeparts.entity.Account;
 import com.bikeparts.entity.Bike;
 import com.bikeparts.service.AccountService;
 import com.bikeparts.service.BikeService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,6 +20,8 @@ import java.util.List;
 public class AccountViewController {
     private final BikeService bikeService;
     private final AccountService accountService;
+
+    private static final Logger log = LoggerFactory.getLogger(AccountViewController.class);
 
     @Autowired
     public AccountViewController(BikeService bikeService, AccountService accountService) {

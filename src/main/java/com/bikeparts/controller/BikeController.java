@@ -57,6 +57,7 @@ public class BikeController {
         }
 
         // Email Format prüfen
+        // TODO: accountService.validateEmail return bool
         if (!account.getEmail().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(Map.of("error", "Email hat ungültiges Format"));

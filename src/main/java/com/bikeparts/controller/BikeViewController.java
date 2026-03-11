@@ -8,6 +8,8 @@ import com.bikeparts.service.AccountService;
 import com.bikeparts.service.BikeService;
 import com.bikeparts.service.CartService;
 import jakarta.servlet.http.HttpSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -24,12 +26,15 @@ public class BikeViewController {
     private final BikeService bikeService;
     private final CartService cartService;
     private final AccountService accountService;
+    private final Account account;
+    private Logger log = LoggerFactory.getLogger(BikeViewController.class);
 
     @Autowired
-    public BikeViewController(BikeService bikeService, CartService cartService, AccountService accountService) {
+    public BikeViewController(BikeService bikeService, CartService cartService, AccountService accountService, Account account) {
         this.bikeService = bikeService;
         this.cartService = cartService;
         this.accountService = accountService;
+        this.account = account;
     }
 
     @GetMapping("/accounts/{id}/bikes")
@@ -38,6 +43,7 @@ public class BikeViewController {
             HttpSession session,
             Model model) {
         session.setAttribute("accountId", id);
+        log.info("****"+ account);
         List<Bike> bikes = bikeService.getAllBikesByAccountId(id);
 
         model.addAttribute("bikes", bikes);
@@ -91,7 +97,7 @@ public class BikeViewController {
         Bikepart bikepartById = bikeService.getBikepartById(id, accountId);
         Cart cart = cartService.addBikepartToCart(id, accountId, quantity);
         model.addAttribute("cart", cart);
-        return "bikepart-details";
+        return "bikeparts-list";
     }
 
     @GetMapping("/cart/{id}")

@@ -9,8 +9,12 @@
 -- ============================================================
 -- 1. ACCOUNT
 -- ============================================================
+-- WICHTIG: Passwörter sind mit BCrypt verschlüsselt!
+-- User: admin, Password: admin123
+-- selbst generiert mit springboot: '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy',
 INSERT INTO accounts (
     email,
+    password,
     first_name,
     last_name,
     role,
@@ -23,6 +27,7 @@ INSERT INTO accounts (
     updated_at
 ) VALUES (
     'ellen@bikeparts.de',
+    '$2a$10$4Ncv9pvRiyMwFRvYHGumWegEjTSkFzsyczwqdG3Mp73iEtyQZNb0.',
     'Ellen',
     NULL,
     'USER',

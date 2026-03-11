@@ -10,6 +10,7 @@ import jakarta.validation.constraints.NotBlank;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +21,8 @@ import java.util.Objects;
  */
 @Entity
 @Table(name = "accounts")
-public class Account {
+// serializable weil Account in den @SessionStore kommt
+public class Account implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,8 +33,8 @@ public class Account {
     @NotBlank(message = "Email darf nicht leer sein")  
     private String email;
 
-//    @Column(nullable = false, length = 255)
-//    private String password; // Should be encrypted (BCrypt)
+    @Column(nullable = false, length = 255)
+    private String password; // Should be encrypted (BCrypt)
 
     @Column(length = 50)
     private String firstName;
@@ -47,6 +49,10 @@ public class Account {
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
+    //    @PrePersist
+//    private void onCreate() {
+//        createdAt = LocalDateTime.now();
+//    }
 
     @UpdateTimestamp
     @Column(nullable = false)
@@ -79,10 +85,7 @@ public class Account {
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Bike> bikes = new ArrayList<>();
 
-//    @PrePersist
-//    private void onCreate() {
-//        createdAt = LocalDateTime.now();
-//    }
+
 
     // Helper-Methoden für bidirectionale Relationship
     public void addBike(Bike bike) {
@@ -119,7 +122,7 @@ public class Account {
                 String language, Currency preferredCurrency, Boolean notificationsEnabled) {
         this.id = id;
         this.email = email;
-//        this.password = password;
+        this.password = password;
         this.firstName = firstName;
         this.lastName = lastName;
         this.role = role;
@@ -150,13 +153,13 @@ public class Account {
         this.email = email;
     }
 
-//    public String getPassword() {
-//        return password;
-//    }
-//
-//    public void setPassword(String password) {
-//        this.password = password;
-//    }
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
     public String getFirstName() {
         return firstName;

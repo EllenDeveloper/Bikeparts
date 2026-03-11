@@ -22,16 +22,16 @@ public class CartService {
     private final CartItemRepository cartItemRepository;
     private final BikepartRepository bikepartRepository;
     private final AccountService accountService;
-    private final ActiveCart activeCart;
+    private final Account account;
 
     @Autowired
-    public CartService(ActiveCart activeCart, CartRepository cartRepository, CartItemRepository cartItemRepository,
-                       BikepartRepository bikepartRepository, AccountService accountService) {
-        this.activeCart = activeCart;
+    public CartService(CartRepository cartRepository, CartItemRepository cartItemRepository,
+                       BikepartRepository bikepartRepository, AccountService accountService, Account account) {
         this.cartRepository = cartRepository;
         this.cartItemRepository = cartItemRepository;
         this.bikepartRepository = bikepartRepository;
         this.accountService = accountService;
+        this.account = account;
     }
 
     // --- Cart methods
@@ -66,15 +66,11 @@ public class CartService {
 
     @Transactional
     public Cart addBikepartToCart(Long bikepartId, Long accountId, Integer quantity) {
-        Account account = accountService.findById(accountId).orElseThrow(() -> new RuntimeException("Account nicht gefunden"));
+//        Account account = accountService.findById(accountId).orElseThrow(() -> new RuntimeException("Account nicht gefunden"));
 
         Cart cart = account.getCart();
         if (cart == null) {
             cart = cartRepository.save(new Cart());
-        }
-        // move this to login-Handler / at a position when the user logs in
-        if (!activeCart.isLoaded()) {
-            activeCart.load(cart);
         }
 
         if (bikepartId != null) {

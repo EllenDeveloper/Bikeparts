@@ -4,6 +4,7 @@ import com.bikeparts.annotation.Timed;
 import com.bikeparts.entity.Account;
 import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,11 +19,24 @@ public class AccountService {
     @Autowired
     private AccountRepository accountRepository;
 
-    // TODO
-//    @Autowired
-//    private PasswordEncoder passwordEncoder;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    public Account getAccountByEmail(String email) {
+        return accountRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Account nicht gefunden: " + email));
+    }
 
     public Account createAccount(Account account) {
+        if (accountRepository.existsByEmail(account.getEmail())) {
+            throw new IllegalArgumentException("Account email bereits vergeben");
+        }
+
+        // Password verschlüsseln
+        account.setPassword(passwordEncoder.encode(account.getPassword()));
+        account.setIsActive(true);
+
         setAccountRelations(account);
         setBikePartRelations(account);
         return accountRepository.save(account);

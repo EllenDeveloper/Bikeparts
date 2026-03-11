@@ -6,17 +6,130 @@
         <title>Login - SecureApp</title>
         <meta charset="UTF-8"/>
         <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-        <link rel="stylesheet" th:href="@{/css/style.css}" type="text/css"/>
+<!--        <link rel="stylesheet" th:href="@{/css/style.css}" type="text/css"/>-->
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .login-container {
+                background: white;
+                padding: 2.5rem;
+                border-radius: 10px;
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+                width: 100%;
+                max-width: 400px;
+            }
+
+            h1 {
+                color: #333;
+                margin-bottom: 0.5rem;
+                font-size: 1.8rem;
+            }
+
+            .subtitle {
+                color: #666;
+                margin-bottom: 2rem;
+                font-size: 0.9rem;
+            }
+
+            .form-group {
+                margin-bottom: 1.5rem;
+            }
+
+            label {
+                display: block;
+                margin-bottom: 0.5rem;
+                color: #333;
+                font-weight: 500;
+            }
+
+            input[type="text"],
+            input[type="password"] {
+                width: 100%;
+                padding: 0.75rem;
+                border: 2px solid #e1e8ed;
+                border-radius: 5px;
+                font-size: 1rem;
+                transition: border-color 0.3s;
+            }
+
+            input[type="text"]:focus,
+            input[type="password"]:focus {
+                outline: none;
+                border-color: #667eea;
+            }
+
+            .remember-me {
+                display: flex;
+                align-items: center;
+                margin-bottom: 1.5rem;
+            }
+
+            .remember-me input {
+                margin-right: 0.5rem;
+            }
+
+            button {
+                width: 100%;
+                padding: 0.75rem;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                border: none;
+                border-radius: 5px;
+                font-size: 1rem;
+                font-weight: 600;
+                cursor: pointer;
+                transition: transform 0.2s;
+            }
+
+            button:hover {
+                transform: translateY(-2px);
+            }
+
+            button:active {
+                transform: translateY(0);
+            }
+
+            .error-message {
+                background-color: #fee;
+                border-left: 4px solid #f44;
+                padding: 1rem;
+                margin-bottom: 1.5rem;
+                border-radius: 4px;
+                color: #c33;
+            }
+
+            .logout-message {
+                background-color: #efe;
+                border-left: 4px solid #4a4;
+                padding: 1rem;
+                margin-bottom: 1.5rem;
+                border-radius: 4px;
+                color: #363;
+            }
+        </style>
     </head>
     <body>
         <!-- Navigation -->
         <nav class="navbar">
             <div class="nav-container">
-                <a href="/web/home" class="nav-brand">🔐 SecureApp</a>
+                <a href="/" class="nav-brand">🔐 SecureApp</a>
                 <ul class="nav-menu">
-                    <li><a href="/web/home" class="nav-link">Home</a></li>
-                    <li><a href="/web/login" class="nav-link active">Login</a></li>
-                    <li><a href="/web/register" class="nav-link">Registrieren</a></li>
+                    <li><a href="/" class="nav-link">Home</a></li>
+                    <li><a href="/login" class="nav-link active">Login</a></li>
+                    <li><a href="/register" class="nav-link">Registrieren</a></li>
                 </ul>
             </div>
         </nav>
@@ -44,7 +157,7 @@
                     Sie sind bereits angemeldet als
                     <strong sec:authentication="principal.username"></strong>.
                 </p>
-                <a href="/web/home" class="btn btn-primary mt-2">Zur Startseite</a>
+                <a href="/" class="btn btn-primary mt-2">Zur Startseite</a>
             </div>
 
             <!-- Login Card -->
@@ -65,14 +178,16 @@
                 </div>
 
                 <!-- Login Form -->
-                <form th:action="@{/web/login}" method="post">
+                <form th:action="@{/login}" method="post">
                     <div class="form-group">
-                        <label for="username" class="form-label">
+                        <label for="email" class="form-label">
                             📧 E-Mail-Adresse
                         </label>
+                        <!--                               name="username"  geht an API-->
+
                         <input type="email"
-                               id="username"
-                               name="username"
+                               id="email"
+                               name="email"
                                class="form-control"
                                placeholder="ihre.email@beispiel.de"
                                required
@@ -107,7 +222,7 @@
                     <p style="color: var(--text-light); margin-bottom: 1rem;">
                         Noch kein Account?
                     </p>
-                    <a href="/web/register" class="btn btn-outline" style="display: inline-block;">
+                    <a href="/register" class="btn btn-outline" style="display: inline-block;">
                         📝 Jetzt registrieren
                     </a>
                 </div>
@@ -145,7 +260,7 @@
 
             <!-- Back to Home -->
             <div class="text-center mt-3">
-                <a href="/web/home" style="color: white; text-decoration: none; opacity: 0.8;">
+                <a href="/" style="color: white; text-decoration: none; opacity: 0.8;">
                     ← Zurück zur Startseite
                 </a>
             </div>
@@ -157,7 +272,7 @@
                 <p>&copy; 2025 SecureApp. Erstellt mit Spring Boot 3 & Spring Security 6.</p>
                 <p style="margin-top: 0.5rem;">
                     <a href="/help.html" style="color: #2563eb; text-decoration: none;">Hilfe</a> •
-                    <a href="/web/home" style="color: #2563eb; text-decoration: none;">Home</a>
+                    <a href="/" style="color: #2563eb; text-decoration: none;">Home</a>
                 </p>
             </div>
         </footer>

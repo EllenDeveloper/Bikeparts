@@ -29,10 +29,10 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
 //     */
 //    boolean existsByAccountname(String accountname);
 //
-//    /**
-//     * Prüft ob Email bereits existiert
-//     */
-//    boolean existsByEmail(String email);
+    /**
+     * Prüft ob Email bereits existiert
+     */
+    boolean existsByEmail(String email);
 //
 //    /**
 //     * Findet alle aktiven Account
