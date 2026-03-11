@@ -65,8 +65,7 @@ public class CartService {
     }
 
     @Transactional
-    public Cart addBikepartToCart(Long bikepartId, Long accountId, Integer quantity) {
-//        Account account = accountService.findById(accountId).orElseThrow(() -> new RuntimeException("Account nicht gefunden"));
+    public void addBikepartToCart(Long bikepartId, Integer quantity) {
 
         Cart cart = account.getCart();
         if (cart == null) {
@@ -78,9 +77,7 @@ public class CartService {
 
             CartItem cartItem = new CartItem(cart, bikepart, quantity);
             createCartItem(cartItem);
-            return cart;
         }
-        return null;
     }
 
     // --- CartItem methods

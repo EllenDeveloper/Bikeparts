@@ -292,7 +292,7 @@ class CartServiceTest {
         void addBikepartToCart_nullId_doesNothing() {
             Account account = new Account();
             when(accountService.findById(any())).thenReturn(Optional.of(account));
-            cartService.addBikepartToCart(null, account.getId(), 1);
+            cartService.addBikepartToCart(null,  1);
 
             verifyNoInteractions(cartRepository);
             verifyNoInteractions(cartItemRepository);
@@ -306,7 +306,7 @@ class CartServiceTest {
             Account account = new Account();
             when(accountService.findById(any())).thenReturn(Optional.of(account));
             RuntimeException ex = assertThrows(RuntimeException.class,
-                    () -> cartService.addBikepartToCart(5L,  account.getId(),1));
+                    () -> cartService.addBikepartToCart(5L, 1));
 
             assertEquals("Bikepart nicht gefunden", ex.getMessage());
         }
@@ -328,7 +328,7 @@ class CartServiceTest {
             when(accountService.findById(any())).thenReturn(Optional.of(account));
             when(bikepartRepository.getById(5L)).thenReturn(bikepart);
             when(cartItemRepository.save(any(CartItem.class))).thenReturn(savedItem);
-            cartService.addBikepartToCart(5L, account.getId(), 1);
+            cartService.addBikepartToCart(5L, 1);
 
             verify(bikepartRepository).getById(5L);
             verify(cartItemRepository).save(any(CartItem.class));

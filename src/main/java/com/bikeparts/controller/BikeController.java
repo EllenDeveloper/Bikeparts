@@ -104,13 +104,13 @@ public class BikeController {
     }
 
     // get all bikes
-    @GetMapping("{id}/bikes")
-    public ResponseEntity<List<Bike>> getAllBikes(@PathVariable Long id) {
-        return ResponseEntity.ok(bikeService.getAllBikesByAccountId(id));
+    @GetMapping("/bikes")
+    public ResponseEntity<List<Bike>> getAllBikes() {
+        return ResponseEntity.ok(bikeService.getAllBikes());
     }
 
     // Cart zu existierendem Account hinzufügen
-    @PostMapping("/{id}/cart")
+    @PostMapping("/cart")
     public ResponseEntity<Account> addCart(
             @PathVariable Long id,
             @RequestBody Cart cart) {
@@ -126,22 +126,13 @@ public class BikeController {
 
     // Bikepart zu existierendem Cart eines Accounts hinzufügen
     // eher cart/addBikepartToCart
-    @PostMapping("/{id}/cart/bikeparts/{bikepartId}")
+    @PostMapping("/cart/bikeparts/{bikepartId}")
     public ResponseEntity<?> addBikePartToCart(
-            @PathVariable Long accountId,
             @PathVariable Long bikepartId,
             @RequestParam(defaultValue = "1") Integer quantity) {
-        Account account = accountService.findById(accountId).orElse(null);
-        if (account == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("error", "Account " + accountId + " nicht gefunden"));
-        }
-//        if (account.getCart() == null) {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-//                    .body(Map.of("error", "Account " + id + " hat keinen Warenkorb"));
-//        }
+
         // TODO: Bikepart muss zu dem account gehören
-        cartService.addBikepartToCart(bikepartId, accountId, quantity);
+        cartService.addBikepartToCart(bikepartId, quantity);
         return ResponseEntity.noContent().build();
     }
 
@@ -150,7 +141,7 @@ public class BikeController {
             @PathVariable Long accountId,
             @PathVariable Long bikeId)  {
         // TODO later: check: "gehört das Bike dem eingeloggten User?". dann muss Account nicht übergeben werden
-        return ResponseEntity.ok(bikeService.getAllBikeparts(accountId, bikeId));
+        return ResponseEntity.ok(bikeService.getAllBikeparts(bikeId));
     }
 
 

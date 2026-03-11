@@ -23,37 +23,39 @@ public class BikeService {
     private final BikeRepository bikeRepository;
     private final AccountService accountService;
     private final BikepartRepository bikepartRepository;
+    private final Account account;
 
     // Constructor Injection
     @Autowired
-    public BikeService(BikeRepository bikeRepository, AccountService accountService, BikepartRepository bikepartRepository) {
+    public BikeService(BikeRepository bikeRepository, AccountService accountService, BikepartRepository bikepartRepository, Account account) {
         this.bikeRepository = bikeRepository;
         this.accountService = accountService;
         this.bikepartRepository = bikepartRepository;
+        this.account = account;
     }
 
     @Timed
-    public List<Bikepart> getAllBikeparts(Long accountId, Long bikeId) {
-        Account account = accountService.findById(accountId).orElseThrow(() -> new RuntimeException("Account nicht gefunden"));
-        Bike bike = account.getBikes().stream().filter(b -> b.getId().equals(bikeId)).findFirst()
+    public List<Bikepart> getAllBikeparts(Long bikeId) {
+        Account accountJPA = accountService.findById(account.getId()).orElseThrow(() -> new RuntimeException("Account nicht gefunden"));
+        Bike bike = accountJPA.getBikes().stream().filter(b -> b.getId().equals(bikeId)).findFirst()
                 .orElseThrow(() -> new RuntimeException("Bike " + bikeId + " nicht gefunden"));
         return bike.getBikeparts().stream().sorted(Comparator.comparing(Bikepart::getName)).toList();
     }
 
-    public List<Bike> getAllBikesByAccountId(Long id) {
-        return bikeRepository.findByAccountIdOrderByTypeAsc(id);
+    public List<Bike> getAllBikes() {
+        return bikeRepository.findByAccountIdOrderByTypeAsc(account.getId());
     }
 
     public Bike getBikeById(Long id) {
         return bikeRepository.findBikeById(id);
     }
 
-    public Bikepart getBikepartById(Long bikepartId, Long accountId) {
+    public Bikepart getBikepartById(Long bikepartId) {
         Bikepart bikepart = bikepartRepository.findBikepartById(bikepartId);
         if (bikepart == null) {
             throw new RuntimeException("Bikepart nicht gefunden");
         }
-        List<Bike> bikesOfAccount = bikeRepository.findByAccountId(accountId);
+        List<Bike> bikesOfAccount = bikeRepository.findByAccountId(account.getId());
         if (bikesOfAccount.stream().toList().contains(bikepart.getBike())) {
             return bikepartRepository.findBikepartById(bikepartId);
         } else {

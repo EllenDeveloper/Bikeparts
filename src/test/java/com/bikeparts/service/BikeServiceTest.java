@@ -3,7 +3,6 @@ package com.bikeparts.service;
 import com.bikeparts.entity.Account;
 import com.bikeparts.entity.Bike;
 import com.bikeparts.entity.Bikepart;
-import com.bikeparts.repository.BikeRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -20,11 +19,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("BikeService – Unit Tests")
+@DisplayName("BikeService - Unit Tests")
 class BikeServiceTest {
-
-    @Mock
-    private BikeRepository bikeRepository;
 
     @Mock
     private AccountService accountService;
@@ -66,11 +62,11 @@ class BikeServiceTest {
     class GetAllBikeparts {
 
         @Test
-        @DisplayName("gibt Bikeparts des gesuchten Bikes zurück")
+        @DisplayName("returns bikeparts of the requested bike")
         void getAllBikeparts_validIds_returnsBikeparts() {
             when(accountService.findById(1L)).thenReturn(Optional.of(account));
 
-            List<Bikepart> result = bikeService.getAllBikeparts(1L, 5L);
+            List<Bikepart> result = bikeService.getAllBikeparts(bike.getId());
 
             assertEquals(2, result.size());
             assertTrue(result.contains(bikepart1));
@@ -83,7 +79,7 @@ class BikeServiceTest {
             when(accountService.findById(99L)).thenReturn(Optional.empty());
 
             RuntimeException ex = assertThrows(RuntimeException.class,
-                    () -> bikeService.getAllBikeparts(99L, 5L));
+                    () -> bikeService.getAllBikeparts(bike.getId()));
 
             assertEquals("Account nicht gefunden", ex.getMessage());
         }
@@ -94,18 +90,18 @@ class BikeServiceTest {
             when(accountService.findById(1L)).thenReturn(Optional.of(account));
 
             RuntimeException ex = assertThrows(RuntimeException.class,
-                    () -> bikeService.getAllBikeparts(1L, 99L));
+                    () -> bikeService.getAllBikeparts(bike.getId()));
 
             assertEquals("Bike 99 nicht gefunden", ex.getMessage());
         }
 
         @Test
-        @DisplayName("Bike hat keine Bikeparts -> leere Liste")
+        @DisplayName("bike has no bikeparts -> returns empty list")
         void getAllBikeparts_bikeHasNoBikeparts_returnsEmptyList() {
             bike.setBikeparts(List.of());
             when(accountService.findById(1L)).thenReturn(Optional.of(account));
 
-            List<Bikepart> result = bikeService.getAllBikeparts(1L, 5L);
+            List<Bikepart> result = bikeService.getAllBikeparts(bike.getId());
 
             assertNotNull(result);
             assertTrue(result.isEmpty());

@@ -3,7 +3,6 @@ package com.bikeparts.controller;
 import com.bikeparts.entity.Account;
 import com.bikeparts.entity.Bike;
 import com.bikeparts.entity.Bikepart;
-import com.bikeparts.entity.Cart;
 import com.bikeparts.service.AccountService;
 import com.bikeparts.service.BikeService;
 import com.bikeparts.service.CartService;
@@ -19,7 +18,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
-import java.util.Optional;
 
 @Controller
 public class BikeViewController {
@@ -37,17 +35,12 @@ public class BikeViewController {
         this.account = account;
     }
 
-    @GetMapping("/accounts/{id}/bikes")
+    @GetMapping("/bikes")
     public String showBikes(
-            @PathVariable Long id,
-            HttpSession session,
             Model model) {
-        session.setAttribute("accountId", id);
-        log.info("****"+ account);
-        List<Bike> bikes = bikeService.getAllBikesByAccountId(id);
+        List<Bike> bikes = bikeService.getAllBikes();
 
         model.addAttribute("bikes", bikes);
-        model.addAttribute("accountId", id);
         return "bikes-list";
     }
 
@@ -64,25 +57,21 @@ public class BikeViewController {
     @GetMapping("/bikes/{bikeId}/bikeparts")
     public String showBikeparts(
             @PathVariable Long bikeId,
-            HttpSession session,
             Model model) {
-        Long accountId = (Long) session.getAttribute("accountId");
         Bike bike = bikeService.getBikeById(bikeId);
-        if (!bike.getAccount().getId().equals(accountId)) {
+        if (!bike.getAccount().getId().equals(account.getId())) {
             throw new RuntimeException("Zugriff verweigert");
         }
-        model.addAttribute("bikeparts", bikeService.getAllBikeparts(accountId, bikeId));
-        model.addAttribute("accountId", accountId);
+        model.addAttribute("bikeparts", bikeService.getAllBikeparts(bikeId));
+        model.addAttribute("accountId", account.getId());
         return "bikeparts-list";
     }
 
     @GetMapping("/bikeparts/{id}")
     public String showBikepart(
             @PathVariable Long id,
-            HttpSession session,
             Model model) {
-        Long accountId = (Long) session.getAttribute("accountId");
-        model.addAttribute("bikepart", bikeService.getBikepartById(id, accountId));
+        model.addAttribute("bikepart", bikeService.getBikepartById(id));
         return "bikepart-details";
     }
 
@@ -90,13 +79,12 @@ public class BikeViewController {
     public String addBikepartToCart(
             @PathVariable Long id,
             @RequestParam(defaultValue = "1") Integer quantity,
-            HttpSession session,
             Model model) {
-        // TODO verschieben nach Login und in die Session packen
-        Long accountId = (Long) session.getAttribute("accountId");
-        Bikepart bikepartById = bikeService.getBikepartById(id, accountId);
-        Cart cart = cartService.addBikepartToCart(id, accountId, quantity);
-        model.addAttribute("cart", cart);
+
+        cartService.addBikepartToCart(id, quantity);
+        Bikepart bikepart = bikeService.getBikepartById(id);
+        model.addAttribute("bikeparts",  bikeService.getAllBikeparts(bikepart.getBike().getId()));
+        model.addAttribute("accountId", account.getId());
         return "bikeparts-list";
     }
 
@@ -105,9 +93,7 @@ public class BikeViewController {
             @PathVariable Long id,
             HttpSession session,
             Model model) {
-        Long accountId = (Long) session.getAttribute("accountId");
-        Account account = accountService.findById(accountId).orElseThrow(() -> new RuntimeException("Account nicht gefunden"));
-        model.addAttribute("cart", account.getCart());
+          model.addAttribute("cart", account.getCart());
         return "cart-cartItems-list";
     }
 }

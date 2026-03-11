@@ -12,9 +12,12 @@
 <body>
 <div style="display: flex; justify-content: space-between; align-items: center;">
     <h1>Fahrradteile</h1>
-    <a th:href="@{/cart/{id}(id=${accountId})}" title="Warenkorb">
-        <i class="fa-solid fa-cart-shopping" style="font-size: 1.8rem;"></i>
-    </a>
+    <span style="display: flex; gap: 0.5rem; align-items: center;">
+        <a th:href="@{/cart/{id}(id=${accountId})}" title="Warenkorb">
+            <i class="fa-solid fa-cart-shopping" style="font-size: 1.8rem;"></i>
+        </a>
+        <i class="fa-solid fa-circle-user" style="font-size: 1.8rem; color: #5659fb;"></i>
+    </span>
 </div>
 
 <p>Anzahl Teile: <span th:text="${bikeparts.size()}">0</span></p>
@@ -57,7 +60,9 @@
                 <form th:action="@{/bikeparts/{id}/addBikepartToCart(id=${bikepart.id})}" method="post">
                     <div class="cart-input-group">
                         <input type="number" name="quantity" value="1" min="1"  style="width: 3rem;height:2rem;" />
-                        <button type="submit" class="cart-btn">
+                        <!--                                class="cart-btn"-->
+                        <button type="submit" style="width: 2rem;height:2rem;"
+                        >
                             <i class="fa-solid fa-cart-shopping cart-default"></i>
                             <i class="fa-solid fa-cart-arrow-down cart-hover"></i>
                         </button>

@@ -28,15 +28,22 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         log.info("Loading user: {}", email);
 
-        account = accountRepository.findByEmail(email)
+        Account accountJPA = accountRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException(
                         "User not found: " + email));
 
+        // Felder in den Session-Proxy kopieren 
+        account.setId(accountJPA.getId());
+        account.setEmail(accountJPA.getEmail());
+        account.setFirstName(accountJPA.getFirstName());
+        account.setLastName(accountJPA.getLastName());
+        account.setRole(accountJPA.getRole());
+        account.setIsActive(accountJPA.getIsActive());
+
         // Spring Security’s User-Objekt erstellen (NICHT unsere Entity!)
-        // Authentifizierung: use the original account data from JPA: found
         return org.springframework.security.core.userdetails.User.builder()
-                .username(account.getEmail()) // email
-                .password(account.getPassword())
+                .username(accountJPA.getEmail())
+                .password(accountJPA.getPassword())
 //                .authorities(getAuthorities(user)) // authorities hinzufügen
 //                .accountLocked(!account.isAccountNonLocked())
                 .disabled(!account.getIsActive())

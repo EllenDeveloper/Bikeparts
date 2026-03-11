@@ -344,11 +344,11 @@ class BikeControllerTest {
 
 
     // =========================================================
-    // POST /api/accounts/{id}/cart/bikeparts/{bikepartId}
+    // POST /api/accounts/cart/bikeparts/{bikepartId}
     // =========================================================
 
     @Nested
-    @DisplayName("addBikePart() – POST /api/accounts/{id}/cart/bikeparts/{bikepartId}")
+    @DisplayName("addBikePart() – POST /api/accounts/cart/bikeparts/{bikepartId}")
     class AddBikePart {
 
         @Test
@@ -364,7 +364,7 @@ class BikeControllerTest {
                     .andExpect(status().isNoContent());
 
             Bikepart bikepart = new Bikepart();
-            verify(cartService).addBikepartToCart(2L, account.getId(), 1);
+            verify(cartService).addBikepartToCart(2L, 1);
         }
 
         @Test
@@ -398,7 +398,7 @@ class BikeControllerTest {
             account.setCart(cart);
             when(accountService.findById(1L)).thenReturn(Optional.of(account));
             doThrow(new RuntimeException("Bikepart nicht gefunden"))
-                    .when(cartService).addBikepartToCart(99L, account.getId(), 1);
+                    .when(cartService).addBikepartToCart(99L,  1);
 
             assertThrows(Exception.class, () ->
                     mockMvc.perform(post("/api/accounts/1/cart/bikeparts/99")));
