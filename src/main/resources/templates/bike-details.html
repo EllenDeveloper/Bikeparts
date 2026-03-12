@@ -4,11 +4,14 @@
     <meta charset="UTF-8">
     <title th:text="${bike.name} + ' – ' + ${bike.brand} + ' (' + ${bike.type} + ')'">Fahrrad-Details</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
-
-<h1 th:text="${bike.name} + ' – ' + ${bike.brand} + ' (' + ${bike.type} + ')'">Fahrrad-Details</h1>
-
+<div style="display: flex; justify-content: space-between; align-items: center;">
+    <h1 th:text="${bike.name} + ' – ' + ${bike.brand} + ' (' + ${bike.type} + ')'">Fahrrad-Details</h1>
+    <!-- Header-Fragment einfügen -->
+    <div th:replace="fragments/header :: header"></div>
+</div>
 <p>
     <a th:href="@{/accounts/{id}/bikes(id=${bike.account.id})}">← Zurück zur Fahrradliste</a>
 </p>
@@ -75,4 +78,5 @@
 </p>
 
 </body>
+<div th:replace="fragments/footer :: footer"></div>
 </html>

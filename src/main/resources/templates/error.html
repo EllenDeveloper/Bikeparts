@@ -4,14 +4,18 @@
     <meta charset="UTF-8">
     <title>Fehler</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
-
-<h1>Ein Fehler ist aufgetreten</h1>
+<div style="display: flex; justify-content: space-between; align-items: center;">
+    <h1>Ein Fehler ist aufgetreten</h1>
+    <div th:replace="fragments/header :: header"></div>
+</div>
 
 <p th:text="${errorMessage}">Unbekannter Fehler</p>
 
 <p><a href="javascript:history.back()">← Zurück</a></p>
 
 </body>
+<div th:replace="fragments/footer :: footer"></div>
 </html>

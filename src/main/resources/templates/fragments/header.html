@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<header th:fragment="header">
+    <span style="display: flex; gap: 0.5rem; align-items: center;">
+        <a th:href="@{/cart/{id}(id=${accountId})}" title="Warenkorb">
+            <i class="fa-solid fa-cart-shopping" style="font-size: 1.8rem;"></i>
+        </a>
+        <i class="fa-solid fa-circle-user" style="font-size: 1.8rem; color: #5659fb;"></i>
+    </span>
+</header>
+</body>
+</html>

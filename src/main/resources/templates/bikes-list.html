@@ -9,12 +9,10 @@
 <body>
 <div style="display: flex; justify-content: space-between; align-items: center;">
     <h1>Verwaltete Fahrräder</h1>
-    <a th:href="@{/cart/{id}(id=${accountId})}" title="Warenkorb">
-        <i class="fa-solid fa-cart-shopping" style="font-size: 1.8rem;"></i>
-    </a>
+    <div th:replace="fragments/header :: header"></div>
 </div>
 
-<p>Anzahl Fahrräder: <span th:text="${bikes.size()}">0</span></p>
+<p><i class="fa-solid fa-bicycle"  style="font-size: 1.8rem; color: #5659fb;"></i> Anzahl Fahrräder: <span th:text="${bikes.size()}">0</span></p>
 
 <table border="1">
     <thead>
@@ -47,4 +45,5 @@
     </tbody>
 </table>
 </body>
+<div th:replace="fragments/footer :: footer"></div>
 </html>

@@ -21,6 +21,11 @@ public class WebController {
         return "login";
     }
 
+    @GetMapping("/error")
+    public String error() {
+        return "error";
+    }
+
 
 //    @GetMapping("/me/full")
 //    public String currentAccountFull(@CurrentAccount Account account) {

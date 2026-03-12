@@ -10,14 +10,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
+
 <div style="display: flex; justify-content: space-between; align-items: center;">
     <h1>Fahrradteile</h1>
-    <span style="display: flex; gap: 0.5rem; align-items: center;">
-        <a th:href="@{/cart/{id}(id=${accountId})}" title="Warenkorb">
-            <i class="fa-solid fa-cart-shopping" style="font-size: 1.8rem;"></i>
-        </a>
-        <i class="fa-solid fa-circle-user" style="font-size: 1.8rem; color: #5659fb;"></i>
-    </span>
+    <div th:replace="fragments/header :: header"></div>
 </div>
 
 <p>Anzahl Teile: <span th:text="${bikeparts.size()}">0</span></p>
@@ -73,4 +69,5 @@
     </tbody>
 </table>
 </body>
+<div th:replace="fragments/footer :: footer"></div>
 </html>
