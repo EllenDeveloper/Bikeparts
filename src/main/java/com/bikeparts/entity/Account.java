@@ -1,7 +1,5 @@
 package com.bikeparts.entity;
 
-import com.bikeparts.enums.Currency;
-import com.bikeparts.enums.PaymentMethod;
 import com.bikeparts.enums.UserRole;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -29,8 +27,8 @@ public class Account implements Serializable {
     private Long id;
 
     @Column(nullable = false, unique = true, length = 100)
-    @Email(message = "Email muss gültiges Format haben") 
-    @NotBlank(message = "Email darf nicht leer sein")  
+    @Email(message = "Email muss gültiges Format haben")
+    @NotBlank(message = "Email darf nicht leer sein")
     private String email;
 
     @Column(nullable = false, length = 255)
@@ -46,46 +44,20 @@ public class Account implements Serializable {
     @Column(nullable = false, length = 20)
     private UserRole role = UserRole.USER;
 
+    @Column(nullable = false)
+    private Boolean isActive = true;
+
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
-    //    @PrePersist
-//    private void onCreate() {
-//        createdAt = LocalDateTime.now();
-//    }
 
     @UpdateTimestamp
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime creationDate;
-
-    @Column
-    private LocalDateTime lastLogin;
-
-    @Enumerated(EnumType.STRING)
-    @Column(length = 20)
-    private PaymentMethod preferredPaymentMethod;
-
-    @Column(length = 2)
-    private String language = "DE"; // DE, EN
-
-    @Enumerated(EnumType.STRING)
-    @Column(length = 3)
-    private Currency preferredCurrency = Currency.EUR;
-
-    @Column(nullable = false)
-    private Boolean isActive = true;
-
-    @Column(nullable = false)
-    private Boolean notificationsEnabled = true;
-
     // Relationships
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Bike> bikes = new ArrayList<>();
-
-
 
     // Helper-Methoden für bidirectionale Relationship
     public void addBike(Bike bike) {
@@ -116,24 +88,17 @@ public class Account implements Serializable {
     public Account() {
     }
 
-    public Account(Long id, String email, String password, String firstName, String lastName, 
-                UserRole role, LocalDateTime createdAt, LocalDateTime updatedAt,
-                LocalDateTime creationDate, LocalDateTime lastLogin, PaymentMethod preferredPaymentMethod, 
-                String language, Currency preferredCurrency, Boolean notificationsEnabled) {
+    public Account(Long id, String email, String password, String firstName, String lastName,
+                   UserRole role, Boolean isActive, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.email = email;
         this.password = password;
         this.firstName = firstName;
         this.lastName = lastName;
         this.role = role;
+        this.isActive = isActive;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
-        this.creationDate = creationDate;
-        this.lastLogin = lastLogin;
-        this.preferredPaymentMethod = preferredPaymentMethod;
-        this.language = language;
-        this.preferredCurrency = preferredCurrency;
-        this.notificationsEnabled = notificationsEnabled;
     }
 
     // Getters and Setters
@@ -185,6 +150,14 @@ public class Account implements Serializable {
         this.role = role;
     }
 
+    public Boolean getIsActive() {
+        return isActive;
+    }
+
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
+    }
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -199,62 +172,6 @@ public class Account implements Serializable {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
-    }
-
-    public LocalDateTime getCreationDate() {
-        return creationDate;
-    }
-
-    public void setCreationDate(LocalDateTime creationDate) {
-        this.creationDate = creationDate;
-    }
-
-    public LocalDateTime getLastLogin() {
-        return lastLogin;
-    }
-
-    public void setLastLogin(LocalDateTime lastLogin) {
-        this.lastLogin = lastLogin;
-    }
-
-    public PaymentMethod getPreferredPaymentMethod() {
-        return preferredPaymentMethod;
-    }
-
-    public void setPreferredPaymentMethod(PaymentMethod preferredPaymentMethod) {
-        this.preferredPaymentMethod = preferredPaymentMethod;
-    }
-
-    public String getLanguage() {
-        return language;
-    }
-
-    public void setLanguage(String language) {
-        this.language = language;
-    }
-
-    public Currency getPreferredCurrency() {
-        return preferredCurrency;
-    }
-
-    public void setPreferredCurrency(Currency preferredCurrency) {
-        this.preferredCurrency = preferredCurrency;
-    }
-
-    public Boolean getIsActive() {
-        return isActive;
-    }
-
-    public void setIsActive(Boolean isActive) {
-        this.isActive = isActive;
-    }
-
-    public Boolean getNotificationsEnabled() {
-        return notificationsEnabled;
-    }
-
-    public void setNotificationsEnabled(Boolean notificationsEnabled) {
-        this.notificationsEnabled = notificationsEnabled;
     }
 
     public Cart getCart() {
@@ -273,21 +190,13 @@ public class Account implements Serializable {
         this.bikes = bikes;
     }
 
-    // Lifecycle callback
-    @PrePersist
-    protected void onCreate() {
-        if (creationDate == null) {
-            creationDate = LocalDateTime.now();
-        }
-    }
-
     // equals and hashCode
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Account account = (Account) o;
-        return Objects.equals(id, account.id) && 
+        return Objects.equals(id, account.id) &&
                Objects.equals(email, account.email);
     }
 
@@ -306,7 +215,6 @@ public class Account implements Serializable {
                 ", lastName='" + lastName + '\'' +
                 ", role=" + role +
                 ", createdAt=" + createdAt +
-                ", language='" + language + '\'' +
                 '}';
     }
 }

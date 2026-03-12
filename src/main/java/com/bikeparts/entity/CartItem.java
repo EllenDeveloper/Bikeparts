@@ -5,7 +5,6 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -37,9 +36,6 @@ public class CartItem {
     @Column(nullable = false)
     private Integer quantity = 1;
 
-    @Column(precision = 10, scale = 2)
-    private BigDecimal targetPrice; // Gewünschter Preis (optional)
-
     @Column(length = 500)
     private String notes;
 
@@ -62,19 +58,17 @@ public class CartItem {
         this.bikepart = bikepart;
         this.productName = bikepart.getName();
         this.quantity = quantity;
-        this.targetPrice = targetPrice;
         this.notes = bikepart.getNotes();
     }
 
-    public CartItem(Long id, Cart cart, Bikepart bikepart, String productName, 
-                    Integer quantity, BigDecimal targetPrice, String notes, 
+    public CartItem(Long id, Cart cart, Bikepart bikepart, String productName,
+                    Integer quantity, String notes,
                     LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.cart = cart;
         this.bikepart = bikepart;
         this.productName = productName;
         this.quantity = quantity;
-        this.targetPrice = targetPrice;
         this.notes = notes;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -119,14 +113,6 @@ public class CartItem {
 
     public void setQuantity(Integer quantity) {
         this.quantity = quantity;
-    }
-
-    public BigDecimal getTargetPrice() {
-        return targetPrice;
-    }
-
-    public void setTargetPrice(BigDecimal targetPrice) {
-        this.targetPrice = targetPrice;
     }
 
     public String getNotes() {
@@ -182,7 +168,6 @@ public class CartItem {
                 "id=" + id +
                 ", productName='" + getEffectiveProductName() + '\'' +
                 ", quantity=" + quantity +
-                ", targetPrice=" + targetPrice +
                 ", createdAt=" + createdAt +
                 '}';
     }

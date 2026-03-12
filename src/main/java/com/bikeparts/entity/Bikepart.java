@@ -6,8 +6,6 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -52,18 +50,6 @@ public class Bikepart {
     @Column
     private String tireWidth; // Mantelbreite in mm (z.B. 2.25, 2.35)
 
-    @Column(precision = 10, scale = 2)
-    private BigDecimal lastPurchasePrice;
-
-    @Column
-    private LocalDate lastPurchaseDate;
-
-    @Column(length = 100)
-    private String lastPurchaseShop;
-
-    @Column
-    private LocalDate installationDate;
-
     @Column(columnDefinition = "TEXT")
     private String notes;
 
@@ -90,8 +76,7 @@ public class Bikepart {
     
     public Bikepart(Long id, Bike bike, BikepartType type, String name, String brand, String model,
                     String quality, String alternativeQualities, String specificDetails, String tireWidth,
-                    BigDecimal lastPurchasePrice, LocalDate lastPurchaseDate, String lastPurchaseShop,
-                    LocalDate installationDate, String notes, LocalDateTime createdAt, LocalDateTime updatedAt) {
+                    String notes, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.bike = bike;
         this.type = type;
@@ -102,10 +87,6 @@ public class Bikepart {
         this.alternativeQualities = alternativeQualities;
         this.specificDetails = specificDetails;
         this.tireWidth = tireWidth;
-        this.lastPurchasePrice = lastPurchasePrice;
-        this.lastPurchaseDate = lastPurchaseDate;
-        this.lastPurchaseShop = lastPurchaseShop;
-        this.installationDate = installationDate;
         this.notes = notes;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -190,38 +171,6 @@ public class Bikepart {
 
     public void setTireWidth(String tireWidth) {
         this.tireWidth = tireWidth;
-    }
-
-    public BigDecimal getLastPurchasePrice() {
-        return lastPurchasePrice;
-    }
-
-    public void setLastPurchasePrice(BigDecimal lastPurchasePrice) {
-        this.lastPurchasePrice = lastPurchasePrice;
-    }
-
-    public LocalDate getLastPurchaseDate() {
-        return lastPurchaseDate;
-    }
-
-    public void setLastPurchaseDate(LocalDate lastPurchaseDate) {
-        this.lastPurchaseDate = lastPurchaseDate;
-    }
-
-    public String getLastPurchaseShop() {
-        return lastPurchaseShop;
-    }
-
-    public void setLastPurchaseShop(String lastPurchaseShop) {
-        this.lastPurchaseShop = lastPurchaseShop;
-    }
-
-    public LocalDate getInstallationDate() {
-        return installationDate;
-    }
-
-    public void setInstallationDate(LocalDate installationDate) {
-        this.installationDate = installationDate;
     }
 
     public String getNotes() {

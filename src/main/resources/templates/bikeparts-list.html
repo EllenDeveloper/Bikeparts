@@ -30,8 +30,6 @@
             <th>Alternative Qualitäten</th>
             <th>Details</th>
             <th>Reifenbreite</th>
-            <th>Letzter Kaufpreis</th>
-            <th>Letzter Shop</th>
             <th>Notizen</th>
             <th>Warenkorb</th>
         </tr>
@@ -49,8 +47,6 @@
             <td th:text="${bikepart.alternativeQualities}"></td>
             <td th:text="${bikepart.specificDetails}"></td>
             <td th:text="${bikepart.tireWidth}"></td>
-            <td th:text="${bikepart.lastPurchasePrice != null} ? ${bikepart.lastPurchasePrice} + ' €' : ''"></td>
-            <td th:text="${bikepart.lastPurchaseShop}"></td>
             <td th:text="${bikepart.notes}"></td>
             <td class="cart-cell" onclick="event.stopPropagation()">
                 <form th:action="@{/bikeparts/{id}/addBikepartToCart(id=${bikepart.id})}" method="post">

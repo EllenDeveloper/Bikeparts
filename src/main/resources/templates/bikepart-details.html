@@ -58,22 +58,6 @@
             <td th:text="${bikepart.tireWidth} ?: '–'"></td>
         </tr>
         <tr>
-            <th>Letzter Kaufpreis</th>
-            <td th:text="${bikepart.lastPurchasePrice != null} ? ${#numbers.formatDecimal(bikepart.lastPurchasePrice, 1, 2)} + ' €' : '–'"></td>
-        </tr>
-        <tr>
-            <th>Letztes Kaufdatum</th>
-            <td th:text="${bikepart.lastPurchaseDate != null} ? ${#temporals.format(bikepart.lastPurchaseDate, 'dd.MM.yyyy')} : '–'"></td>
-        </tr>
-        <tr>
-            <th>Letzter Shop</th>
-            <td th:text="${bikepart.lastPurchaseShop} ?: '–'"></td>
-        </tr>
-        <tr>
-            <th>Einbaudatum</th>
-            <td th:text="${bikepart.installationDate != null} ? ${#temporals.format(bikepart.installationDate, 'dd.MM.yyyy')} : '–'"></td>
-        </tr>
-        <tr>
             <th>Notizen</th>
             <td th:text="${bikepart.notes} ?: '–'"></td>
         </tr>

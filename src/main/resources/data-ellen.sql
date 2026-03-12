@@ -19,10 +19,6 @@ INSERT INTO accounts (
     last_name,
     role,
     is_active,
-    language,
-    preferred_currency,
-    notifications_enabled,
-    creation_date,
     created_at,
     updated_at
 ) VALUES (
@@ -32,10 +28,6 @@ INSERT INTO accounts (
     NULL,
     'USER',
     TRUE,
-    'DE',
-    'EUR',
-    TRUE,
-    CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP
 );
@@ -125,7 +117,7 @@ INSERT INTO bikeparts (
     'Shimano XT Kette 10-fach',
     'Shimano',
     'CN-HG95',
-    'XT',
+    'XT 10-fach',
     'SLX, Deore',
     '10-fach',
     'Shimano XT 10-fach Kette. Kompatibel mit 10-fach Kassetten.',

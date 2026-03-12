@@ -65,9 +65,4 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
 //     */
 //    Long countByIsActiveTrue();
 //
-//    /**
-//     * Findet Account die sich seit X Tagen nicht eingeloggt haben
-//     */
-//    @Query("SELECT u FROM Account u WHERE u.lastLogin IS NULL OR u.lastLogin < :cutoffDate")
-//    List<Account> findInactiveAccountsSince(@Param("cutoffDate") LocalDateTime cutoffDate);
 }

@@ -7,8 +7,6 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,12 +45,6 @@ public class Bike {
 
     @Column(length = 100)
     private String modelName; // Modellname
-
-    @Column
-    private LocalDate purchaseDate;
-
-    @Column(precision = 10, scale = 2)
-    private BigDecimal purchasePrice;
 
     @Column
     private Integer wheelSize; // 27, 29 Zoll
@@ -95,9 +87,8 @@ public class Bike {
         this.name = name;
     }
     
-    public Bike(Long id, Account account, BikeType type, Boolean isEbike, String name, String brand, 
-                String modelName, LocalDate purchaseDate, BigDecimal purchasePrice, Integer wheelSize, 
-                String notes, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public Bike(Long id, Account account, BikeType type, Boolean isEbike, String name, String brand,
+                String modelName, Integer wheelSize, String notes, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.account = account;
         this.type = type;
@@ -105,8 +96,6 @@ public class Bike {
         this.name = name;
         this.brand = brand;
         this.modelName = modelName;
-        this.purchaseDate = purchaseDate;
-        this.purchasePrice = purchasePrice;
         this.wheelSize = wheelSize;
         this.notes = notes;
         this.createdAt = createdAt;
@@ -168,22 +157,6 @@ public class Bike {
 
     public void setModelName(String modelName) {
         this.modelName = modelName;
-    }
-
-    public LocalDate getPurchaseDate() {
-        return purchaseDate;
-    }
-
-    public void setPurchaseDate(LocalDate purchaseDate) {
-        this.purchaseDate = purchaseDate;
-    }
-
-    public BigDecimal getPurchasePrice() {
-        return purchasePrice;
-    }
-
-    public void setPurchasePrice(BigDecimal purchasePrice) {
-        this.purchasePrice = purchasePrice;
     }
 
     public Integer getWheelSize() {

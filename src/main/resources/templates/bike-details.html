@@ -51,14 +51,6 @@
             <td th:text="${bike.wheelSize != null} ? ${bike.wheelSize} + ' Zoll' : '–'"></td>
         </tr>
         <tr>
-            <th>Kaufdatum</th>
-            <td th:text="${bike.purchaseDate != null} ? ${#temporals.format(bike.purchaseDate, 'dd.MM.yyyy')} : '–'"></td>
-        </tr>
-        <tr>
-            <th>Kaufpreis</th>
-            <td th:text="${bike.purchasePrice != null} ? ${#numbers.formatDecimal(bike.purchasePrice, 1, 2)} + ' €' : '–'"></td>
-        </tr>
-        <tr>
             <th>Notizen</th>
             <td th:text="${bike.notes} ?: '–'"></td>
         </tr>
