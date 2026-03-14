@@ -13,7 +13,7 @@
 
 <div style="display: flex; justify-content: space-between; align-items: center;">
     <h1>Fahrradteile</h1>
-    <div th:replace="fragments/header :: header"></div>
+    <div th:replace="~{fragments/header :: header}"></div>
 </div>
 
 <p>Anzahl Teile: <span th:text="${bikeparts.size()}">0</span></p>
@@ -65,5 +65,5 @@
     </tbody>
 </table>
 </body>
-<div th:replace="fragments/footer :: footer"></div>
+<div th:replace="~{fragments/footer :: footer}"></div>
 </html>

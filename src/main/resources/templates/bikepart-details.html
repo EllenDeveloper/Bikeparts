@@ -9,7 +9,7 @@
 
 <div style="display: flex; justify-content: space-between; align-items: center;">
     <h1 th:text="${bikepart.name} + ' – ' + ${bikepart.brand} + ' (' + ${bikepart.type} + ')'">Fahrradteil-Details</h1>
-    <div th:replace="fragments/header :: header"></div>
+    <div th:replace="~{fragments/header :: header}"></div>
 </div>
 <p>
     <a th:href="@{/bikes/{bikeId}/bikeparts(bikeId=${bikepart.bike.id})}">← Zurück zur Teileliste</a>
@@ -85,5 +85,5 @@
 </table>
 
 </body>
-<div th:replace="fragments/footer :: footer"></div>
+<div th:replace="~{fragments/footer :: footer}"></div>
 </html>

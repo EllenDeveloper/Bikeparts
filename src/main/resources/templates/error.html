@@ -9,7 +9,7 @@
 <body>
 <div style="display: flex; justify-content: space-between; align-items: center;">
     <h1>Ein Fehler ist aufgetreten</h1>
-    <div th:replace="fragments/header :: header"></div>
+    <div th:replace="~{fragments/header :: header}"></div>
 </div>
 
 <p th:text="${errorMessage}">Unbekannter Fehler</p>
@@ -17,5 +17,5 @@
 <p><a href="javascript:history.back()">← Zurück</a></p>
 
 </body>
-<div th:replace="fragments/footer :: footer"></div>
+<div th:replace="~{fragments/footer :: footer}"></div>
 </html>

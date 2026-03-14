@@ -9,7 +9,7 @@
 <body>
 <div style="display: flex; justify-content: space-between; align-items: center;">
     <h1>Verwaltete Fahrräder</h1>
-    <div th:replace="fragments/header :: header"></div>
+    <div th:replace="~{fragments/header :: header}"></div>
 </div>
 
 <p><i class="fa-solid fa-bicycle"  style="font-size: 1.8rem; color: #5659fb;"></i> Anzahl Fahrräder: <span th:text="${bikes.size()}">0</span></p>
@@ -45,5 +45,5 @@
     </tbody>
 </table>
 </body>
-<div th:replace="fragments/footer :: footer"></div>
+<div th:replace="~{fragments/footer :: footer}"></div>
 </html>
