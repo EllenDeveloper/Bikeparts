@@ -1,0 +1,218 @@
+package com.bikeparts.price.service;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.bikeparts.price.ScrapingConstants;
+import com.bikeparts.price.enums.FetchMethod;
+import com.bikeparts.price.entity.ProductOffer;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Scraper-Service für den Online-Shop <a href="https://www.bike-components.de">bike-components.de</a>.
+ *
+ * <h2>Technischer Hintergrund</h2>
+ * <p>bike-components.de verwendet Server-Side Rendering (SSR) mit Vue.js und Inertia.js.
+ * Alle Produktdaten der Suchergebnisseite sind als JSON im HTML-Attribut
+ * {@code data-props} des Elements {@code <div data-component="ProductCatalog">} enthalten.
+ * Ein JavaScript-Rendering (z. B. Selenium) ist daher <strong>nicht erforderlich</strong> –
+ * Jsoup ist für den HTTP-Request und das DOM-Parsing ausreichend.</p>
+ *
+ * <h2>robots.txt</h2>
+ * <p>Die robots.txt von bike-components.de enthält keine Disallow-Regeln.
+ * Die Suchseite {@code /de/s/?keywords=} ist explizit erlaubt. Scraping ist damit
+ * rechtlich unproblematisch.</p>
+ *
+ * <h2>Caching</h2>
+ * <p>Suchergebnisse werden mit {@code @Cacheable} gecacht, um wiederholte
+ * identische Anfragen zu vermeiden und Rate-Limiting des Shops zu reduzieren.</p>
+ *
+ * <h2>Paginierung</h2>
+ * <p>Pro Seite liefert der Shop standardmäßig 24 Produkte. Das Feld
+ * {@code initialData.total} enthält die Gesamtanzahl der Treffer.</p>
+ *
+ * @see BikeComponentsShippingCostScraperService
+ * @see ProductOffer
+ */
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class BikeComponentsScraperService {
+
+    /**
+     * Jackson {@link ObjectMapper} zum Deserialisieren des JSON aus dem
+     * {@code data-props}-Attribut. Wird per Constructor Injection bereitgestellt.
+     */
+    private final ObjectMapper objectMapper;
+
+    /**
+     * Schnelltest-Einstiegspunkt zum manuellen Ausführen des Scrapers
+     * außerhalb des Spring-Kontexts (z. B. in der IDE direkt starten).
+     *
+     * @param args Kommandozeilenargumente (werden nicht ausgewertet).
+     */
+    public static void main(String[] args) {
+        ObjectMapper objectMapper1 = new ObjectMapper();
+        BikeComponentsScraperService bikeComponentsScraperService = new BikeComponentsScraperService(objectMapper1);
+        List<ProductOffer> result = bikeComponentsScraperService.search(ScrapingConstants.SEARCH_URL_BIKE_COMPONENTS + "shimano fahrradkette slx");
+    }
+
+    /**
+     * Führt eine Produktsuche auf bike-components.de durch und gibt die
+     * ersten {@link ScrapingConstants#MAX_NUMBER_PRODUCT_OFFERS} Suchergebnisse als Liste zurück.
+     *
+     * <p>Der Ablauf:</p>
+     * <ol>
+     *   <li>Suchbegriff URL-kodieren und an {@link ScrapingConstants#SEARCH_URL_BIKE_COMPONENTS} anhängen</li>
+     *   <li>HTTP-GET via Jsoup mit {@link ScrapingConstants#USER_AGENT} und 10 s Timeout</li>
+     *   <li>HTML-Dokument an {@link #parseDocument(Document)} delegieren</li>
+     *   <li>Bei Fehler (IOException, Timeout etc.): leere Liste zurückgeben</li>
+     * </ol>
+     *
+     * <p>Das Ergebnis wird pro Query gecacht ({@code @Cacheable}).
+     * Ein erneuter Aufruf mit demselben Suchbegriff trifft daher den Cache
+     * und löst keinen neuen HTTP-Request aus.</p>
+     *
+     * @param searchQuery Suchbegriff, z. B. {@code "shimano kette"}.
+     *              Leerzeichen werden als {@code +} kodiert (URL-Encoding).
+     * @return Liste der gefundenen {@link ProductOffer}s, oder leere Liste bei Fehler.
+     */
+    @Cacheable(value = "bikeComponentsSearch", key = "#searchQuery")
+    public List<ProductOffer> search(String searchQuery) {
+        String url = ScrapingConstants.SEARCH_URL_BIKE_COMPONENTS + URLEncoder.encode(searchQuery, StandardCharsets.UTF_8);
+        log.debug("Scraping bike-components.de: {}", url);
+        log.debug("searchQuery: {}", searchQuery);
+
+        try {
+            Document doc = Jsoup.connect(url)
+                    .userAgent(ScrapingConstants.USER_AGENT)
+                    .timeout(10_000)
+                    .get();
+            return parseDocument(doc, searchQuery);
+        } catch (Exception e) {
+            log.error("Fehler beim Scraping von bike-components.de für Query '{}': {}", searchQuery, e.getMessage());
+            return List.of();
+        }
+    }
+
+    /**
+     * Parst ein bereits geladenes Jsoup-{@link Document} und extrahiert
+     * alle Produkte aus dem {@code data-props}-JSON-Attribut.
+     *
+     * <p>Diese Methode ist <strong>package-private</strong>, um sie in Unit-Tests
+     * direkt mit einem aus einer Testdatei geparsten Dokument aufrufen zu können –
+     * ohne einen echten HTTP-Request durchzuführen.</p>
+     *
+     * <p>Ablauf:</p>
+     * <ol>
+     *   <li>CSS-Selektor {@code [data-component='ProductCatalog']} findet das
+     *       Vue-Einstiegselement im HTML</li>
+     *   <li>Das Attribut {@code data-props} enthält das vollständige JSON
+     *       der Suchergebnisse</li>
+     *   <li>Pfad im JSON: {@code initialData → products → [n] → data}</li>
+     *   <li>Jedes Produkt wird über {@link #mapToDto(JsonNode, searchQuery)} in ein
+     *       {@link ProductOffer} überführt</li>
+     * </ol>
+     *
+     * @param doc Das von Jsoup geparste HTML-Dokument der Suchergebnisseite.
+     * @return Liste der extrahierten {@link ProductOffer}s,
+     *         oder leere Liste wenn das {@code ProductCatalog}-Element fehlt
+     *         oder ein JSON-Fehler auftritt.
+     */
+    List<ProductOffer> parseDocument(Document doc, String searchQuery) {
+        Element catalog = doc.selectFirst("[data-component='ProductCatalog']");
+        if (catalog == null) {
+            log.warn("ProductCatalog-Element nicht gefunden");
+            return List.of();
+        }
+        try {
+            JsonNode root = objectMapper.readTree(catalog.attr("data-props"));
+            JsonNode initialData = root.path("initialData");
+            if (initialData.isMissingNode()) {
+                log.warn("API-Struktur geändert? Knoten 'initialData' fehlt im data-props-JSON");
+                return List.of();
+            }
+            JsonNode products = initialData.path("products");
+            if (products.isMissingNode() || !products.isArray()) {
+                log.warn("API-Struktur geändert? Knoten 'initialData.products' fehlt oder ist kein Array");
+                return List.of();
+            }
+            if (products.isEmpty()) {
+                log.warn("bike-components.de: Keine Produkte in 'initialData.products' – API-Struktur geändert oder keine Treffer?");
+            }
+
+            List<ProductOffer> result = new ArrayList<>();
+            for (int i = 0; i < Math.min(ScrapingConstants.MAX_NUMBER_PRODUCT_OFFERS, products.size()); i++) {
+                result.add(mapToDto(products.get(i).path("data"), searchQuery));
+            }
+
+            int total = root.path("initialData").path("total").asInt();
+            log.debug("bike-components.de: {} Produkte gefunden (Gesamt: {}), gespeichert: {}",
+                    products.size(), total, ScrapingConstants.MAX_NUMBER_PRODUCT_OFFERS);
+            result.forEach(offer -> log.debug("ProductOffer: {}", offer));
+            return result;
+
+        } catch (Exception e) {
+            log.error("Fehler beim Parsen des HTML-Dokuments: {}", e.getMessage());
+            return List.of();
+        }
+    }
+
+    /**
+     * Überführt einen einzelnen JSON-Knoten ({@code data}-Objekt eines Produkts)
+     * in ein {@link ProductOffer}.
+     *
+     * <p>Mapping-Regeln:</p>
+     * <ul>
+     *   <li>{@code productName}  ← {@code data.productName}</li>
+     *   <li>{@code price}        ← {@code data.priceRaw} als {@link BigDecimal};
+     *       {@code null} wenn {@code priceRaw <= 0}</li>
+     *   <li>{@code productUrl}   ← {@link ScrapingConstants#BASE_URL_BIKE_COMPONENTS} + {@code data.link} (relativer Pfad)</li>
+     *   <li>{@code inStock}      ← {@code !isSoldOut && isBuyable}</li>
+     *   <li>{@code shopName}     ← {@link ScrapingConstants#SHOP_NAME_BIKE_COMPONENTS}</li>
+     *   <li>{@code shopId}       ← {@link ScrapingConstants#SHOP_ID_BIKE_COMPONENTS}</li>
+     *   <li>{@code source}       ← immer {@link FetchMethod#WEB_SCRAPING}</li>
+     *   <li>{@code fetchedAt}    ← {@link LocalDateTime#now()} zum Zeitpunkt des Mappings</li>
+     * </ul>
+     *
+     * @param data JSON-Knoten mit den Produktdaten eines einzelnen Eintrags.
+     * @return Befülltes {@link ProductOffer}.
+     */
+    private ProductOffer mapToDto(JsonNode data, String searchQuery) {
+        double priceRaw = data.path("priceRaw").asDouble();
+        String productName = data.path("productName").asText();
+        boolean isBuyable = data.path("isBuyable").asBoolean();
+        String productId = data.path("productId").asText("?");
+
+        if (productName.isBlank()) {
+            log.warn("API-Struktur geändert? Feld 'productName' fehlt oder leer (productId={})", productId);
+        }
+        if (isBuyable && priceRaw <= 0) {
+            log.warn("API-Struktur geändert? Feld 'priceRaw' fehlt oder 0 bei kaufbarem Produkt (productId={})", productId);
+        }
+
+        return ProductOffer.builder()
+                .productName(productName)
+                .price(priceRaw > 0 ? BigDecimal.valueOf(priceRaw) : null)
+                .productUrl(ScrapingConstants.BASE_URL_BIKE_COMPONENTS + data.path("link").asText())
+                .inStock(!data.path("isSoldOut").asBoolean() && isBuyable)
+                .shopName(ScrapingConstants.SHOP_NAME_BIKE_COMPONENTS)
+                .shopId(ScrapingConstants.SHOP_ID_BIKE_COMPONENTS)
+                .source(FetchMethod.WEB_SCRAPING)
+                .fetchedAt(LocalDateTime.now())
+                .searchQuery(searchQuery)
+                .build();
+    }
+}

@@ -174,7 +174,7 @@ INSERT INTO bikeparts (
 ) VALUES (
     (SELECT id FROM bikes WHERE name = 'mtb1'
         AND account_id = (SELECT id FROM accounts WHERE email = 'ellen@bikeparts.de')),
-    'BRAKE_HYDRAULIC',
+    'DISC_BRAKE',
     'Shimano Disc Brake Pads G03A',
     'Shimano',
     'G03A',

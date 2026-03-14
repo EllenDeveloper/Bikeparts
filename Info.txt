@@ -62,5 +62,6 @@ curl -X POST http://localhost:8080/api/accounts/1/cart/bikeparts/1
   
  erste Seite anzeigen
  http://localhost:8080/accounts/1/bikes
- 
-  
+
+ searchPriceBikeComponents -> Achtung: Request wird angetriggert!
+ http://localhost:8080/api/accounts/bike/1/bikepart/2/searchPriceBikeComponents

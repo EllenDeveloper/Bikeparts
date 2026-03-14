@@ -1,5 +1,6 @@
 package com.bikeparts.entity;
 
+import com.bikeparts.price.entity.ProductOffer;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -7,6 +8,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.List;
 
 /**
  * CartItem entity (Warenkorb-Artikel)
@@ -27,8 +29,12 @@ public class CartItem {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bikepart_id")
-    @JsonIgnore  // Verhindert zirkuläre Serialisierung
+    @JsonIgnore
     private Bikepart bikepart; // nullable - kann auch manuell eingetragen sein
+
+    @OneToMany(mappedBy = "cartItem", cascade = CascadeType.ALL,
+            orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<ProductOffer> productOffers;
 
     @Column(length = 200)
     private String productName; // Falls nicht von eigenem Bike

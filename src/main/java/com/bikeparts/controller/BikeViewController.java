@@ -3,6 +3,8 @@ package com.bikeparts.controller;
 import com.bikeparts.entity.Account;
 import com.bikeparts.entity.Bike;
 import com.bikeparts.entity.Bikepart;
+import com.bikeparts.entity.CartItem;
+import com.bikeparts.price.entity.ProductOffer;
 import com.bikeparts.service.AccountService;
 import com.bikeparts.service.BikeService;
 import com.bikeparts.service.CartService;
@@ -88,12 +90,22 @@ public class BikeViewController {
         return "bikeparts-list";
     }
 
-    @GetMapping("/cart/{id}")
+    @GetMapping("/cart/")
     public String showCart(
-            @PathVariable Long id,
-            HttpSession session,
             Model model) {
           model.addAttribute("cart", account.getCart());
         return "cart-cartItems-list";
+    }
+
+    @GetMapping("/cart/cartItem/{id}/searchPriceBikeComponents")
+    public String searchPriceBikeComponents(
+            @PathVariable Long id,
+            Model model) {
+
+        // TODO: check
+        CartItem cartItem = cartService.getCartItem(account.getCart(), id);
+        List<ProductOffer> productOffers = cartService.searchPriceBikeComponents(cartItem.getBikepart());
+        model.addAttribute("productOffers", productOffers);
+        return "price-search-result";
     }
 }

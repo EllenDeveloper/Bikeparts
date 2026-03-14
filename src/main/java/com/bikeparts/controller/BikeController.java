@@ -3,6 +3,7 @@
 package com.bikeparts.controller;
 
 import com.bikeparts.entity.*;
+import com.bikeparts.price.entity.ProductOffer;
 import com.bikeparts.service.AccountService;
 import com.bikeparts.service.BikeService;
 import com.bikeparts.service.CartService;
@@ -13,6 +14,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -95,6 +97,8 @@ public class BikeController {
             @PathVariable Long id,
             @RequestBody Bike bike) {
 
+        // TODO: remove account
+
         return accountService.findById(id)
                 .map(account -> {
                     account.addBike(bike);  // Helper-Methode!
@@ -136,13 +140,26 @@ public class BikeController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/{accountId}/bike/{bikeId}")
+    @GetMapping("/bike/{bikeId}")
     public ResponseEntity<List<Bikepart>> getAllBikeparts(
-            @PathVariable Long accountId,
             @PathVariable Long bikeId)  {
         // TODO later: check: "gehört das Bike dem eingeloggten User?". dann muss Account nicht übergeben werden
         return ResponseEntity.ok(bikeService.getAllBikeparts(bikeId));
     }
 
+    @GetMapping("/bike/{bikeId}/bikepart/{bikepartId}/searchPriceBikeComponents")
+    public ResponseEntity<?> searchPriceBikeComponents(
+            @PathVariable Long bikeId,
+            @PathVariable Long bikepartId) {
+        Bike bikeById = bikeService.getBikeById(bikeId);
+        Bikepart bikepartById = bikeService.getBikepartById(bikepartId);
+        if (!bikeById.getBikeparts().stream().toList().contains(bikepartById)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "Bikepart "+bikepartId + "gehört nicht zum Bike "+bikeId));
+        }
+
+        List<ProductOffer> productOffers = cartService.searchPriceBikeComponents(bikepartById);
+        return ResponseEntity.ok(productOffers);
+    }
 
 }
