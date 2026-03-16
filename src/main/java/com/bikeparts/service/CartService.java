@@ -9,6 +9,7 @@ import com.bikeparts.price.ScrapingConstants;
 import com.bikeparts.price.entity.ProductOffer;
 import com.bikeparts.price.repository.ProductOfferRepository;
 import com.bikeparts.price.service.BikeComponentsScraperService;
+import com.bikeparts.price.service.ScrapingResult;
 import com.bikeparts.repository.BikepartRepository;
 import com.bikeparts.repository.CartItemRepository;
 import com.bikeparts.repository.CartRepository;
@@ -108,7 +109,7 @@ public class CartService {
 
 
     @Transactional
-    public List<ProductOffer> searchPriceBikeComponents(Bikepart bikepart) {
+    public ScrapingResult searchPriceBikeComponents(Bikepart bikepart) {
         // TODO: Daten richtig importieren
         //
          String searchQuery = bikepart.getBrand() + " " +bikepart.getModel() + " " +bikepart.getSpecificDetails()
@@ -125,28 +126,33 @@ public class CartService {
                 LocalDateTime.now().minusDays(ScrapingConstants.CACHE_DAYS));
         if (!cached.isEmpty()) {
             log.debug("*** take productOffers from DB-cache! query = {}", searchQuery);
-            return cached;
+            return ScrapingResult.success(cached);
         }
         log.info("*** take productOffers from Website! query = {}", searchQuery);
 
-        List<ProductOffer> productOffers = bikeComponentsScraperService.search(searchQuery);
-        if (productOffers.isEmpty()) {
-            log.warn("Scraping bike-components.de: got no data for query {}", searchQuery);
-        } else {
-            productOfferRepository.saveAllAndFlush(productOffers);
+        ScrapingResult scrapingResult = bikeComponentsScraperService.search(searchQuery);
+
+        if (scrapingResult.status() == ScrapingResult.ScrapingStatus.SUCCESS) {
+            productOfferRepository.saveAllAndFlush(scrapingResult.offers());
+            List<ProductOffer> oldData = productOfferRepository.findBySearchQueryAndFetchedAtBefore(
+                    searchQuery, LocalDateTime.now().minusDays(ScrapingConstants.CACHE_DAYS));
+            if (!oldData.isEmpty()) {
+                productOfferRepository.deleteAll(oldData);
+                log.debug("*** deleted {} outdated productOffers from DB-cache for query = {}", oldData.size(), searchQuery);
+            }
+            return scrapingResult;
         }
-        // get very old data from database
+
+        // Fehler oder keine Treffer: auf veraltete DB-Daten zurückfallen
         List<ProductOffer> oldData = productOfferRepository.findBySearchQueryAndFetchedAtBefore(
                 searchQuery, LocalDateTime.now().minusDays(ScrapingConstants.CACHE_DAYS));
-        if (!oldData.isEmpty() ) {
-            if (productOffers.isEmpty()) {
-                log.warn("Scraping bike-components.de: use very old data");
-                return oldData;
-            }
-            productOfferRepository.deleteAll(oldData);
-            log.debug("*** deleted {} outdated productOffers from DB-cache for query = {}", oldData.size(), searchQuery);
+        if (!oldData.isEmpty()) {
+            log.warn("Scraping bike-components.de: verwende veraltete DB-Daten für query = {}", searchQuery);
+            return ScrapingResult.success(oldData);
         }
-        return productOffers;
+
+        log.warn("Scraping bike-components.de: {} für query = {} - {}", scrapingResult.status(), searchQuery, scrapingResult.errorMessage());
+        return scrapingResult;
     }
 
     public CartItem getCartItem(Cart cart, Long cartItemId) {

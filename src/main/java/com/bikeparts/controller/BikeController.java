@@ -3,7 +3,7 @@
 package com.bikeparts.controller;
 
 import com.bikeparts.entity.*;
-import com.bikeparts.price.entity.ProductOffer;
+import com.bikeparts.price.service.ScrapingResult;
 import com.bikeparts.service.AccountService;
 import com.bikeparts.service.BikeService;
 import com.bikeparts.service.CartService;
@@ -158,8 +158,13 @@ public class BikeController {
                     .body(Map.of("error", "Bikepart "+bikepartId + "gehört nicht zum Bike "+bikeId));
         }
 
-        List<ProductOffer> productOffers = cartService.searchPriceBikeComponents(bikepartById);
-        return ResponseEntity.ok(productOffers);
+        ScrapingResult result = cartService.searchPriceBikeComponents(bikepartById);
+        return switch (result.status()) {
+            case SUCCESS -> ResponseEntity.ok(result.offers());
+            case NO_RESULTS -> ResponseEntity.ok(Map.of("message", "Keine Angebote gefunden", "offers", List.of()));
+            case ERROR -> ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                    .body(Map.of("error", "Shop konnte nicht erreicht werden", "details", result.errorMessage()));
+        };
     }
 
 }

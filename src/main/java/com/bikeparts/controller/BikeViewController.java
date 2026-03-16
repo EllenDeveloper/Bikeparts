@@ -4,7 +4,7 @@ import com.bikeparts.entity.Account;
 import com.bikeparts.entity.Bike;
 import com.bikeparts.entity.Bikepart;
 import com.bikeparts.entity.CartItem;
-import com.bikeparts.price.entity.ProductOffer;
+import com.bikeparts.price.service.ScrapingResult;
 import com.bikeparts.service.AccountService;
 import com.bikeparts.service.BikeService;
 import com.bikeparts.service.CartService;
@@ -104,8 +104,10 @@ public class BikeViewController {
 
         // TODO: check
         CartItem cartItem = cartService.getCartItem(account.getCart(), id);
-        List<ProductOffer> productOffers = cartService.searchPriceBikeComponents(cartItem.getBikepart());
-        model.addAttribute("productOffers", productOffers);
+        ScrapingResult result = cartService.searchPriceBikeComponents(cartItem.getBikepart());
+        model.addAttribute("productOffers", result.offers());
+        model.addAttribute("scrapingStatus", result.status());
+        model.addAttribute("scrapingError", result.errorMessage());
         return "price-search-result";
     }
 }

@@ -3,6 +3,7 @@ package com.bikeparts.price.service;
 import com.bikeparts.price.ScrapingConstants;
 import com.bikeparts.price.enums.FetchMethod;
 import com.bikeparts.price.entity.ShopInfo;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -49,6 +50,18 @@ import java.time.LocalDateTime;
 @Service
 public class BikeComponentsShippingCostScraperService {
 
+    /**
+     * Schnelltest-Einstiegspunkt zum manuellen Ausführen des Scrapers
+     * außerhalb des Spring-Kontexts (z. B. in der IDE direkt starten).
+     *
+     * @param args Kommandozeilenargumente (werden nicht ausgewertet).
+     */
+    public static void main(String[] args) {
+        ObjectMapper objectMapper1 = new ObjectMapper();
+        BikeComponentsShippingCostScraperService bikeComponentsShippingCostScraperService
+                = new BikeComponentsShippingCostScraperService();
+        bikeComponentsShippingCostScraperService.getStandardShippingCostForGermany();
+    }
 
     /**
      * Ruft den Standard-Versandpreis für Deutschland von der Versandkostenseite ab

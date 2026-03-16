@@ -66,7 +66,7 @@ public class BikeComponentsScraperService {
     public static void main(String[] args) {
         ObjectMapper objectMapper1 = new ObjectMapper();
         BikeComponentsScraperService bikeComponentsScraperService = new BikeComponentsScraperService(objectMapper1);
-        List<ProductOffer> result = bikeComponentsScraperService.search(ScrapingConstants.SEARCH_URL_BIKE_COMPONENTS + "shimano fahrradkette slx");
+        ScrapingResult result = bikeComponentsScraperService.search(ScrapingConstants.SEARCH_URL_BIKE_COMPONENTS + "shimano fahrradkette slx");
     }
 
     /**
@@ -90,7 +90,7 @@ public class BikeComponentsScraperService {
      * @return Liste der gefundenen {@link ProductOffer}s, oder leere Liste bei Fehler.
      */
     @Cacheable(value = "bikeComponentsSearch", key = "#searchQuery")
-    public List<ProductOffer> search(String searchQuery) {
+    public ScrapingResult search(String searchQuery) {
         String url = ScrapingConstants.SEARCH_URL_BIKE_COMPONENTS + URLEncoder.encode(searchQuery, StandardCharsets.UTF_8);
         log.debug("Scraping bike-components.de: {}", url);
         log.debug("searchQuery: {}", searchQuery);
@@ -103,7 +103,7 @@ public class BikeComponentsScraperService {
             return parseDocument(doc, searchQuery);
         } catch (Exception e) {
             log.error("Fehler beim Scraping von bike-components.de für Query '{}': {}", searchQuery, e.getMessage());
-            return List.of();
+            return ScrapingResult.error(e.getMessage());
         }
     }
 
@@ -131,26 +131,27 @@ public class BikeComponentsScraperService {
      *         oder leere Liste wenn das {@code ProductCatalog}-Element fehlt
      *         oder ein JSON-Fehler auftritt.
      */
-    List<ProductOffer> parseDocument(Document doc, String searchQuery) {
+    ScrapingResult parseDocument(Document doc, String searchQuery) {
         Element catalog = doc.selectFirst("[data-component='ProductCatalog']");
         if (catalog == null) {
             log.warn("ProductCatalog-Element nicht gefunden");
-            return List.of();
+            return ScrapingResult.error("ProductCatalog-Element nicht gefunden");
         }
         try {
             JsonNode root = objectMapper.readTree(catalog.attr("data-props"));
             JsonNode initialData = root.path("initialData");
             if (initialData.isMissingNode()) {
                 log.warn("API-Struktur geändert? Knoten 'initialData' fehlt im data-props-JSON");
-                return List.of();
+                return ScrapingResult.error("API-Struktur geändert: 'initialData' fehlt");
             }
             JsonNode products = initialData.path("products");
             if (products.isMissingNode() || !products.isArray()) {
                 log.warn("API-Struktur geändert? Knoten 'initialData.products' fehlt oder ist kein Array");
-                return List.of();
+                return ScrapingResult.error("API-Struktur geändert: 'initialData.products' fehlt oder kein Array");
             }
             if (products.isEmpty()) {
-                log.warn("bike-components.de: Keine Produkte in 'initialData.products' – API-Struktur geändert oder keine Treffer?");
+                log.warn("bike-components.de: Keine Produkte gefunden für diese Suchanfrage");
+                return ScrapingResult.noResults();
             }
 
             List<ProductOffer> result = new ArrayList<>();
@@ -162,11 +163,11 @@ public class BikeComponentsScraperService {
             log.debug("bike-components.de: {} Produkte gefunden (Gesamt: {}), gespeichert: {}",
                     products.size(), total, ScrapingConstants.MAX_NUMBER_PRODUCT_OFFERS);
             result.forEach(offer -> log.debug("ProductOffer: {}", offer));
-            return result;
+            return ScrapingResult.success(result);
 
         } catch (Exception e) {
             log.error("Fehler beim Parsen des HTML-Dokuments: {}", e.getMessage());
-            return List.of();
+            return ScrapingResult.error(e.getMessage());
         }
     }
 

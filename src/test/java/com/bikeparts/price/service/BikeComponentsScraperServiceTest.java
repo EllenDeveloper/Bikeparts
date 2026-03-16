@@ -3,6 +3,7 @@ package com.bikeparts.price.service;
 import com.bikeparts.price.ScrapingConstants;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.bikeparts.price.entity.ProductOffer;
+import com.bikeparts.price.service.ScrapingResult;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.junit.jupiter.api.*;
@@ -116,7 +117,7 @@ class BikeComponentsScraperServiceTest {
         @Test
         @DisplayName("returns at most MAX_NUMBER_PRODUCT_OFFERS products (total=66, 24 per page)")
         void returns8Products_limitedByMaxNumberProductOffers() {
-            List<ProductOffer> result = service.parseDocument(realDoc, TEST_QUERY);
+            List<ProductOffer> result = service.parseDocument(realDoc, TEST_QUERY).offers();
             assertEquals(ScrapingConstants.MAX_NUMBER_PRODUCT_OFFERS, result.size());
         }
 
@@ -128,7 +129,7 @@ class BikeComponentsScraperServiceTest {
         @Test
         @DisplayName("maps the first product's name from JSON correctly")
         void mapsFirstProduct_name() {
-            ProductOffer first = service.parseDocument(realDoc, TEST_QUERY).get(0);
+            ProductOffer first = service.parseDocument(realDoc, TEST_QUERY).offers().get(0);
             assertTrue(first.getProductName().toLowerCase().contains("shimano xt"));
         }
 
@@ -140,7 +141,7 @@ class BikeComponentsScraperServiceTest {
         @Test
         @DisplayName("maps the first product's price as non-null positive BigDecimal")
         void mapsFirstProduct_price() {
-            ProductOffer first = service.parseDocument(realDoc, TEST_QUERY).get(0);
+            ProductOffer first = service.parseDocument(realDoc, TEST_QUERY).offers().get(0);
             assertNotNull(first.getPrice());
             assertTrue(first.getPrice().doubleValue() > 0);
         }
@@ -152,7 +153,7 @@ class BikeComponentsScraperServiceTest {
         @Test
         @DisplayName("sets inStock=true for the first product (isBuyable=true, isSoldOut=false)")
         void mapsFirstProduct_inStock() {
-            assertTrue(service.parseDocument(realDoc, TEST_QUERY).get(0).isInStock());
+            assertTrue(service.parseDocument(realDoc, TEST_QUERY).offers().get(0).isInStock());
         }
 
         /**
@@ -164,7 +165,7 @@ class BikeComponentsScraperServiceTest {
         @Test
         @DisplayName("sets productUrl with bike-components.de base URL for every product")
         void setsProductUrl_withBaseUrl() {
-            service.parseDocument(realDoc, TEST_QUERY).forEach(dto ->
+            service.parseDocument(realDoc, TEST_QUERY).offers().forEach(dto ->
                     assertTrue(dto.getProductUrl().startsWith("https://www.bike-components.de/")));
         }
 
@@ -176,7 +177,7 @@ class BikeComponentsScraperServiceTest {
         @Test
         @DisplayName("sets shopName='bike-components.de' and shopId=1 on every product")
         void setsShopMetadata() {
-            service.parseDocument(realDoc, TEST_QUERY).forEach(dto -> {
+            service.parseDocument(realDoc, TEST_QUERY).offers().forEach(dto -> {
                 assertEquals("bike-components.de", dto.getShopName());
                 assertEquals(1L, dto.getShopId());
             });
@@ -190,7 +191,7 @@ class BikeComponentsScraperServiceTest {
         @Test
         @DisplayName("sets non-null fetchedAt on every product")
         void setsFetchedAt_nonNull() {
-            service.parseDocument(realDoc, TEST_QUERY).forEach(dto ->
+            service.parseDocument(realDoc, TEST_QUERY).offers().forEach(dto ->
                     assertNotNull(dto.getFetchedAt()));
         }
 
@@ -201,7 +202,7 @@ class BikeComponentsScraperServiceTest {
         @Test
         @DisplayName("sets searchQuery on every product from the passed query parameter")
         void setsSearchQuery_onEveryProduct() {
-            service.parseDocument(realDoc, TEST_QUERY).forEach(dto ->
+            service.parseDocument(realDoc, TEST_QUERY).offers().forEach(dto ->
                     assertEquals(TEST_QUERY, dto.getSearchQuery()));
         }
     }
@@ -222,9 +223,11 @@ class BikeComponentsScraperServiceTest {
          * Shop-Strukturen auf.
          */
         @Test
-        @DisplayName("returns empty list when ProductCatalog element is absent from HTML")
-        void returnsEmptyList_whenNoCatalogElement() {
-            assertTrue(service.parseDocument(emptyDoc, TEST_QUERY).isEmpty());
+        @DisplayName("returns ERROR status when ProductCatalog element is absent from HTML")
+        void returnsError_whenNoCatalogElement() {
+            ScrapingResult result = service.parseDocument(emptyDoc, TEST_QUERY);
+            assertEquals(ScrapingResult.ScrapingStatus.ERROR, result.status());
+            assertTrue(result.offers().isEmpty());
         }
     }
 }
