@@ -4,8 +4,12 @@ import com.bikeparts.entity.Account;
 import com.bikeparts.entity.Bike;
 import com.bikeparts.entity.Bikepart;
 import com.bikeparts.entity.Cart;
+import com.bikeparts.price.entity.ProductOffer;
+import com.bikeparts.price.enums.FetchMethod;
+import com.bikeparts.price.service.ScrapingResult;
 import com.bikeparts.repository.CartItemRepository;
 import com.bikeparts.service.AccountService;
+import com.bikeparts.service.BikeService;
 import com.bikeparts.service.CartService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -21,6 +25,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,6 +44,12 @@ class BikeControllerTest {
 
     @Mock
     private CartService cartService;
+
+    @Mock
+    private BikeService bikeService;
+
+    @Mock
+    private Account account;
 
     @InjectMocks
     private BikeController bikeController;
@@ -303,42 +315,42 @@ class BikeControllerTest {
 
 
     // =========================================================
-    // POST /api/accounts/{id}/cart
+    // POST /api/accounts/cart
     // =========================================================
 
     @Nested
-    @DisplayName("addCart() – POST /api/accounts/{id}/cart")
+    @DisplayName("addCart() - POST /api/accounts/cart")
     class AddCart {
 
         @Test
-        @DisplayName("Account gefunden -> Cart gesetzt, 200 OK")
-        void addCart_accountFound_returns200() throws Exception {
-            Account account = new Account();
-            account.setEmail("ellen@bikeparts.de");
+        @DisplayName("Cart set on session account -> 200 OK")
+        void addCart_returns200() throws Exception {
+            Account updatedAccount = new Account();
+            updatedAccount.setEmail("ellen@bikeparts.de");
             Cart cart = new Cart();
             cart.setName("Frühjahrs-Wartung 2026");
-            when(accountService.findById(1L)).thenReturn(Optional.of(account));
-            when(accountService.updateAccount(account)).thenReturn(account);
+            when(accountService.updateAccount(account)).thenReturn(updatedAccount);
 
-            mockMvc.perform(post("/api/accounts/1/cart")
+            mockMvc.perform(post("/api/accounts/cart")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(cart)))
-                    .andExpect(status().isOk());
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.email").value("ellen@bikeparts.de"));
 
+            verify(account).addCart(any(Cart.class));
             verify(accountService).updateAccount(account);
-            assertNotNull(account.getCart());
         }
 
-
         @Test
-        @DisplayName("Account nicht gefunden -> 404 Not Found")
-        void addCart_accountNotFound_returns404() throws Exception {
-            when(accountService.findById(99L)).thenReturn(Optional.empty());
+        @DisplayName("AccountService wirft Exception -> wird weitergeleitet")
+        void addCart_serviceThrows_propagatesException() {
+            when(accountService.updateAccount(account))
+                    .thenThrow(new RuntimeException("DB nicht erreichbar"));
 
-            mockMvc.perform(post("/api/accounts/99/cart")
+            assertThrows(Exception.class, () ->
+                    mockMvc.perform(post("/api/accounts/cart")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(new Cart())))
-                    .andExpect(status().isNotFound());
+                            .content(objectMapper.writeValueAsString(new Cart()))));
         }
     }
 
@@ -348,60 +360,120 @@ class BikeControllerTest {
     // =========================================================
 
     @Nested
-    @DisplayName("addBikePart() – POST /api/accounts/cart/bikeparts/{bikepartId}")
+    @DisplayName("addBikePartToCart() - POST /api/accounts/cart/bikeparts/{bikepartId}")
     class AddBikePart {
 
         @Test
-        @DisplayName("Account und Cart vorhanden -> 204 No Content")
-        void addBikePart_accountAndCartFound_returns204() throws Exception {
-            Account account = new Account();
-            Cart cart = new Cart();
-            cart.setId(10L);
-            account.setCart(cart);
-            when(accountService.findById(1L)).thenReturn(Optional.of(account));
-
-            mockMvc.perform(post("/api/accounts/1/cart/bikeparts/2"))
+        @DisplayName("valid bikepartId -> 204 No Content")
+        void addBikePartToCart_validRequest_returns204() throws Exception {
+            mockMvc.perform(post("/api/accounts/cart/bikeparts/2"))
                     .andExpect(status().isNoContent());
 
-            Bikepart bikepart = new Bikepart();
             verify(cartService).addBikepartToCart(2L, 1);
         }
 
         @Test
-        @DisplayName("Account nicht gefunden -> 404 mit Fehlermeldung")
-        void addBikePart_accountNotFound_returns404WithMessage() throws Exception {
-            when(accountService.findById(99L)).thenReturn(Optional.empty());
+        @DisplayName("custom quantity param -> passed to cartService")
+        void addBikePartToCart_withQuantity_passesQuantityToService() throws Exception {
+            mockMvc.perform(post("/api/accounts/cart/bikeparts/2")
+                            .param("quantity", "3"))
+                    .andExpect(status().isNoContent());
 
-            mockMvc.perform(post("/api/accounts/99/cart/bikeparts/1"))
-                    .andExpect(status().isNotFound())
-                    .andExpect(jsonPath("$.error").value("Account 99 nicht gefunden"));
-        }
-
-        @Test
-        @DisplayName("Account hat keinen Cart -> 404 mit Fehlermeldung")
-        void addBikePart_noCart_returns404WithMessage() throws Exception {
-            Account account = new Account();
-            account.setCart(null);
-            when(accountService.findById(1L)).thenReturn(Optional.of(account));
-
-            mockMvc.perform(post("/api/accounts/1/cart/bikeparts/2"))
-                    .andExpect(status().isNotFound())
-                    .andExpect(jsonPath("$.error").value("Account 1 hat keinen Warenkorb"));
+            verify(cartService).addBikepartToCart(2L, 3);
         }
 
         @Test
         @DisplayName("CartService wirft Exception -> wird weitergeleitet")
-        void addBikePart_serviceThrows_propagatesException() {
-            Account account = new Account();
-            Cart cart = new Cart();
-            cart.setId(10L);
-            account.setCart(cart);
-            when(accountService.findById(1L)).thenReturn(Optional.of(account));
+        void addBikePartToCart_serviceThrows_propagatesException() {
             doThrow(new RuntimeException("Bikepart nicht gefunden"))
-                    .when(cartService).addBikepartToCart(99L,  1);
+                    .when(cartService).addBikepartToCart(99L, 1);
 
             assertThrows(Exception.class, () ->
-                    mockMvc.perform(post("/api/accounts/1/cart/bikeparts/99")));
+                    mockMvc.perform(post("/api/accounts/cart/bikeparts/99")));
+        }
+    }
+
+
+    // =========================================================
+    // GET /api/accounts/bike/{bikeId}/bikepart/{bikepartId}/searchPriceBikeComponents
+    // =========================================================
+
+    @Nested
+    @DisplayName("searchPriceBikeComponents() – GET /api/accounts/bike/{bikeId}/bikepart/{bikepartId}/searchPriceBikeComponents")
+    class SearchPriceBikeComponents {
+
+        private Bike bike;
+        private Bikepart bikepart;
+
+        @BeforeEach
+        void setUpBikeAndBikepart() {
+            bikepart = new Bikepart();
+            bikepart.setId(10L);
+            bike = new Bike();
+            bike.addBikepart(bikepart);
+            when(bikeService.getBikeById(1L)).thenReturn(bike);
+        }
+
+        @Test
+        @DisplayName("SUCCESS -> 200 OK with offers list")
+        void search_success_returns200WithOffers() throws Exception {
+            when(bikeService.getBikepartById(10L)).thenReturn(bikepart);
+            ProductOffer offer = ProductOffer.builder()
+                    .productName("Shimano XT Kette")
+                    .price(new BigDecimal("39.99"))
+                    .productUrl("https://www.bike-components.de/de/shimano-xt-kette")
+                    .inStock(true)
+                    .shopName("bike-components.de")
+                    .shopId(1L)
+                    .source(FetchMethod.WEB_SCRAPING)
+                    .fetchedAt(LocalDateTime.now())
+                    .searchQuery("Shimano XT Kette")
+                    .build();
+            when(cartService.searchPriceBikeComponents(bikepart))
+                    .thenReturn(ScrapingResult.success(List.of(offer)));
+
+            mockMvc.perform(get("/api/accounts/bike/1/bikepart/10/searchPriceBikeComponents"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.length()").value(1))
+                    .andExpect(jsonPath("$[0].productName").value("Shimano XT Kette"));
+        }
+
+        @Test
+        @DisplayName("NO_RESULTS -> 200 OK with message")
+        void search_noResults_returns200WithMessage() throws Exception {
+            when(bikeService.getBikepartById(10L)).thenReturn(bikepart);
+            when(cartService.searchPriceBikeComponents(bikepart))
+                    .thenReturn(ScrapingResult.noResults());
+
+            mockMvc.perform(get("/api/accounts/bike/1/bikepart/10/searchPriceBikeComponents"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.message").value("Keine Angebote gefunden"));
+        }
+
+        @Test
+        @DisplayName("ERROR -> 503 Service Unavailable with error details")
+        void search_error_returns503() throws Exception {
+            when(bikeService.getBikepartById(10L)).thenReturn(bikepart);
+            when(cartService.searchPriceBikeComponents(bikepart))
+                    .thenReturn(ScrapingResult.error("Connection refused"));
+
+            mockMvc.perform(get("/api/accounts/bike/1/bikepart/10/searchPriceBikeComponents"))
+                    .andExpect(status().isServiceUnavailable())
+                    .andExpect(jsonPath("$.error").value("Shop konnte nicht erreicht werden"))
+                    .andExpect(jsonPath("$.details").value("Connection refused"));
+        }
+
+        @Test
+        @DisplayName("Bikepart gehört nicht zum Bike -> 400 Bad Request")
+        // my checked
+        void search_bikepartNotInBike_returns400() throws Exception {
+            Bikepart otherBikepart = new Bikepart();
+            otherBikepart.setId(99L);
+            when(bikeService.getBikepartById(99L)).thenReturn(otherBikepart);
+
+            mockMvc.perform(get("/api/accounts/bike/1/bikepart/99/searchPriceBikeComponents"))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.error").exists());
         }
     }
 }

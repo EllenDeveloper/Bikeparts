@@ -23,12 +23,15 @@ public class BikeController {
     private final AccountService accountService;
     private final CartService cartService;
     private final BikeService bikeService;
+    private final Account account;
 
     @Autowired
-    public BikeController(AccountService accountService, CartService cartService, BikeService bikeService) {
+    public BikeController(AccountService accountService, CartService cartService,
+                          BikeService bikeService, Account account) {
         this.accountService = accountService;
         this.cartService = cartService;
         this.bikeService = bikeService;
+        this.account = account;
     }
 
     @GetMapping
@@ -113,18 +116,11 @@ public class BikeController {
         return ResponseEntity.ok(bikeService.getAllBikes());
     }
 
-    // Cart zu existierendem Account hinzufügen
+    // Cart zum eingeloggten Account hinzufügen
     @PostMapping("/cart")
-    public ResponseEntity<Account> addCart(
-            @PathVariable Long id,
-            @RequestBody Cart cart) {
-
-        return accountService.findById(id)
-                .map(account -> {
-                    account.addCart(cart);  // Helper-Methode!
-                    return ResponseEntity.ok(accountService.updateAccount(account));
-                })
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<Account> addCart(@RequestBody Cart cart) {
+        account.addCart(cart);
+        return ResponseEntity.ok(accountService.updateAccount(account));
     }
 
 

@@ -37,6 +37,9 @@ class CartServiceTest {
     @Mock
     private AccountService accountService;
 
+    @Mock
+    private Account account;
+
     @InjectMocks
     private CartService cartService;
 
@@ -290,9 +293,10 @@ class CartServiceTest {
         @Test
         @DisplayName("null-bikepartId -> keine Repository-Interaktion")
         void addBikepartToCart_nullId_doesNothing() {
-            Account account = new Account();
-            when(accountService.findById(any())).thenReturn(Optional.of(account));
-            cartService.addBikepartToCart(null,  1);
+            Cart cart = new Cart();
+            when(account.getCart()).thenReturn(cart);
+
+            cartService.addBikepartToCart(null, 1);
 
             verifyNoInteractions(cartRepository);
             verifyNoInteractions(cartItemRepository);
@@ -302,9 +306,11 @@ class CartServiceTest {
         @Test
         @DisplayName("Repository wirft Exception -> wird weitergeleitet")
         void addBikepartToCart_repositoryThrows_propagatesException() {
-            when(bikepartRepository.getById(5L)).thenThrow(new RuntimeException("Bikepart nicht gefunden"));
-            Account account = new Account();
-            when(accountService.findById(any())).thenReturn(Optional.of(account));
+            Cart cart = new Cart();
+            when(account.getCart()).thenReturn(cart);
+            when(bikepartRepository.findBikepartById(5L))
+                    .thenThrow(new RuntimeException("Bikepart nicht gefunden"));
+
             RuntimeException ex = assertThrows(RuntimeException.class,
                     () -> cartService.addBikepartToCart(5L, 1));
 
@@ -316,6 +322,7 @@ class CartServiceTest {
         void addBikepartToCart_validId_addsItemToCart() {
             Bikepart bikepart = new Bikepart();
             bikepart.setId(5L);
+            bikepart.setName("Shimano XT Kette");
 
             CartItem savedItem = new CartItem();
             savedItem.setId(99L);
@@ -323,16 +330,14 @@ class CartServiceTest {
             Cart cart = new Cart();
             cart.setId(1L);
 
-            Account account = new Account();
-            account.setCart(cart);
-            when(accountService.findById(any())).thenReturn(Optional.of(account));
-            when(bikepartRepository.getById(5L)).thenReturn(bikepart);
+            when(account.getCart()).thenReturn(cart);
+            when(bikepartRepository.findBikepartById(5L)).thenReturn(bikepart);
             when(cartItemRepository.save(any(CartItem.class))).thenReturn(savedItem);
+
             cartService.addBikepartToCart(5L, 1);
 
-            verify(bikepartRepository).getById(5L);
+            verify(bikepartRepository).findBikepartById(5L);
             verify(cartItemRepository).save(any(CartItem.class));
-//            verify(cartRepository).getCartById(1L);
             assertEquals(1, cart.getCartItems().size());
         }
     }

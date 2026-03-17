@@ -4,6 +4,7 @@ import com.bikeparts.price.ScrapingConstants;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.bikeparts.price.entity.ProductOffer;
 import com.bikeparts.price.service.ScrapingResult;
+import org.hibernate.internal.util.collections.ArrayHelper;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.junit.jupiter.api.*;
@@ -118,6 +119,11 @@ class BikeComponentsScraperServiceTest {
         @DisplayName("returns at most MAX_NUMBER_PRODUCT_OFFERS products (total=66, 24 per page)")
         void returns8Products_limitedByMaxNumberProductOffers() {
             List<ProductOffer> result = service.parseDocument(realDoc, TEST_QUERY).offers();
+            Long id = 10L;
+            for (int i = 0; i < result.size(); i++) {
+                result.get(i).setId(id--);
+                System.out.println(result.get(i).toStringForLlama());
+            }
             assertEquals(ScrapingConstants.MAX_NUMBER_PRODUCT_OFFERS, result.size());
         }
 

@@ -25,10 +25,14 @@ class BikeServiceTest {
     @Mock
     private AccountService accountService;
 
+    @Mock
+    private Account account;
+
     @InjectMocks
     private BikeService bikeService;
 
-    private Account account;
+    // accountJpa: echter Account-Datensatz, der vom accountService zurückgegeben wird
+    private Account accountJpa;
     private Bike bike;
     private Bikepart bikepart1;
     private Bikepart bikepart2;
@@ -47,9 +51,11 @@ class BikeServiceTest {
         bike.setId(5L);
         bike.setBikeparts(List.of(bikepart1, bikepart2));
 
-        account = new Account();
-        account.setId(1L);
-        account.setBikes(List.of(bike));
+        accountJpa = new Account();
+        accountJpa.setId(1L);
+        accountJpa.setBikes(List.of(bike));
+
+        when(account.getId()).thenReturn(1L);
     }
 
 
@@ -64,7 +70,7 @@ class BikeServiceTest {
         @Test
         @DisplayName("returns bikeparts of the requested bike")
         void getAllBikeparts_validIds_returnsBikeparts() {
-            when(accountService.findById(1L)).thenReturn(Optional.of(account));
+            when(accountService.findById(1L)).thenReturn(Optional.of(accountJpa));
 
             List<Bikepart> result = bikeService.getAllBikeparts(bike.getId());
 
@@ -76,7 +82,7 @@ class BikeServiceTest {
         @Test
         @DisplayName("Account nicht gefunden -> RuntimeException")
         void getAllBikeparts_accountNotFound_throwsException() {
-            when(accountService.findById(99L)).thenReturn(Optional.empty());
+            when(accountService.findById(1L)).thenReturn(Optional.empty());
 
             RuntimeException ex = assertThrows(RuntimeException.class,
                     () -> bikeService.getAllBikeparts(bike.getId()));
@@ -87,10 +93,10 @@ class BikeServiceTest {
         @Test
         @DisplayName("Bike gehört nicht zum Account -> RuntimeException")
         void getAllBikeparts_bikeNotInAccount_throwsException() {
-            when(accountService.findById(1L)).thenReturn(Optional.of(account));
+            when(accountService.findById(1L)).thenReturn(Optional.of(accountJpa));
 
             RuntimeException ex = assertThrows(RuntimeException.class,
-                    () -> bikeService.getAllBikeparts(bike.getId()));
+                    () -> bikeService.getAllBikeparts(99L));
 
             assertEquals("Bike 99 nicht gefunden", ex.getMessage());
         }
@@ -99,7 +105,7 @@ class BikeServiceTest {
         @DisplayName("bike has no bikeparts -> returns empty list")
         void getAllBikeparts_bikeHasNoBikeparts_returnsEmptyList() {
             bike.setBikeparts(List.of());
-            when(accountService.findById(1L)).thenReturn(Optional.of(account));
+            when(accountService.findById(1L)).thenReturn(Optional.of(accountJpa));
 
             List<Bikepart> result = bikeService.getAllBikeparts(bike.getId());
 
