@@ -23,7 +23,7 @@ public final class ScrapingConstants {
     public static final int CACHE_DAYS = 14;
 
     /** Maximale Anzahl der zurueckgegebenen Produkte pro Suchanfrage. */
-    public static final int MAX_NUMBER_PRODUCT_OFFERS = 8;
+    public static final int MAX_NUMBER_PRODUCT_OFFERS = 6;
 
     // --- bike-components.de ---
 
