@@ -34,14 +34,18 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * <h2>Testdaten</h2>
  * <ul>
- *   <li>{@code response_bike_components_versandkosten.xml} – echte HTTP-Antwort
+ *   <li>{@code response_versandkosten.xml} - echte HTTP-Antwort
  *       der Versandkostenseite; enthält die Versandkostentabelle mit Deutschland-Zeile
  *       ({@code Standard: 4,99€})</li>
- *   <li>{@code emptyDoc} – minimales HTML ohne Tabelle, simuliert eine fehlerhafte
+ *   <li>{@code emptyDoc} - minimales HTML ohne Tabelle, simuliert eine fehlerhafte
  *       oder unerwartete Seite</li>
- *   <li>{@code noGermanyDoc} – HTML mit Tabelle, aber ohne Deutschland-Zeile,
+ *   <li>{@code noGermanyDoc} - HTML mit Tabelle, aber ohne Deutschland-Zeile,
  *       simuliert eine Seite mit geändertem Tabelleninhalt</li>
  * </ul>
+ *
+ * <p>Hinweis: {@link ShopInfo#getFreeShippingOnOrdersOver()} wird vom Service nicht
+ * befüllt und ist daher in den Ergebnissen immer {@code null}. Dieses Feld wird
+ * hier nicht separat getestet.</p>
  *
  * @see BikeComponentsShippingCostScraperService
  * @see ShopInfo
@@ -78,7 +82,7 @@ class BikeComponentsShippingCostScraperServiceTest {
     /**
      * Lädt alle für die Tests benötigten Dokumente einmalig vor dem ersten Test.
      *
-     * <p>{@code response_bike_components_versandkosten.xml} wird über den
+     * <p>{@code response_versandkosten.xml} wird über den
      * Classpath-Mechanismus von JUnit geladen, sodass der Pfad unabhängig
      * vom Working Directory des Build-Tools ist.</p>
      *
@@ -91,7 +95,7 @@ class BikeComponentsShippingCostScraperServiceTest {
     @BeforeAll
     static void loadDocuments() throws Exception {
         URL resource = BikeComponentsShippingCostScraperServiceTest.class.getClassLoader()
-                .getResource("response_bike_components_versandkosten.xml");
+                .getResource("bikeComponents/response_versandkosten.xml");
         realDoc = Jsoup.parse(new File(resource.toURI()), "UTF-8");
 
         emptyDoc = Jsoup.parse("<html><body><p>Keine Tabelle</p></body></html>");

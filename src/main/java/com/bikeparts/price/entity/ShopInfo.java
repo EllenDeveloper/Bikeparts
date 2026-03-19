@@ -13,12 +13,27 @@ import java.time.LocalDateTime;
 /**
  * Enthält Metadaten und Versandkosten eines Online-Shops.
  *
- * <p>Wird vom {@link com.bikeparts.price.service.BikeComponentsShippingCostScraperService}
- * befüllt und kapselt neben den gescrapten Versandkosten alle zur Nachvollziehbarkeit
- * notwendigen Informationen: Shop-Identifikation, Quellenangabe und Abfragezeitpunkt.</p>
+ * <p>Wird von den Shipping-Cost-Scraper-Services befüllt und kapselt neben den
+ * gescrapten Versandkosten alle zur Nachvollziehbarkeit notwendigen Informationen:
+ * Shop-Identifikation, Quellenangabe und Abfragezeitpunkt.</p>
+ *
+ * <p>Felder laut Datenmodell:</p>
+ * <ul>
+ *   <li>{@link #shopName} - Anzeigename des Shops</li>
+ *   <li>{@link #shippingCostUrl} - URL der gescrapten Versandkostenseite</li>
+ *   <li>{@link #shippingCost} - Standard-Versandkosten für Deutschland</li>
+ *   <li>{@link #freeShippingOnOrdersOver} - Mindestbestellwert für kostenlosen Versand</li>
+ *   <li>{@link #source} - Bezugsquelle (immer {@link FetchMethod#WEB_SCRAPING})</li>
+ *   <li>{@link #fetchedAt} - Zeitstempel des letzten Abrufs</li>
+ * </ul>
+ *
+ * <p>Relation: N:1 zu CART_ITEM (mehrere ShopInfo-Einträge können einem Cart-Item
+ * zugeordnet werden). Die Relation zu SEARCH_RESULT ist für eine spätere Phase
+ * vorgesehen.</p>
  *
  * @see FetchMethod
  * @see com.bikeparts.price.service.BikeComponentsShippingCostScraperService
+ * @see com.bikeparts.price.service.BikeDiscountShippingCostScraperService
  */
 @Data
 @NoArgsConstructor
@@ -57,6 +72,15 @@ public class ShopInfo {
      */
     @Column
     private BigDecimal shippingCost;
+
+    /**
+     * Mindestbestellwert, ab dem der Shop versandkostenfrei liefert.
+     * Ist {@code null}, wenn kein kostenloser Versand angeboten wird oder der Wert
+     * beim Scraping nicht ermittelt werden konnte.
+     * Beispiel: {@code 49.00} (ab 49 € = kostenloser Versand)
+     */
+    @Column
+    private BigDecimal freeShippingOnOrdersOver;
 
     /**
      * Quelle, aus der die Versandkosten bezogen wurden.

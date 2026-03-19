@@ -20,7 +20,10 @@ import java.time.LocalDateTime;
  * von <a href="https://www.bike-components.de/de/service/versand/">bike-components.de/service/versand</a>.
  *
  * <p>Das Ergebnis wird als vollständiges {@link ShopInfo}-Objekt zurückgegeben,
- * das neben dem Preis auch Shop-Metadaten, Quelle und Abfragezeitpunkt enthält.</p>
+ * das neben dem Preis auch Shop-Metadaten, Quelle und Abfragezeitpunkt enthält.
+ * {@link ShopInfo#getFreeShippingOnOrdersOver()} wird von diesem Service nicht befüllt
+ * (bleibt {@code null}), da die Seite keinen entsprechenden Wert in Tabellenform
+ * enthält.</p>
  *
  * <h2>Seitenstruktur</h2>
  * <p>Die Versandkostenseite enthält eine HTML-Tabelle mit folgenden Spalten:</p>
@@ -34,7 +37,7 @@ import java.time.LocalDateTime;
  * die Zeile „Deutschland" (Spaltenindex 1).</p>
  *
  * <h2>Caching</h2>
- * <p>Das Ergebnis wird dauerhaft gecacht ({@code @Cacheable("shippingCosts")}),
+ * <p>Das Ergebnis wird dauerhaft gecacht ({@code @Cacheable("shippingCostsBikeComponents")}),
  * da sich Versandkosten selten ändern. Der Cache wird erst bei einem
  * Neustart der Anwendung geleert.</p>
  *
@@ -69,10 +72,8 @@ public class BikeComponentsShippingCostScraperService {
      *
      * <p>Ablauf:</p>
      * <ol>
-     *   <li>HTTP-GET auf {@link ScrapingConstants#SHIPPING_URL_BIKE_COMPONENTS} via Jsoup mit
-     *       {@link ScrapingConstants#USER_AGENT} und 10 s Timeout</li>
-     *   <li>Das geladene HTML-Dokument wird an {@link #parseDocument(Document)}
-     *       delegiert</li>
+     *   <li>HTTP-GET via Jsoup auf die Versandkostenseite (10 s Timeout)</li>
+     *   <li>Das geladene HTML-Dokument wird an {@link #parseDocument(Document)} delegiert</li>
      *   <li>Bei Fehler: {@code null} zurückgeben und Fehler loggen</li>
      * </ol>
      *
@@ -82,12 +83,12 @@ public class BikeComponentsShippingCostScraperService {
      * @return {@link ShopInfo} mit Versandkosten und Shop-Metadaten,
      *         oder {@code null} bei Fehler.
      */
-    @Cacheable("shippingCosts")
+    @Cacheable("shippingCostsBikeComponents")
     public ShopInfo getStandardShippingCostForGermany() {
-        log.info("Scraping Versandkosten von: {}", ScrapingConstants.SHIPPING_URL_BIKE_COMPONENTS);
+        log.info("Scraping Versandkosten von: {}", ScrapingConstants.BikeComponents.SHIPPING_URL);
         try {
-            Document doc = Jsoup.connect(ScrapingConstants.SHIPPING_URL_BIKE_COMPONENTS)
-                    .userAgent(ScrapingConstants.USER_AGENT)
+            Document doc = Jsoup.connect(ScrapingConstants.BikeComponents.SHIPPING_URL)
+                    .userAgent(ScrapingConstants.Common.USER_AGENT)
                     .timeout(10_000)
                     .get();
             return parseDocument(doc);
@@ -102,17 +103,20 @@ public class BikeComponentsShippingCostScraperService {
      * in der Versandkostentabelle und gibt ein befülltes {@link ShopInfo}-Objekt zurück.
      *
      * <p>Diese Methode ist <strong>package-private</strong>, um sie in Unit-Tests
-     * direkt mit einem aus einer Testdatei geparsten Dokument aufrufen zu können –
+     * direkt mit einem aus einer Testdatei geparsten Dokument aufrufen zu können -
      * ohne einen echten HTTP-Request durchzuführen.</p>
      *
      * <p>Ablauf:</p>
      * <ol>
      *   <li>Alle {@code <tr>}-Elemente der Tabelle selektieren</li>
      *   <li>Zeilen ohne {@code <td>}-Zellen überspringen (z. B. Header-Zeilen mit {@code <th>})</li>
-     *   <li>Erste Zelle (Index 0) auf Enthaltensein von {@link ScrapingConstants#COUNTRY_GERMANY} prüfen</li>
-     *   <li>Zweite Zelle (Index 1) enthält den Standard-Versandpreis → {@link #parsePrice(String)}</li>
+     *   <li>Erste Zelle (Index 0) auf {@link ScrapingConstants.Common#COUNTRY_GERMANY} prüfen</li>
+     *   <li>Zweite Zelle (Index 1) enthält den Standard-Versandpreis -> {@link #parsePrice(String)}</li>
      *   <li>Ergebnis in ein {@link ShopInfo}-Objekt verpacken</li>
      * </ol>
+     *
+     * <p>{@link ShopInfo#getFreeShippingOnOrdersOver()} wird nicht gesetzt und bleibt
+     * {@code null}, da dieser Wert nicht aus der Tabellenstruktur herausgelesen wird.</p>
      *
      * @param doc Das von Jsoup geparste HTML-Dokument der Versandkostenseite.
      * @return {@link ShopInfo} mit gescrapten Versandkosten und Metadaten,
@@ -127,14 +131,14 @@ public class BikeComponentsShippingCostScraperService {
                 continue;
             }
             String country = cells.get(0).text().trim();
-            if (country.contains(ScrapingConstants.COUNTRY_GERMANY) && cells.size() >= 2) {
+            if (country.contains(ScrapingConstants.Common.COUNTRY_GERMANY) && cells.size() >= 2) {
                 String priceText = cells.get(1).text().trim();
                 BigDecimal shippingCost = parsePrice(priceText);
                 log.info("Versandkosten Deutschland Standard: {}", shippingCost);
                 return ShopInfo.builder()
-                        .id(ScrapingConstants.SHOP_ID_BIKE_COMPONENTS)
-                        .shopName(ScrapingConstants.SHOP_NAME_BIKE_COMPONENTS)
-                        .shippingCostUrl(ScrapingConstants.SHIPPING_URL_BIKE_COMPONENTS)
+                        .id(ScrapingConstants.BikeComponents.SHOP_ID)
+                        .shopName(ScrapingConstants.BikeComponents.SHOP_NAME)
+                        .shippingCostUrl(ScrapingConstants.BikeComponents.SHIPPING_URL)
                         .shippingCost(shippingCost)
                         .source(FetchMethod.WEB_SCRAPING)
                         .fetchedAt(LocalDateTime.now())
@@ -142,7 +146,7 @@ public class BikeComponentsShippingCostScraperService {
             }
         }
 
-        log.warn("Keine Versandkosten für '{}' gefunden", ScrapingConstants.COUNTRY_GERMANY);
+        log.warn("Keine Versandkosten für '{}' gefunden", ScrapingConstants.Common.COUNTRY_GERMANY);
         return null;
     }
 
@@ -158,7 +162,7 @@ public class BikeComponentsShippingCostScraperService {
      *   <li>String als {@link BigDecimal} parsen</li>
      * </ol>
      *
-     * <p>Beispiel: {@code "4,99€"} → {@code new BigDecimal("4.99")}</p>
+     * <p>Beispiel: {@code "4,99€"} -> {@code new BigDecimal("4.99")}</p>
      *
      * @param priceText Preisstring im deutschen Format, z. B. {@code "4,99€"}.
      * @return Exakter Dezimalwert als {@link BigDecimal}.
