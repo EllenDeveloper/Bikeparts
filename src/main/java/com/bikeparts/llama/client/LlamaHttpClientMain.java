@@ -14,7 +14,7 @@ import java.util.Properties;
 /**
  * ACHTUNG:
  * Diese Klasse funktioniert auch unter Java SE! Da die HTTP-klassen von java.net verwendet werden.
- * Es wurden absichtlich nicht die Klassen von SpringBoot verwendet.
+ * Es wurden absichtlich nicht die Klassen von SpringBoot (spring-ai-starter-model-ollama) verwendet.
  *
  * Testprogramm fuer die REST-Kommunikation mit dem llama-server.
  *

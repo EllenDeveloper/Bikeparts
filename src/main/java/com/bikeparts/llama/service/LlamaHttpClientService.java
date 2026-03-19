@@ -16,7 +16,7 @@ import java.time.Duration;
 /**
  * ACHTUNG:
  * Diese Klasse funktioniert auch unter Java SE! Da die HTTP-klassen von java.net verwendet werden.
- * Es wurden absichtlich nicht die Klassen von SpringBoot verwendet.
+ * Es wurden absichtlich nicht die Klassen von SpringBoot (spring-ai-starter-model-ollama) verwendet.
  *
  * <p>Spring-Service fuer die Kommunikation mit dem externen llama-server.
  * Baut einen {@link LlamaCompletionRequest}, sendet ihn per HTTP POST an den

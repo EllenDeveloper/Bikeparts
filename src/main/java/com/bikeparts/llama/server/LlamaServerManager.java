@@ -1,5 +1,6 @@
 package com.bikeparts.llama.server;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -14,7 +15,7 @@ import java.time.Duration;
 /**
  * ACHTUNG:
  * Diese Klasse funktioniert auch unter Java SE! Da die HTTP-klassen von java.net verwendet werden.
- * Es wurden absichtlich nicht die Klassen von SpringBoot verwendet.
+ * Es wurden absichtlich nicht die Klassen von SpringBoot (spring-ai-starter-model-ollama) verwendet.
  *
  * <p>Verwaltet den llama-server-Prozess: Pruefen ob er laeuft, starten falls nicht,
  * und warten bis er bereit ist.</p>
@@ -49,9 +50,10 @@ import java.time.Duration;
  * </pre>
  * </p>
  *
- * @see LlamaServerConfig
+ * @see com.bikeparts.config.LlamaServerConfig
  */
 @Component
+@Slf4j
 public class LlamaServerManager {
 
     /** Endpunkt fuer den Health-Check des llama-servers. */
@@ -85,6 +87,12 @@ public class LlamaServerManager {
     private final int startTimeoutSekunden;
 
     /**
+     * Steuert, ob der llama-server-Prozess beim Beenden der JVM automatisch gestoppt wird.
+     * Konfigurierbar via {@code llama.server.lifecycle.auto-shutdown} in {@code application.properties}.
+     */
+    private final boolean autoShutdown;
+
+    /**
      * Der gestartete llama-server-Prozess.
      * Ist {@code null}, wenn der Server nicht von dieser Instanz gestartet wurde
      * (z.B. weil er bereits lief).
@@ -103,6 +111,8 @@ public class LlamaServerManager {
      * @param contextGroesse       Kontextgroesse in Tokens ({@code llama.server.context})
      * @param threads              Anzahl CPU-Kerne ({@code llama.server.threads})
      * @param startTimeoutSekunden maximale Wartezeit in Sekunden ({@code llama.server.timeout})
+     * @param autoShutdown         {@code true} = Prozess wird beim JVM-Ende automatisch beendet
+     *                             ({@code llama.server.lifecycle.auto-shutdown})
      */
     @Autowired
     public LlamaServerManager(
@@ -113,7 +123,8 @@ public class LlamaServerManager {
             @Value("${llama.server.serverBaseUrl}:${llama.server.port}/completion") String serverUrl,
             @Value("${llama.server.context}") int contextGroesse,
             @Value("${llama.server.threads}") int threads,
-            @Value("${llama.server.timeout}") int startTimeoutSekunden) {
+            @Value("${llama.server.timeout}") int startTimeoutSekunden,
+            @Value("${llama.server.lifecycle.auto-shutdown:false}") boolean autoShutdown) {
         this.serverExe = serverExe;
         this.serverBaseUrl = serverBaseUrl;
         this.modelPath = modelPath;
@@ -122,6 +133,7 @@ public class LlamaServerManager {
         this.contextGroesse = contextGroesse;
         this.threads = threads;
         this.startTimeoutSekunden = startTimeoutSekunden;
+        this.autoShutdown = autoShutdown;
     }
 
     /**
@@ -138,6 +150,7 @@ public class LlamaServerManager {
         this.contextGroesse = builder.contextGroesse;
         this.threads = builder.threads;
         this.startTimeoutSekunden = builder.startTimeoutSekunden;
+        this.autoShutdown = builder.autoShutdown;
     }
 
     /**
@@ -159,13 +172,13 @@ public class LlamaServerManager {
      */
     public void startIfNotRunning() throws IOException, InterruptedException {
         if (isRunning()) {
-            System.out.println("llamaServer: laeuft bereits auf Port " + port);
+            log.info("llamaServer: laeuft bereits auf Port " + port);
             return;
         }
-        System.out.println("llamaServer: nicht erreichbar - starte Prozess...");
+        log.info("llamaServer: nicht erreichbar - starte Prozess...");
         start();
         waitUntilReady();
-        System.out.println("llamaServer: bereit auf Port " + port);
+        log.info("llamaServer: bereit auf Port " + port);
     }
 
     /**
@@ -178,6 +191,7 @@ public class LlamaServerManager {
             HttpClient client = HttpClient.newBuilder()
                     .connectTimeout(Duration.ofSeconds(2))
                     .build();
+
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(serverBaseUrl + ":" + port + HEALTH_PFAD))
                     .timeout(Duration.ofSeconds(2))
@@ -193,6 +207,10 @@ public class LlamaServerManager {
     /**
      * Startet den llama-server als externen Prozess via {@link ProcessBuilder}.
      * Stdout und Stderr des Prozesses werden verworfen, um die Konsole sauber zu halten.
+     *
+     * <p>Falls {@code llama.server.lifecycle.auto-shutdown=true} konfiguriert ist,
+     * wird ein JVM-Shutdown-Hook registriert, der den Prozess beim Beenden der JVM
+     * automatisch stoppt.</p>
      *
      * @throws IOException wenn die ausfuehrbare Datei nicht gefunden wird oder
      *                     der Prozess nicht gestartet werden kann
@@ -212,13 +230,15 @@ public class LlamaServerManager {
 
         this.serverProzess = pb.start();
 
-        // Prozess beim JVM-Ende automatisch beenden
-//        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-//            if (serverProzess != null && serverProzess.isAlive()) {
-//                System.out.println("llamaServer: beende Prozess...");
-//                serverProzess.destroy();
-//            }
-//        }));
+        if (autoShutdown) {
+            // Prozess beim JVM-Ende automatisch beenden
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                if (serverProzess != null && serverProzess.isAlive()) {
+                    log.info("llamaServer: beende Prozess...");
+                    serverProzess.destroy();
+                }
+            }));
+        }
     }
 
     /**
@@ -237,7 +257,6 @@ public class LlamaServerManager {
             Thread.sleep(POLL_INTERVALL_MS);
             System.out.print(".");
         }
-        System.out.println();
         throw new IllegalStateException(
                 "llama-server nicht bereit nach " + startTimeoutSekunden + " Sekunden.");
     }
@@ -251,6 +270,7 @@ public class LlamaServerManager {
      *   <li>contextGroesse: 2048</li>
      *   <li>threads: 4</li>
      *   <li>startTimeoutSekunden: 60</li>
+     *   <li>autoShutdown: false</li>
      * </ul>
      */
     public static class Builder {
@@ -263,6 +283,8 @@ public class LlamaServerManager {
         private int contextGroesse = 2048;
         private int threads = 4;
         private int startTimeoutSekunden = 60;
+        private boolean autoShutdown = false;
+
         /**
          * @param serverExe Pfad zur llama-server.exe
          * @return this Builder
@@ -332,6 +354,18 @@ public class LlamaServerManager {
          */
         public Builder startTimeoutSekunden(int startTimeoutSekunden) {
             this.startTimeoutSekunden = startTimeoutSekunden;
+            return this;
+        }
+
+        /**
+         * Steuert, ob der llama-server-Prozess beim Beenden der JVM automatisch gestoppt wird.
+         * Standard: {@code false}.
+         *
+         * @param autoShutdown {@code true} = Shutdown-Hook wird registriert
+         * @return this Builder
+         */
+        public Builder autoShutdown(boolean autoShutdown) {
+            this.autoShutdown = autoShutdown;
             return this;
         }
 
