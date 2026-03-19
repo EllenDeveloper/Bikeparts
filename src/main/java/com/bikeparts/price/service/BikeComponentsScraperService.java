@@ -18,7 +18,10 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Scraper-Service für den Online-Shop <a href="https://www.bike-components.de">bike-components.de</a>.
@@ -155,8 +158,19 @@ public class BikeComponentsScraperService {
             }
 
             List<ProductOffer> result = new ArrayList<>();
-            for (int i = 0; i < Math.min(ScrapingConstants.MAX_NUMBER_PRODUCT_OFFERS, products.size()); i++) {
-                result.add(mapToDto(products.get(i).path("data"), searchQuery));
+            for (JsonNode product : products) {
+
+                // Maximale Anzahl passender Treffer erreicht - Schleife abbrechen
+                if (result.size() >= ScrapingConstants.MAX_NUMBER_PRODUCT_OFFERS) break;
+
+                String productName = product.path("data").path("productName").asText();
+
+                // Nur Produkte uebernehmen, deren Name alle Suchbegriffe enthaelt
+                if (containsAllTerms(searchQuery, productName)) {
+                    result.add(mapToDto(product.path("data"), searchQuery));
+                } else {
+                    log.debug("Produkt herausgefiltert (nicht alle Suchbegriffe enthalten): {}", productName);
+                }
             }
 
             int total = root.path("initialData").path("total").asInt();
@@ -191,6 +205,45 @@ public class BikeComponentsScraperService {
      * @param data JSON-Knoten mit den Produktdaten eines einzelnen Eintrags.
      * @return Befülltes {@link ProductOffer}.
      */
+    /**
+     * Prueft ob alle Suchbegriffe der {@code searchQuery} als exakte Token
+     * im {@code productName} enthalten sind.
+     *
+     * <p>Beide Strings werden in Kleinbuchstaben umgewandelt und an den Zeichen
+     * Leerzeichen, {@code /}, {@code +} und {@code ,} in Token zerlegt.
+     * Ein Suchbegriff muss als <em>exaktes</em> Token vorkommen -
+     * Teilstring-Matches werden vermieden (z. B. "Kette" matcht nicht "Kettenblatt").</p>
+     *
+     * <p>Beispiel:
+     * <pre>
+     *   searchQuery  = "Shimano XT Kette 10-fach"
+     *   productName  = "Shimano XT / XTR / SLX CN-HG95 10-fach Kette"
+     *   productTokens = [shimano, xt, xtr, slx, cn-hg95, 10-fach, kette]
+     *
+     *   contains("shimano") -> true
+     *   contains("xt")      -> true
+     *   contains("kette")   -> true
+     *   contains("10-fach") -> true
+     *   -> true (alle Begriffe gefunden)
+     * </pre>
+     * </p>
+     *
+     * @param searchQuery Suchbegriff, z. B. {@code "Shimano XT Kette 10-fach"}
+     * @param productName Produktname aus dem Scraping-Ergebnis
+     * @return {@code true} wenn alle Suchbegriffe als Token im Produktnamen vorkommen
+     */
+    private boolean containsAllTerms(String searchQuery, String productName) {
+        // Produktnamen in Token-Set zerlegen (Trennzeichen: Leerzeichen, /, +, ,)
+        Set<String> productTokens = Arrays.stream(
+                        productName.toLowerCase().split("[\\s/+,]+"))
+                .collect(Collectors.toSet());
+
+        // true wenn jeder Suchbegriff als exaktes Token im Produktnamen vorkommt
+        // allMatch bricht beim ersten fehlenden Begriff sofort ab (Short-Circuit)
+        return Arrays.stream(searchQuery.toLowerCase().split("\\s+"))
+                .allMatch(productTokens::contains);
+    }
+
     private ProductOffer mapToDto(JsonNode data, String searchQuery) {
         double priceRaw = data.path("priceRaw").asDouble();
         String productName = data.path("productName").asText();
