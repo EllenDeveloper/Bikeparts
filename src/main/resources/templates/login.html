@@ -1,281 +1,97 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:th="https://www.thymeleaf.org"
-      xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity6" lang="de">
-    <head>
-        <title>Login - SecureApp</title>
-        <meta charset="UTF-8"/>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<!--        <link rel="stylesheet" th:href="@{/css/style.css}" type="text/css"/>-->
-        <style>
-            * {
-                margin: 0;
-                padding: 0;
-                box-sizing: border-box;
-            }
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
+      lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - BikePartsFinder</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+<div style="display: flex; justify-content: space-between; align-items: center;">
+    <h1><i class="fa-solid fa-bicycle"  style="font-size: 1.8rem; color: #5659fb;"></i>  Login</h1>
+</div>
 
-            body {
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                min-height: 100vh;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
+<!-- Erfolgsmeldung: Logout -->
+<div th:if="${param.logout}" class="alert alert-success fade-in">
+    <strong>Erfolgreich abgemeldet</strong>
+    <p style="margin-top: 0.5rem; margin-bottom: 0;">
+        Sie wurden erfolgreich abgemeldet.
+    </p>
+</div>
 
-            .login-container {
-                background: white;
-                padding: 2.5rem;
-                border-radius: 10px;
-                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-                width: 100%;
-                max-width: 400px;
-            }
+<!-- Bereits angemeldet -->
+<div sec:authorize="isAuthenticated()" class="alert alert-success fade-in">
+    <strong>Bereits angemeldet</strong>
+    <p style="margin-top: 0.5rem; margin-bottom: 0;">
+        Sie sind bereits angemeldet als
+        <strong sec:authentication="principal.username"></strong>.
+    </p>
+    <a href="/" class="btn btn-primary mt-2">Zur Startseite</a>
+</div>
 
-            h1 {
-                color: #333;
-                margin-bottom: 0.5rem;
-                font-size: 1.8rem;
-            }
+<!-- Login-Formular -->
+<div class="card fade-in" sec:authorize="isAnonymous()">
+    <div class="card-header">
+        <h2 class="card-title">Anmelden</h2>
+        <p class="card-subtitle">Geben Sie Ihre Zugangsdaten ein</p>
+    </div>
 
-            .subtitle {
-                color: #666;
-                margin-bottom: 2rem;
-                font-size: 0.9rem;
-            }
+    <!-- Fehlermeldung -->
+    <div th:if="${param.error}" class="alert alert-error">
+        <strong>Anmeldung fehlgeschlagen</strong>
+        <p style="margin-top: 0.5rem; margin-bottom: 0;">
+            Falsche E-Mail oder Passwort, oder Ihr Account ist nicht aktiviert.
+            <br/>
+            <small>Bitte überprüfen Sie Ihre Email-Adresse für den Bestätigungslink.</small>
+        </p>
+    </div>
 
-            .form-group {
-                margin-bottom: 1.5rem;
-            }
-
-            label {
-                display: block;
-                margin-bottom: 0.5rem;
-                color: #333;
-                font-weight: 500;
-            }
-
-            input[type="text"],
-            input[type="password"] {
-                width: 100%;
-                padding: 0.75rem;
-                border: 2px solid #e1e8ed;
-                border-radius: 5px;
-                font-size: 1rem;
-                transition: border-color 0.3s;
-            }
-
-            input[type="text"]:focus,
-            input[type="password"]:focus {
-                outline: none;
-                border-color: #667eea;
-            }
-
-            .remember-me {
-                display: flex;
-                align-items: center;
-                margin-bottom: 1.5rem;
-            }
-
-            .remember-me input {
-                margin-right: 0.5rem;
-            }
-
-            button {
-                width: 100%;
-                padding: 0.75rem;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
-                border: none;
-                border-radius: 5px;
-                font-size: 1rem;
-                font-weight: 600;
-                cursor: pointer;
-                transition: transform 0.2s;
-            }
-
-            button:hover {
-                transform: translateY(-2px);
-            }
-
-            button:active {
-                transform: translateY(0);
-            }
-
-            .error-message {
-                background-color: #fee;
-                border-left: 4px solid #f44;
-                padding: 1rem;
-                margin-bottom: 1.5rem;
-                border-radius: 4px;
-                color: #c33;
-            }
-
-            .logout-message {
-                background-color: #efe;
-                border-left: 4px solid #4a4;
-                padding: 1rem;
-                margin-bottom: 1.5rem;
-                border-radius: 4px;
-                color: #363;
-            }
-        </style>
-    </head>
-    <body>
-        <!-- Navigation -->
-        <nav class="navbar">
-            <div class="nav-container">
-                <a href="/" class="nav-brand">🔐 SecureApp</a>
-                <ul class="nav-menu">
-                    <li><a href="/" class="nav-link">Home</a></li>
-                    <li><a href="/login" class="nav-link active">Login</a></li>
-                    <li><a href="/register" class="nav-link">Registrieren</a></li>
-                </ul>
-            </div>
-        </nav>
-
-        <!-- Hero Section -->
-        <section class="hero" style="padding: 2rem;">
-            <h1>Willkommen zurück!</h1>
-            <p>Melden Sie sich an, um fortzufahren</p>
-        </section>
-
-        <!-- Main Content -->
-        <div class="container" style="max-width: 500px;">
-            <!-- Success Message (Logout) -->
-            <div th:if="${param.logout}" class="alert alert-success fade-in">
-                <strong>✓ Erfolgreich abgemeldet</strong>
-                <p style="margin-top: 0.5rem; margin-bottom: 0;">
-                    Sie wurden erfolgreich abgemeldet.
-                </p>
-            </div>
-
-            <!-- Success Message (Already Authenticated) -->
-            <div sec:authorize="isAuthenticated()" class="alert alert-success fade-in">
-                <strong>✓ Bereits angemeldet</strong>
-                <p style="margin-top: 0.5rem; margin-bottom: 0;">
-                    Sie sind bereits angemeldet als
-                    <strong sec:authentication="principal.username"></strong>.
-                </p>
-                <a href="/" class="btn btn-primary mt-2">Zur Startseite</a>
-            </div>
-
-            <!-- Login Card -->
-            <div class="card fade-in" sec:authorize="isAnonymous()">
-                <div class="card-header">
-                    <h2 class="card-title">🔐 Login</h2>
-                    <p class="card-subtitle">Geben Sie Ihre Zugangsdaten ein</p>
-                </div>
-
-                <!-- Error Message -->
-                <div th:if="${param.error}" class="alert alert-error">
-                    <strong>✗ Anmeldung fehlgeschlagen</strong>
-                    <p style="margin-top: 0.5rem; margin-bottom: 0;">
-                        Falsche E-Mail oder Passwort, oder Ihr Account ist nicht aktiviert.
-                        <br/>
-                        <small>Bitte überprüfen Sie Ihre Email-Adresse für den Bestätigungslink.</small>
-                    </p>
-                </div>
-
-                <!-- Login Form -->
-                <form th:action="@{/login}" method="post">
-                    <div class="form-group">
-                        <label for="email" class="form-label">
-                            📧 E-Mail-Adresse
-                        </label>
-                        <!--                               name="username"  geht an API-->
-
-                        <input type="email"
-                               id="email"
-                               name="email"
-                               class="form-control"
-                               placeholder="ihre.email@beispiel.de"
-                               required
-                               autofocus />
-                        <small class="form-text">
-                            Verwenden Sie die E-Mail-Adresse, die Sie bei der Registrierung angegeben haben.
-                        </small>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="password" class="form-label">
-                            🔑 Passwort
-                        </label>
-                        <input type="password"
-                               id="password"
-                               name="password"
-                               class="form-control"
-                               placeholder="Ihr Passwort"
-                               required />
-                        <small class="form-text">
-                            Mindestens 8 Zeichen empfohlen.
-                        </small>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary btn-block">
-                        🔓 Jetzt anmelden
-                    </button>
-                </form>
-
-                <!-- Additional Links -->
-                <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color); text-align: center;">
-                    <p style="color: var(--text-light); margin-bottom: 1rem;">
-                        Noch kein Account?
-                    </p>
-                    <a href="/register" class="btn btn-outline" style="display: inline-block;">
-                        📝 Jetzt registrieren
-                    </a>
-                </div>
-            </div>
-
-            <!-- Info Card -->
-            <div class="card fade-in" style="animation-delay: 0.2s;">
-                <div class="card-header">
-                    <h3 class="card-title">ℹ️ Hinweise</h3>
-                </div>
-
-                <div class="features" style="grid-template-columns: 1fr;">
-                    <div style="background: var(--bg-light); padding: 1rem; border-radius: 0.5rem; margin-bottom: 0.5rem;">
-                        <strong>🔒 Sicherheit:</strong>
-                        <p style="margin: 0.5rem 0 0 0; color: var(--text-light);">
-                            Ihre Passwörter werden mit BCrypt verschlüsselt und sicher gespeichert.
-                        </p>
-                    </div>
-
-                    <div style="background: var(--bg-light); padding: 1rem; border-radius: 0.5rem; margin-bottom: 0.5rem;">
-                        <strong>📧 Email-Verifizierung:</strong>
-                        <p style="margin: 0.5rem 0 0 0; color: var(--text-light);">
-                            Nach der Registrierung erhalten Sie eine Bestätigungs-Email.
-                        </p>
-                    </div>
-
-                    <div style="background: var(--bg-light); padding: 1rem; border-radius: 0.5rem;">
-                        <strong>🚫 Probleme beim Login?</strong>
-                        <p style="margin: 0.5rem 0 0 0; color: var(--text-light);">
-                            Stellen Sie sicher, dass Sie Ihren Account per Email bestätigt haben.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Back to Home -->
-            <div class="text-center mt-3">
-                <a href="/" style="color: white; text-decoration: none; opacity: 0.8;">
-                    ← Zurück zur Startseite
-                </a>
-            </div>
+    <form th:action="@{/login}" method="post">
+        <div class="form-group">
+            <label for="email" class="form-label">E-Mail-Adresse</label>
+            <input type="email"
+                   id="email"
+                   name="email"
+                   class="form-control"
+                   placeholder="ihre.email@beispiel.de"
+                   required
+                   autofocus />
+            <small class="form-text">
+                Verwenden Sie die E-Mail-Adresse, die Sie bei der Registrierung angegeben haben.
+            </small>
         </div>
 
-        <!-- Footer -->
-        <footer class="footer">
-            <div class="footer-content">
-                <p>&copy; 2025 SecureApp. Erstellt mit Spring Boot 3 & Spring Security 6.</p>
-                <p style="margin-top: 0.5rem;">
-                    <a href="/help.html" style="color: #2563eb; text-decoration: none;">Hilfe</a> •
-                    <a href="/" style="color: #2563eb; text-decoration: none;">Home</a>
-                </p>
-            </div>
-        </footer>
-    </body>
-    <div th:replace="~{fragments/footer :: footer}"></div>
+        <div class="form-group">
+            <label for="password" class="form-label">Passwort</label>
+            <input type="password"
+                   id="password"
+                   name="password"
+                   class="form-control"
+                   placeholder="Ihr Passwort"
+                   required />
+            <small class="form-text">
+                Mindestens 8 Zeichen empfohlen.
+            </small>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">
+            Jetzt anmelden
+        </button>
+    </form>
+
+    <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color); text-align: center;">
+        <p style="color: var(--text-light); margin-bottom: 1rem;">
+            Noch kein Account?
+        </p>
+        <a href="/register" class="btn btn-outline" style="display: inline-block;">
+            Jetzt registrieren
+        </a>
+    </div>
+</div>
+
+</body>
+<div th:replace="~{fragments/footer :: footer}"></div>
 </html>

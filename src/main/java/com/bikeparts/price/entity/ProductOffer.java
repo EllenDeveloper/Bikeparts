@@ -136,6 +136,6 @@ public class ProductOffer {
         return "id=" + id
              + ", productName=" + productName
              + ", price=" + price
-             + ", inStock=" + inStock;
+             + ", inStock=" + inStock + " \n";
     }
 }

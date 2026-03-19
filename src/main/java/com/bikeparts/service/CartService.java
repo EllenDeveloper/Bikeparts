@@ -5,6 +5,9 @@ import com.bikeparts.entity.Bikepart;
 import com.bikeparts.entity.Cart;
 import com.bikeparts.entity.CartItem;
 import com.bikeparts.enums.BikepartType;
+import com.bikeparts.llama.client.LlamaCompletionRequest;
+import com.bikeparts.llama.client.LlamaHttpClientMain;
+import com.bikeparts.llama.service.LlamaHttpClientService;
 import com.bikeparts.price.ScrapingConstants;
 import com.bikeparts.price.entity.ProductOffer;
 import com.bikeparts.price.repository.ProductOfferRepository;
@@ -22,9 +25,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.annotation.SessionScope;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Component
 public class CartService {
@@ -38,10 +43,14 @@ public class CartService {
     private final Account account;
     private final BikeComponentsScraperService bikeComponentsScraperService;
     private final ProductOfferRepository productOfferRepository;
+    private final LlamaHttpClientService llamaHttpClientService;
 
     @Autowired
     public CartService(CartRepository cartRepository, CartItemRepository cartItemRepository,
-                       BikepartRepository bikepartRepository, AccountService accountService, Account account, BikeComponentsScraperService bikeComponentsScraperService, ProductOfferRepository productOfferRepository) {
+                       BikepartRepository bikepartRepository, AccountService accountService, Account account,
+                       BikeComponentsScraperService bikeComponentsScraperService,
+                       ProductOfferRepository productOfferRepository,
+                       LlamaHttpClientService llamaHttpClientService) {
         this.cartRepository = cartRepository;
         this.cartItemRepository = cartItemRepository;
         this.bikepartRepository = bikepartRepository;
@@ -49,6 +58,7 @@ public class CartService {
         this.account = account;
         this.bikeComponentsScraperService = bikeComponentsScraperService;
         this.productOfferRepository = productOfferRepository;
+        this.llamaHttpClientService = llamaHttpClientService;
     }
 
     // --- Cart methods
@@ -107,18 +117,22 @@ public class CartService {
         cartItemRepository.deleteById(id);
     }
 
-
+private String getSearchQuery(Bikepart bikepart) {
+    String searchQuery = bikepart.getBrand() + " " +bikepart.getModel() + " " +bikepart.getSpecificDetails()
+            + " " +bikepart.getType().getLabel();
+//        String searchQuery = bikepart.getName();
+    //        später: +bikepart.getAlternativeQualities() != null
+    if (bikepart.getType().toString().contains("TIRE") || bikepart.getType().toString().contains("WHEEL")) {
+        searchQuery += " " + bikepart.getTireWidth();
+    }
+    return searchQuery;
+}
     @Transactional
     public ScrapingResult searchPriceBikeComponents(Bikepart bikepart) {
         // TODO: Daten richtig importieren
         //
-         String searchQuery = bikepart.getBrand() + " " +bikepart.getModel() + " " +bikepart.getSpecificDetails()
-         + " " +bikepart.getType().getLabel();
-//        String searchQuery = bikepart.getName();
-        if (bikepart.getType().toString().contains("TIRE") || bikepart.getType().toString().contains("WHEEL")) {
-            searchQuery += " " + bikepart.getTireWidth();
-        }
-//        später: +bikepart.getAlternativeQualities() != null
+         String searchQuery = getSearchQuery(bikepart);
+
         //my Für tests. Da der Server für die Entwicklung immer hoch und runterfährt, bringt der Cache mit
         //my Caffeine nichts. Es sollen die Daten in der DB als cache-Ersatz gespeichert werden.
         List<ProductOffer> cached = productOfferRepository.findBySearchQueryAndFetchedAtAfter(
@@ -160,5 +174,34 @@ public class CartService {
                 .filter(item -> item.getId().equals(cartItemId))
                 .findFirst()
                 .orElseThrow(() -> new EntityNotFoundException("CartItem nicht gefunden: " + cartItemId));
+    }
+
+    @Transactional
+    public String rateSearchResultsWithKI(Long bikepartId) {
+        if (bikepartId != null) {
+            Bikepart bikepart = bikepartRepository.findBikepartById(bikepartId);
+            String searchQuery1 = getSearchQuery(bikepart);
+            String searchQuery = "Shimano XT Kette 10-fach";
+            List<ProductOffer> bySearchQuery = productOfferRepository.findBySearchQuery(searchQuery);
+            String stringForLlama = bySearchQuery.stream()
+                    .map(p -> p.toStringForLlama())
+                    .collect(Collectors.joining("\n"));
+//            CartItem cartItem = new CartItem(cart, bikepart, quantity);
+            try {
+                if (!stringForLlama.isEmpty()) {
+                    String result = llamaHttpClientService.accessTry(stringForLlama);
+                    System.out.println("**** " + result);
+                    return result;
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+
+//            LlamaCompletionRequest llamaCompletionRequest = LlamaCompletionRequest.fromInventory(LlamaHttpClientMain.SYSTEM_PROMPT, stringForLlama);
+        }
+        // TODO error handling
+        return "no KI result of rateSearchResultsWithKI with bikepartId "+ bikepartId;
     }
 }

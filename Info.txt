@@ -65,3 +65,14 @@ curl -X POST http://localhost:8080/api/accounts/1/cart/bikeparts/1
 
  searchPriceBikeComponents -> Achtung: Request wird angetriggert!
  http://localhost:8080/api/accounts/bike/1/bikepart/2/searchPriceBikeComponents
+
+illama starten:
+cd C:\dev\IBB\Referenzprojekt\llama-b8308-bin-win-cpu-x64>
+llama-server.exe -m "C:\dev\IBB\Referenzprojekt\ki_models\qwen2.5-1.5b-instruct-q4_k_m.gguf" --port 8085 -c 2048 --threads 4
+
+http://localhost:8080/bikeparts/2/addBikepartToCart
+
+ POST http://localhost:8080/api/accounts/cart/bikeparts/2/rateSearchResultsWithKI
+
+  curl -X POST http://localhost:8080/api/accounts/cart/bikeparts/2/rateSearchResultsWithKI \
+    -H "Content-Type: application/json"

@@ -11,12 +11,14 @@ import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/accounts")
 public class BikeController {
@@ -134,6 +136,16 @@ public class BikeController {
         // TODO: Bikepart muss zu dem account gehören
         cartService.addBikepartToCart(bikepartId, quantity);
         return ResponseEntity.noContent().build();
+    }
+
+    // Werte von Bikepart productOffer bewerten lassen
+    @PostMapping("/cart/bikeparts/{bikepartId}/rateSearchResultsWithKI")
+    public ResponseEntity<?> rateSearchResultsWithKI(
+            @PathVariable Long bikepartId) {
+
+        log.info("***** rateSearchResultsWithKI");
+        String result = cartService.rateSearchResultsWithKI(bikepartId);
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/bike/{bikeId}")

@@ -10,6 +10,8 @@ import java.util.List;
 @Repository
 public interface ProductOfferRepository extends JpaRepository<ProductOffer, Long> {
 
+    List<ProductOffer> findBySearchQuery(String searchQuery);
+
     /**
      * Cache-Lookup: Findet alle Angebote fuer einen Suchbegriff,
      * die nach einem bestimmten Zeitpunkt abgerufen wurden.
