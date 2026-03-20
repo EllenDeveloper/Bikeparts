@@ -163,7 +163,6 @@ public class BikeDiscountShippingCostScraperService {
             }
 
             return ShopInfo.builder()
-                    .id(ScrapingConstants.BikeDiscount.SHOP_ID)
                     .shopName(ScrapingConstants.BikeDiscount.SHOP_NAME)
                     .shippingCostUrl(ScrapingConstants.BikeDiscount.SHIPPING_URL)
                     .shippingCost(shippingCost)

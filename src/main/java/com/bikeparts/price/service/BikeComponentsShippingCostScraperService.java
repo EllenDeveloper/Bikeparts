@@ -136,7 +136,6 @@ public class BikeComponentsShippingCostScraperService {
                 BigDecimal shippingCost = parsePrice(priceText);
                 log.info("Versandkosten Deutschland Standard: {}", shippingCost);
                 return ShopInfo.builder()
-                        .id(ScrapingConstants.BikeComponents.SHOP_ID)
                         .shopName(ScrapingConstants.BikeComponents.SHOP_NAME)
                         .shippingCostUrl(ScrapingConstants.BikeComponents.SHIPPING_URL)
                         .shippingCost(shippingCost)

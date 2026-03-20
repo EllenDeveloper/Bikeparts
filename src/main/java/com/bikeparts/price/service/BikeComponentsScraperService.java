@@ -28,13 +28,12 @@ import java.util.List;
  * <p>bike-components.de verwendet Server-Side Rendering (SSR) mit Vue.js und Inertia.js.
  * Alle Produktdaten der Suchergebnisseite sind als JSON im HTML-Attribut
  * {@code data-props} des Elements {@code <div data-component="ProductCatalog">} enthalten.
- * Ein JavaScript-Rendering (z. B. Selenium) ist daher <strong>nicht erforderlich</strong> –
+ * Ein JavaScript-Rendering (z. B. Selenium) ist daher <strong>nicht erforderlich</strong> -
  * Jsoup ist für den HTTP-Request und das DOM-Parsing ausreichend.</p>
  *
  * <h2>robots.txt</h2>
- * <p>Die robots.txt von bike-components.de enthält keine Disallow-Regeln.
- * Die Suchseite {@code /de/s/?keywords=} ist explizit erlaubt. Scraping ist damit
- * rechtlich unproblematisch.</p>
+ * <p>Die robots.txt enthält keine Disallow-Regeln.
+ * Die Suchseite {@code /de/s/?keywords=} ist explizit erlaubt.</p>
  *
  * <h2>Caching</h2>
  * <p>Suchergebnisse werden mit {@code @Cacheable} gecacht, um wiederholte
@@ -67,19 +66,19 @@ public class BikeComponentsScraperService {
     public static void main(String[] args) {
         ObjectMapper objectMapper1 = new ObjectMapper();
         BikeComponentsScraperService bikeComponentsScraperService = new BikeComponentsScraperService(objectMapper1);
-        ScrapingResult result = bikeComponentsScraperService.search(ScrapingConstants.SEARCH_URL_BIKE_COMPONENTS + "shimano fahrradkette slx");
+        ScrapingResult result = bikeComponentsScraperService.search(ScrapingConstants.BikeComponents.SEARCH_URL + "shimano fahrradkette slx");
     }
 
     /**
-     * Führt eine Produktsuche auf bike-components.de durch und gibt die
-     * ersten {@link ScrapingConstants#MAX_NUMBER_PRODUCT_OFFERS} Suchergebnisse als Liste zurück.
+     * Führt eine Produktsuche durch und gibt die ersten
+     * {@link ScrapingConstants.Common#MAX_NUMBER_PRODUCT_OFFERS} Treffer zurück.
      *
      * <p>Der Ablauf:</p>
      * <ol>
-     *   <li>Suchbegriff URL-kodieren und an {@link ScrapingConstants#SEARCH_URL_BIKE_COMPONENTS} anhängen</li>
-     *   <li>HTTP-GET via Jsoup mit {@link ScrapingConstants#USER_AGENT} und 10 s Timeout</li>
-     *   <li>HTML-Dokument an {@link #parseDocument(Document)} delegieren</li>
-     *   <li>Bei Fehler (IOException, Timeout etc.): leere Liste zurückgeben</li>
+     *   <li>Suchbegriff URL-kodieren und an die Such-URL anhängen</li>
+     *   <li>HTTP-GET via Jsoup (10 s Timeout)</li>
+     *   <li>HTML-Dokument an {@link #parseDocument(Document, String)} delegieren</li>
+     *   <li>Bei Fehler (IOException, Timeout etc.): Fehlerstatus zurückgeben</li>
      * </ol>
      *
      * <p>Das Ergebnis wird pro Query gecacht ({@code @Cacheable}).
@@ -88,17 +87,17 @@ public class BikeComponentsScraperService {
      *
      * @param searchQuery Suchbegriff, z. B. {@code "shimano kette"}.
      *              Leerzeichen werden als {@code +} kodiert (URL-Encoding).
-     * @return Liste der gefundenen {@link ProductOffer}s, oder leere Liste bei Fehler.
+     * @return {@link ScrapingResult} mit gefundenen {@link ProductOffer}s, oder Fehlerstatus.
      */
     @Cacheable(value = "bikeComponentsSearch", key = "#searchQuery")
     public ScrapingResult search(String searchQuery) {
-        String url = ScrapingConstants.SEARCH_URL_BIKE_COMPONENTS + URLEncoder.encode(searchQuery, StandardCharsets.UTF_8);
+        String url = ScrapingConstants.BikeComponents.SEARCH_URL + URLEncoder.encode(searchQuery, StandardCharsets.UTF_8);
         log.debug("Scraping bike-components.de: {}", url);
         log.debug("searchQuery: {}", searchQuery);
 
         try {
             Document doc = Jsoup.connect(url)
-                    .userAgent(ScrapingConstants.USER_AGENT)
+                    .userAgent(ScrapingConstants.Common.USER_AGENT)
                     .timeout(10_000)
                     .get();
             return parseDocument(doc, searchQuery);
@@ -113,7 +112,7 @@ public class BikeComponentsScraperService {
      * alle Produkte aus dem {@code data-props}-JSON-Attribut.
      *
      * <p>Diese Methode ist <strong>package-private</strong>, um sie in Unit-Tests
-     * direkt mit einem aus einer Testdatei geparsten Dokument aufrufen zu können –
+     * direkt mit einem aus einer Testdatei geparsten Dokument aufrufen zu können -
      * ohne einen echten HTTP-Request durchzuführen.</p>
      *
      * <p>Ablauf:</p>
@@ -122,14 +121,15 @@ public class BikeComponentsScraperService {
      *       Vue-Einstiegselement im HTML</li>
      *   <li>Das Attribut {@code data-props} enthält das vollständige JSON
      *       der Suchergebnisse</li>
-     *   <li>Pfad im JSON: {@code initialData → products → [n] → data}</li>
-     *   <li>Jedes Produkt wird über {@link #mapToDto(JsonNode, searchQuery)} in ein
+     *   <li>Pfad im JSON: {@code initialData -> products -> [n] -> data}</li>
+     *   <li>Jedes Produkt wird über {@link #mapToDto(JsonNode, String)} in ein
      *       {@link ProductOffer} überführt</li>
      * </ol>
      *
-     * @param doc Das von Jsoup geparste HTML-Dokument der Suchergebnisseite.
-     * @return Liste der extrahierten {@link ProductOffer}s,
-     *         oder leere Liste wenn das {@code ProductCatalog}-Element fehlt
+     * @param doc         Das von Jsoup geparste HTML-Dokument der Suchergebnisseite.
+     * @param searchQuery Suchbegriff, der für Filterung und Mapping weitergereicht wird.
+     * @return {@link ScrapingResult} mit extrahierten {@link ProductOffer}s,
+     *         oder Fehlerstatus wenn das {@code ProductCatalog}-Element fehlt
      *         oder ein JSON-Fehler auftritt.
      */
     ScrapingResult parseDocument(Document doc, String searchQuery) {
@@ -159,7 +159,7 @@ public class BikeComponentsScraperService {
             for (JsonNode product : products) {
 
                 // Maximale Anzahl passender Treffer erreicht - Schleife abbrechen
-                if (result.size() >= ScrapingConstants.MAX_NUMBER_PRODUCT_OFFERS) break;
+                if (result.size() >= ScrapingConstants.Common.MAX_NUMBER_PRODUCT_OFFERS) break;
 
                 String productName = product.path("data").path("productName").asText();
 
@@ -173,7 +173,7 @@ public class BikeComponentsScraperService {
 
             int total = root.path("initialData").path("total").asInt();
             log.debug("bike-components.de: {} Produkte gefunden (Gesamt: {}), gespeichert: {}",
-                    products.size(), total, ScrapingConstants.MAX_NUMBER_PRODUCT_OFFERS);
+                    products.size(), total, ScrapingConstants.Common.MAX_NUMBER_PRODUCT_OFFERS);
             result.forEach(offer -> log.debug("ProductOffer: {}", offer));
             return ScrapingResult.success(result);
 
@@ -190,18 +190,19 @@ public class BikeComponentsScraperService {
      *
      * <p>Mapping-Regeln:</p>
      * <ul>
-     *   <li>{@code productName}  ← {@code data.productName}</li>
-     *   <li>{@code price}        ← {@code data.priceRaw} als {@link BigDecimal};
+     *   <li>{@code productName}  <- {@code data.productName}</li>
+     *   <li>{@code price}        <- {@code data.priceRaw} als {@link BigDecimal};
      *       {@code null} wenn {@code priceRaw <= 0}</li>
-     *   <li>{@code productUrl}   ← {@link ScrapingConstants#BASE_URL_BIKE_COMPONENTS} + {@code data.link} (relativer Pfad)</li>
-     *   <li>{@code inStock}      ← {@code !isSoldOut && isBuyable}</li>
-     *   <li>{@code shopName}     ← {@link ScrapingConstants#SHOP_NAME_BIKE_COMPONENTS}</li>
-     *   <li>{@code shopId}       ← {@link ScrapingConstants#SHOP_ID_BIKE_COMPONENTS}</li>
-     *   <li>{@code source}       ← immer {@link FetchMethod#WEB_SCRAPING}</li>
-     *   <li>{@code fetchedAt}    ← {@link LocalDateTime#now()} zum Zeitpunkt des Mappings</li>
+     *   <li>{@code productUrl}   <- {@link ScrapingConstants.BikeComponents#BASE_URL} + {@code data.link}</li>
+     *   <li>{@code inStock}      <- {@code !isSoldOut && isBuyable}</li>
+     *   <li>{@code shopName}     <- {@link ScrapingConstants.BikeComponents#SHOP_NAME}</li>
+     *   <li>{@code shopId}       <- {@link ScrapingConstants.BikeComponents#SHOP_ID}</li>
+     *   <li>{@code source}       <- immer {@link FetchMethod#WEB_SCRAPING}</li>
+     *   <li>{@code fetchedAt}    <- {@link LocalDateTime#now()} zum Zeitpunkt des Mappings</li>
      * </ul>
      *
-     * @param data JSON-Knoten mit den Produktdaten eines einzelnen Eintrags.
+     * @param data        JSON-Knoten mit den Produktdaten eines einzelnen Eintrags.
+     * @param searchQuery Suchbegriff, der dem {@link ProductOffer} zugeordnet wird.
      * @return Befülltes {@link ProductOffer}.
      */
     private ProductOffer mapToDto(JsonNode data, String searchQuery) {
@@ -220,10 +221,9 @@ public class BikeComponentsScraperService {
         return ProductOffer.builder()
                 .productName(productName)
                 .price(priceRaw > 0 ? BigDecimal.valueOf(priceRaw) : null)
-                .productUrl(ScrapingConstants.BASE_URL_BIKE_COMPONENTS + data.path("link").asText())
+                .productUrl(ScrapingConstants.BikeComponents.BASE_URL + data.path("link").asText())
                 .inStock(!data.path("isSoldOut").asBoolean() && isBuyable)
-                .shopName(ScrapingConstants.SHOP_NAME_BIKE_COMPONENTS)
-                .shopId(ScrapingConstants.SHOP_ID_BIKE_COMPONENTS)
+                .shopName(ScrapingConstants.BikeComponents.SHOP_NAME)
                 .source(FetchMethod.WEB_SCRAPING)
                 .fetchedAt(LocalDateTime.now())
                 .searchQuery(searchQuery)

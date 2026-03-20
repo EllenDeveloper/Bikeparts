@@ -47,9 +47,6 @@ public final class ScrapingConstants {
         /** Anzeigename des Shops. */
         public static final String SHOP_NAME = "bike-components.de";
 
-        /** Interne Shop-ID. */
-        public static final Long SHOP_ID = 1L;
-
         /** Basis-URL. Wird fuer absolute Produkt-URLs benoetigt. */
         public static final String BASE_URL = "https://www.bike-components.de";
 
@@ -72,9 +69,6 @@ public final class ScrapingConstants {
 
         /** Anzeigename des Shops. */
         public static final String SHOP_NAME = "bike-discount.de";
-
-        /** Interne Shop-ID. */
-        public static final Long SHOP_ID = 2L;
 
         /** Basis-URL. Wird fuer absolute Produkt-URLs benoetigt. */
         public static final String BASE_URL = "https://www.bike-discount.de";

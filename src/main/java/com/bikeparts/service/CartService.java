@@ -4,9 +4,6 @@ import com.bikeparts.entity.Account;
 import com.bikeparts.entity.Bikepart;
 import com.bikeparts.entity.Cart;
 import com.bikeparts.entity.CartItem;
-import com.bikeparts.enums.BikepartType;
-import com.bikeparts.llama.client.LlamaCompletionRequest;
-import com.bikeparts.llama.client.LlamaHttpClientMain;
 import com.bikeparts.llama.service.LlamaHttpClientService;
 import com.bikeparts.price.ScrapingConstants;
 import com.bikeparts.price.entity.ProductOffer;
@@ -21,14 +18,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.context.annotation.SessionScope;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
@@ -137,7 +131,7 @@ private String getSearchQuery(Bikepart bikepart) {
         //my Caffeine nichts. Es sollen die Daten in der DB als cache-Ersatz gespeichert werden.
         List<ProductOffer> cached = productOfferRepository.findBySearchQueryAndFetchedAtAfter(
                 searchQuery,
-                LocalDateTime.now().minusDays(ScrapingConstants.CACHE_DAYS));
+                LocalDateTime.now().minusDays(ScrapingConstants.Common.CACHE_DAYS));
         if (!cached.isEmpty()) {
             log.debug("*** take productOffers from DB-cache! query = {}", searchQuery);
             return ScrapingResult.success(cached);
@@ -149,7 +143,7 @@ private String getSearchQuery(Bikepart bikepart) {
         if (scrapingResult.status() == ScrapingResult.ScrapingStatus.SUCCESS) {
             productOfferRepository.saveAllAndFlush(scrapingResult.offers());
             List<ProductOffer> oldData = productOfferRepository.findBySearchQueryAndFetchedAtBefore(
-                    searchQuery, LocalDateTime.now().minusDays(ScrapingConstants.CACHE_DAYS));
+                    searchQuery, LocalDateTime.now().minusDays(ScrapingConstants.Common.CACHE_DAYS));
             if (!oldData.isEmpty()) {
                 productOfferRepository.deleteAll(oldData);
                 log.debug("*** deleted {} outdated productOffers from DB-cache for query = {}", oldData.size(), searchQuery);
@@ -159,7 +153,7 @@ private String getSearchQuery(Bikepart bikepart) {
 
         // Fehler oder keine Treffer: auf veraltete DB-Daten zurückfallen
         List<ProductOffer> oldData = productOfferRepository.findBySearchQueryAndFetchedAtBefore(
-                searchQuery, LocalDateTime.now().minusDays(ScrapingConstants.CACHE_DAYS));
+                searchQuery, LocalDateTime.now().minusDays(ScrapingConstants.Common.CACHE_DAYS));
         if (!oldData.isEmpty()) {
             log.warn("Scraping bike-components.de: verwende veraltete DB-Daten für query = {}", searchQuery);
             return ScrapingResult.success(oldData);

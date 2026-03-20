@@ -166,16 +166,6 @@ class BikeComponentsShippingCostScraperServiceTest {
         }
 
         /**
-         * Verifiziert, dass {@code id} auf {@code 1L} gesetzt wird (interne Shop-ID
-         * für bike-components.de).
-         */
-        @Test
-        @DisplayName("sets shopId=1")
-        void setsShopId() {
-            assertEquals(1L, service.parseDocument(realDoc).getId());
-        }
-
-        /**
          * Verifiziert, dass {@code shippingCostUrl} auf die korrekte Versandkostenseite
          * von bike-components.de gesetzt wird.
          */

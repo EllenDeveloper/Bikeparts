@@ -42,7 +42,9 @@ import java.util.regex.Pattern;
  *               Modell (z. B. "SLX CN-M7100 12-fach Kette")
  *       span.product-price                         (ownText = "24,99 €")
  *         span.list-price > span.list-price-price  (UVP, optional)
- *       form.buy-widget[data-add-to-cart="true"]   (vorhanden = auf Lager)
+ *       div.product-action
+ *         form.buy-widget[data-add-to-cart="true"]   (direkt kaufbar = auf Lager)
+ *         ODER a.product-button-detail               (Varianten-Produkt = ebenfalls auf Lager)
  * </pre>
  *
  * <h2>Preisparser</h2>
@@ -77,7 +79,7 @@ public class BikeDiscountScraperService {
     public static void main(String[] args) {
         BikeDiscountScraperService service = new BikeDiscountScraperService();
         ScrapingResult result = service.search("shimano slx kette 10-fach");
-        result.getOffers().forEach(System.out::println);
+        result.offers().forEach(System.out::println);
     }
 
     /**
@@ -190,8 +192,8 @@ public class BikeDiscountScraperService {
      *   <li>{@code productUrl}  <- {@code div.product-title a[href]} (absolute URL)</li>
      *   <li>{@code price}       <- {@code span.product-price} (.ownText(), z. B. {@code "89,99 €"});
      *       {@code null} bei leerem oder nicht parsebarem Preistext</li>
-     *   <li>{@code inStock}     <- {@code form.buy-widget} vorhanden (= "In den Warenkorb"
-     *       Button sichtbar)</li>
+     *   <li>{@code inStock}     <- {@code form.buy-widget} vorhanden (direkt kaufbar)
+     *       ODER {@code a.product-button-detail} vorhanden (Varianten-Produkt, ebenfalls verfügbar)</li>
      *   <li>{@code shopName}    <- {@link ScrapingConstants.BikeDiscount#SHOP_NAME}</li>
      *   <li>{@code shopId}      <- {@link ScrapingConstants.BikeDiscount#SHOP_ID}</li>
      *   <li>{@code source}      <- immer {@link FetchMethod#WEB_SCRAPING}</li>
@@ -220,7 +222,8 @@ public class BikeDiscountScraperService {
             }
         }
 
-        boolean inStock = item.selectFirst("form.buy-widget") != null;
+        boolean inStock = item.selectFirst("form.buy-widget") != null
+                || item.selectFirst("a.product-button-detail") != null;
 
         if (productName.isBlank()) {
             log.warn("Seitenstruktur geändert? Produktname leer (URL: {})", productUrl);
@@ -235,7 +238,6 @@ public class BikeDiscountScraperService {
                 .productUrl(productUrl)
                 .inStock(inStock)
                 .shopName(ScrapingConstants.BikeDiscount.SHOP_NAME)
-                .shopId(ScrapingConstants.BikeDiscount.SHOP_ID)
                 .source(FetchMethod.WEB_SCRAPING)
                 .fetchedAt(LocalDateTime.now())
                 .searchQuery(searchQuery)

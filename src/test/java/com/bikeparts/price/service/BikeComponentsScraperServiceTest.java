@@ -3,13 +3,10 @@ package com.bikeparts.price.service;
 import com.bikeparts.price.ScrapingConstants;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.bikeparts.price.entity.ProductOffer;
-import com.bikeparts.price.service.ScrapingResult;
-import org.hibernate.internal.util.collections.ArrayHelper;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.platform.commons.util.StringUtils;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.File;
@@ -38,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * <h2>Testdaten</h2>
  * <ul>
- *   <li>{@code response_bike_components_Shimano_Kette_SLX.xml} – echte HTTP-Antwort
+ *   <li>{@code response_Shimano_Kette_SLX.xml} – echte HTTP-Antwort
  *       der Suchseite für „shimano fahrradkette slx"; enthält 66 Treffer,
  *       24 Produkte auf Seite 1</li>
  *   <li>{@code emptyDoc} – minimales HTML ohne {@code ProductCatalog}-Element,
@@ -74,7 +71,7 @@ class BikeComponentsScraperServiceTest {
     /**
      * Lädt alle für die Tests benötigten Dokumente einmalig vor dem ersten Test.
      *
-     * <p>Die Testressource {@code response_bike_components_Shimano_Kette_SLX.xml}
+     * <p>Die Testressource {@code response_Shimano_Kette_SLX.xml}
      * wird über den Classpath-Mechanismus von JUnit geladen, sodass der Pfad
      * unabhängig vom Working Directory des Build-Tools ist.</p>
      *
@@ -84,7 +81,7 @@ class BikeComponentsScraperServiceTest {
     @BeforeAll
     static void loadDocuments() throws Exception {
         URL resource = BikeComponentsScraperServiceTest.class.getClassLoader()
-                .getResource("response_bike_components_Shimano_Kette_SLX.xml");
+                .getResource("bikeComponents/response_Shimano_Kette_SLX.xml");
         realDoc  = Jsoup.parse(new File(resource.toURI()), "UTF-8");
         emptyDoc = Jsoup.parse("<html><body><p>Keine Ergebnisse</p></body></html>");
     }
@@ -124,7 +121,7 @@ class BikeComponentsScraperServiceTest {
                 result.get(i).setId(id--);
                 System.out.println(result.get(i).toStringForLlama());
             }
-            assertEquals(ScrapingConstants.MAX_NUMBER_PRODUCT_OFFERS, result.size());
+            assertEquals(ScrapingConstants.Common.MAX_NUMBER_PRODUCT_OFFERS, result.size());
         }
 
         /**
@@ -185,7 +182,6 @@ class BikeComponentsScraperServiceTest {
         void setsShopMetadata() {
             service.parseDocument(realDoc, TEST_QUERY).offers().forEach(dto -> {
                 assertEquals("bike-components.de", dto.getShopName());
-                assertEquals(1L, dto.getShopId());
             });
         }
 
