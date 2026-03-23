@@ -59,7 +59,7 @@ public class LlamaServerConfig {
         if (autoStart) {
             initLlamaServerManager();
         } else {
-            log.debug("llama-server Auto-Start deaktiviert (llama.server.lifecycle.auto-start=false).");
+            log.warn("llama-server Auto-Start deaktiviert (llama.server.lifecycle.auto-start=false).");
         }
     }
 

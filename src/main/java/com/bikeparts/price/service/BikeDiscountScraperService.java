@@ -106,7 +106,7 @@ public class BikeDiscountScraperService implements ScraperShopInterface {
     public ScrapingResult search(String searchQuery) {
         String url = ScrapingConstants.BikeDiscount.SEARCH_URL
                 + URLEncoder.encode(searchQuery, StandardCharsets.UTF_8);
-        log.debug("Scraping bike-discount.de: {}", url);
+        log.info("Scraping bike-discount.de: {}", url);
 
         try {
             Document doc = Jsoup.connect(url)
@@ -167,7 +167,13 @@ public class BikeDiscountScraperService implements ScraperShopInterface {
             if (result.size() >= ScrapingConstants.Common.MAX_NUMBER_PRODUCT_OFFERS) break;
 
             String productName = item.select("div.product-title a").text();
-            if (ScrapingUtils.containsAllTerms(searchQuery, productName)) {
+
+//            if (ScrapingUtils.containsShimanoType(searchQuery, productName)) {
+//                result.add(mapToDto(item, searchQuery));
+//                break;
+//            }
+
+            if (ScrapingUtils.checkTerms(searchQuery, productName)) {
                 result.add(mapToDto(item, searchQuery));
             } else {
                 log.debug("Produkt herausgefiltert (nicht alle Suchbegriffe enthalten): {}",

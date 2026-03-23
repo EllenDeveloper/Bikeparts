@@ -163,8 +163,12 @@ public class BikeComponentsScraperService implements ScraperShopInterface {
 
                 String productName = product.path("data").path("productName").asText();
 
+//                if (ScrapingUtils.containsShimanoType(searchQuery, productName)) {
+//                    result.add(mapToDto(product.path("data"), searchQuery));
+//                    break;
+//                }
                 // Nur Produkte uebernehmen, deren Name alle Suchbegriffe enthaelt
-                if (ScrapingUtils.containsAllTerms(searchQuery, productName)) {
+                if (ScrapingUtils.checkTerms(searchQuery, productName)) {
                     result.add(mapToDto(product.path("data"), searchQuery));
                 } else {
                     log.debug("Produkt herausgefiltert (nicht alle Suchbegriffe enthalten): {}", productName);

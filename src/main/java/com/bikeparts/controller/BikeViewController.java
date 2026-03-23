@@ -91,7 +91,7 @@ public class BikeViewController {
         return "bikeparts-list";
     }
 
-    @GetMapping("/cart/")
+    @GetMapping("/cart")
     public String showCart(
             Model model) {
         Cart cart = account.getCart();

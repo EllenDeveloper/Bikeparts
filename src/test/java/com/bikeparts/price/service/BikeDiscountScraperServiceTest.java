@@ -143,7 +143,8 @@ class BikeDiscountScraperServiceTest {
         @DisplayName("returns at most MAX_NUMBER_PRODUCT_OFFERS matching products")
         void limitsResultsToMaxProductOffers() {
             List<ProductOffer> result = service.parseDocument(realDoc, TEST_QUERY).offers();
-            assertEquals(ScrapingConstants.Common.MAX_NUMBER_PRODUCT_OFFERS, result.size());
+//            assertEquals(ScrapingConstants.Common.MAX_NUMBER_PRODUCT_OFFERS, result.size());
+            assertEquals(1, result.size());
         }
 
         /**

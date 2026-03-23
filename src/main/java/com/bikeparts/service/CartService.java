@@ -7,7 +7,9 @@ import com.bikeparts.entity.CartItem;
 import com.bikeparts.llama.service.LlamaHttpClientService;
 import com.bikeparts.price.ScrapingConstants;
 import com.bikeparts.price.entity.ProductOffer;
+import com.bikeparts.price.entity.ShopInfo;
 import com.bikeparts.price.repository.ProductOfferRepository;
+import com.bikeparts.price.repository.ShopInfoRepository;
 import com.bikeparts.price.service.BikeComponentsScraperService;
 import com.bikeparts.price.service.BikeDiscountScraperService;
 import com.bikeparts.price.service.ScraperShopInterface;
@@ -29,12 +31,14 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
 public class CartService {
     private final BikeDiscountScraperService bikeDiscountScraperService;
     private final AccountRepository accountRepository;
+    private final ShopInfoRepository shopInfoRepository;
     /**
      * Logger fuer diese Klasse.
      */
@@ -53,7 +57,7 @@ public class CartService {
                        BikepartRepository bikepartRepository, Account account,
                        BikeComponentsScraperService bikeComponentsScraperService,
                        ProductOfferRepository productOfferRepository,
-                       LlamaHttpClientService llamaHttpClientService, BikeDiscountScraperService bikeDiscountScraperService, AccountRepository accountRepository) {
+                       LlamaHttpClientService llamaHttpClientService, BikeDiscountScraperService bikeDiscountScraperService, AccountRepository accountRepository, ShopInfoRepository shopInfoRepository) {
         this.cartRepository = cartRepository;
         this.cartItemRepository = cartItemRepository;
         this.bikepartRepository = bikepartRepository;
@@ -63,6 +67,7 @@ public class CartService {
         this.llamaHttpClientService = llamaHttpClientService;
         this.bikeDiscountScraperService = bikeDiscountScraperService;
         this.accountRepository = accountRepository;
+        this.shopInfoRepository = shopInfoRepository;
     }
 
     // --- Cart methods
@@ -158,7 +163,8 @@ public class CartService {
         String searchQuery = getSearchQuery(bikepart);
         List<ScrapingResult> results = new ArrayList<ScrapingResult>();
 
-        String[] shopNames = {"bike-components", "bike-discount"};
+        //my extra für suche mit shopName. In produktiv muss das die shopId sein!
+        String[] shopNames = {ScrapingConstants.BikeComponents.SHOP_NAME, ScrapingConstants.BikeDiscount.SHOP_NAME};
         ScraperShopInterface[] scraperShopInterfaces = {bikeComponentsScraperService, bikeDiscountScraperService};
         for (int i = 0; i < shopNames.length; i++) {
 
@@ -177,14 +183,18 @@ public class CartService {
                 searchQuery, shopName,
                 LocalDateTime.now().minusDays(ScrapingConstants.Common.CACHE_DAYS));
         if (!cached.isEmpty()) {
-            log.debug("*** take productOffers from DB-cache! query = {}", searchQuery);
+            log.debug("*** take productOffers from DB-cache! {} query = {}", shopName, searchQuery);
             return ScrapingResult.success(cached, shopName);
         }
-        log.info("*** take productOffers from Website! query = {}", searchQuery);
+        log.info("*** take productOffers from Website! {} query = {}", shopName, searchQuery);
 
         ScrapingResult scrapingResult = scraperShopInterface.search(searchQuery);
 
         if (scrapingResult.status() == ScrapingResult.ScrapingStatus.SUCCESS) {
+            ShopInfo shopInfo = shopInfoRepository.findByShopName(shopName).orElseThrow(() -> new IllegalArgumentException(
+                    "Shop nicht gefunden: " + shopName));
+            // set shopId to the offers
+            scrapingResult.offers().forEach(o -> o.setShopId(shopInfo.getId()));
             productOfferRepository.saveAllAndFlush(scrapingResult.offers());
             List<ProductOffer> oldData = productOfferRepository.findBySearchQueryAndFetchedAtBefore(
                     searchQuery, LocalDateTime.now().minusDays(ScrapingConstants.Common.CACHE_DAYS));

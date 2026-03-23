@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 import java.util.List;
 
@@ -47,7 +48,12 @@ class BikeViewControllerTest {
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(bikeViewController).build();
+        InternalResourceViewResolver viewResolver = new InternalResourceViewResolver();
+        viewResolver.setPrefix("/templates/");
+        viewResolver.setSuffix(".html");
+        mockMvc = MockMvcBuilders.standaloneSetup(bikeViewController)
+                .setViewResolvers(viewResolver)
+                .build();
     }
 
 
@@ -246,7 +252,7 @@ class BikeViewControllerTest {
             Cart cart = new Cart();
             when(account.getCart()).thenReturn(cart);
 
-            mockMvc.perform(get("/cart/"))
+            mockMvc.perform(get("/cart"))
                     .andExpect(status().isOk())
                     .andExpect(view().name("cart"))
                     .andExpect(model().attribute("cart", cart));

@@ -76,3 +76,7 @@ http://localhost:8080/bikeparts/2/addBikepartToCart
 
   curl -X POST http://localhost:8080/api/accounts/cart/bikeparts/2/rateSearchResultsWithKI \
     -H "Content-Type: application/json"
+
+Daten aus der DB exportieren
+  SCRIPT TABLE shop_info;
+  SCRIPT TABLE product_offer;

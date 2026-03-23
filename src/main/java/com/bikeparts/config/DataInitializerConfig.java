@@ -41,13 +41,14 @@ public class DataInitializerConfig {
         initShippingCostsBikeDiscount();
     }
 
+    // TODO: duplizierter code. Interface für bikeComponentsShippingCostScraperService.getStandardShippingCostForGermany() einführen
     public void initShippingCostsBikeComponents() {
         LocalDateTime cacheThreshold = LocalDateTime.now().minusDays(ScrapingConstants.Common.CACHE_DAYS);
         boolean cacheValid = shopInfoRepository.existsByShopNameAndFetchedAtAfter(
                 ScrapingConstants.BikeComponents.SHOP_NAME, cacheThreshold);
 
         if (cacheValid) {
-            log.debug("Versandkosten fuer '{}' sind aktuell - kein Scraping noetig.",
+            log.info("Versandkosten fuer '{}' sind aktuell - kein Scraping noetig.",
                     ScrapingConstants.BikeComponents.SHOP_NAME);
             return;
         }
@@ -70,7 +71,7 @@ public class DataInitializerConfig {
                 ScrapingConstants.BikeDiscount.SHOP_NAME, cacheThreshold);
 
         if (cacheValid) {
-            log.debug("Versandkosten fuer '{}' sind aktuell - kein Scraping noetig.",
+            log.info("Versandkosten fuer '{}' sind aktuell - kein Scraping noetig.",
                     ScrapingConstants.BikeDiscount.SHOP_NAME);
             return;
         }

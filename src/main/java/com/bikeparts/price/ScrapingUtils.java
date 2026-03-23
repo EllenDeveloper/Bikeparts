@@ -1,13 +1,20 @@
 package com.bikeparts.price;
 
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class ScrapingUtils {
 
+    public static boolean checkTerms(String searchQuery, String productName) {
+        return containsAllTerms(searchQuery, productName)
+                || containsShimanoAbbreviation(searchQuery, productName)
+                || containsSomeTerms(searchQuery, productName);
+    }
+
     /**
-     * Prueft ob alle Suchbegriffe der {@code searchQuery} als exakte Token
+     * Prueft, ob alle Suchbegriffe der {@code searchQuery} als exakte Token
      * im {@code productName} enthalten sind.
      *
      * <p>Beide Strings werden in Kleinbuchstaben umgewandelt und an den Zeichen
@@ -43,5 +50,40 @@ public class ScrapingUtils {
         // allMatch bricht beim ersten fehlenden Begriff sofort ab (Short-Circuit)
         return Arrays.stream(searchQuery.toLowerCase().split("\\s+"))
                 .allMatch(productTokens::contains);
+    }
+
+    public static boolean containsShimanoAbbreviation(String searchQuery, String productName) {
+        // Produktnamen in Token-Set zerlegen (Trennzeichen: Leerzeichen, /, +, ,)
+        Set<String> productTokens = Arrays.stream(
+                        productName.toLowerCase().split("[\\s/+,]+"))
+                .collect(Collectors.toSet());
+
+        // die CS- bezeichnung von shimano herausfiltern: CS-M771-10
+        Set<String> searchQuerySet = Arrays.stream(
+                        productName.toLowerCase().split("[\\s/+,]+"))
+                .collect(Collectors.toSet());
+
+        //  TODO: Shomano Abkürzungen in application.properties
+        Optional<String> shimanoAbbreviations = searchQuerySet.stream()
+                .filter(p -> p.contains("cs-")).filter(p -> p.contains("cn-"))
+                .filter(p -> p.contains("st-")).filter(p -> p.contains("sl-"))
+                .findFirst();
+
+        if (shimanoAbbreviations.isPresent()) {
+             return productTokens.contains(shimanoAbbreviations.get());
+        }
+        return false;
+    }
+
+    public static boolean containsSomeTerms(String searchQuery, String productName) {
+        // Produktnamen in Token-Set zerlegen (Trennzeichen: Leerzeichen, /, +, ,)
+        Set<String> productTokens = Arrays.stream(
+                        productName.toLowerCase().split("[\\s/+,]+"))
+                .collect(Collectors.toSet());
+
+        // true wenn ein Suchbegriff als exaktes Token im Produktnamen vorkommt
+        // TODO: Suche verbessern
+        return Arrays.stream(searchQuery.toLowerCase().split("\\s+"))
+                .anyMatch(productTokens::contains);
     }
 }
