@@ -143,8 +143,7 @@ class BikeDiscountScraperServiceTest {
         @DisplayName("returns at most MAX_NUMBER_PRODUCT_OFFERS matching products")
         void limitsResultsToMaxProductOffers() {
             List<ProductOffer> result = service.parseDocument(realDoc, TEST_QUERY).offers();
-//            assertEquals(ScrapingConstants.Common.MAX_NUMBER_PRODUCT_OFFERS, result.size());
-            assertEquals(1, result.size());
+            assertEquals(ScrapingConstants.Common.MAX_NUMBER_PRODUCT_OFFERS, result.size());
         }
 
         /**
@@ -156,7 +155,7 @@ class BikeDiscountScraperServiceTest {
         @Test
         @DisplayName("first product name contains all search terms (shimano, slx)")
         void firstProduct_nameContainsAllSearchTerms() {
-            String name = service.parseDocument(realDoc, TEST_QUERY).offers().get(0)
+            String name = service.parseDocument(realDoc, TEST_QUERY).offers().getFirst()
                     .getProductName().toLowerCase();
             assertTrue(name.contains("shimano"));
             assertTrue(name.contains("slx"));
@@ -169,7 +168,7 @@ class BikeDiscountScraperServiceTest {
         @Test
         @DisplayName("first product has non-null positive price")
         void firstProduct_hasPositivePrice() {
-            ProductOffer first = service.parseDocument(realDoc, TEST_QUERY).offers().get(0);
+            ProductOffer first = service.parseDocument(realDoc, TEST_QUERY).offers().getFirst();
             assertNotNull(first.getPrice());
             assertTrue(first.getPrice().doubleValue() > 0);
         }
@@ -181,7 +180,7 @@ class BikeDiscountScraperServiceTest {
         @Test
         @DisplayName("first product is inStock=true (has buy-widget)")
         void firstProduct_isInStock() {
-            assertTrue(service.parseDocument(realDoc, TEST_QUERY).offers().get(0).isInStock());
+            assertTrue(service.parseDocument(realDoc, TEST_QUERY).offers().getFirst().isInStock());
         }
 
         /**

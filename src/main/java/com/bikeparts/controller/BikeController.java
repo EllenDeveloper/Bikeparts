@@ -3,7 +3,6 @@
 package com.bikeparts.controller;
 
 import com.bikeparts.entity.*;
-import com.bikeparts.price.entity.ProductOffer;
 import com.bikeparts.price.service.ScrapingResult;
 import com.bikeparts.service.AccountService;
 import com.bikeparts.service.BikeService;
@@ -17,8 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import static com.bikeparts.price.service.ScrapingResult.ScrapingStatus.ERROR;
 
 @Slf4j
 @RestController
@@ -80,7 +77,6 @@ public class BikeController {
     // PUT /api/accounts/{id} - Account aktualisieren
     @PutMapping("/{id}")
     public ResponseEntity<Account> updateAccount(
-            @PathVariable Long id,
             @Valid @RequestBody Account accountDetails
     ) {
         try {

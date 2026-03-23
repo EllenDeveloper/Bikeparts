@@ -15,7 +15,7 @@ import java.util.List;
  * @param offers       gefundene Angebote; leer bei {@code NO_RESULTS} und {@code ERROR}
  * @param status       Ergebnis-Status der Scraping-Anfrage
  * @param errorMessage technische Fehlermeldung bei {@code ERROR}, sonst {@code null}
- * @param shopName     Name des Shops; wird in {@code CartService} via {@link #withShopName(String)} gesetzt
+ * @param shopName     Name des Shops; wird in {@code CartService}
  */
 public record ScrapingResult(List<ProductOffer> offers, ScrapingStatus status,
                              String errorMessage, String shopName) {

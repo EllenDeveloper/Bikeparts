@@ -1,5 +1,5 @@
 package com.bikeparts.price.service;
 
 public interface ScraperShopInterface {
-    public ScrapingResult search(String searchQuery);
+    ScrapingResult search(String searchQuery);
 }

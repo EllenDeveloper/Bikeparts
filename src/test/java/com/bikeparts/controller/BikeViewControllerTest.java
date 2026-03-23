@@ -2,7 +2,6 @@ package com.bikeparts.controller;
 
 import com.bikeparts.entity.*;
 import com.bikeparts.price.service.ScrapingResult;
-import com.bikeparts.service.AccountService;
 import com.bikeparts.service.BikeService;
 import com.bikeparts.service.CartService;
 import jakarta.persistence.EntityNotFoundException;
@@ -34,9 +33,6 @@ class BikeViewControllerTest {
 
     @Mock
     private CartService cartService;
-
-    @Mock
-    private AccountService accountService;
 
     @Mock
     private Account account;
@@ -293,8 +289,6 @@ class BikeViewControllerTest {
         @Test
         @DisplayName("CartItem not found -> throws EntityNotFoundException")
         void search_cartItemNotFound_throwsException() {
-            Cart cart = new Cart();
-
             when(cartService.getCartItem(99L))
                     .thenThrow(new EntityNotFoundException("CartItem nicht gefunden: 99"));
 

@@ -117,9 +117,9 @@ class BikeComponentsScraperServiceTest {
         void returns8Products_limitedByMaxNumberProductOffers() {
             List<ProductOffer> result = service.parseDocument(realDoc, TEST_QUERY).offers();
             Long id = 10L;
-            for (int i = 0; i < result.size(); i++) {
-                result.get(i).setId(id--);
-                System.out.println(result.get(i).toStringForLlama());
+            for (ProductOffer productOffer : result) {
+                productOffer.setId(id--);
+                System.out.println(productOffer.toStringForLlama());
             }
             assertEquals(ScrapingConstants.Common.MAX_NUMBER_PRODUCT_OFFERS, result.size());
         }
@@ -132,7 +132,7 @@ class BikeComponentsScraperServiceTest {
         @Test
         @DisplayName("maps the first product's name from JSON correctly")
         void mapsFirstProduct_name() {
-            ProductOffer first = service.parseDocument(realDoc, TEST_QUERY).offers().get(0);
+            ProductOffer first = service.parseDocument(realDoc, TEST_QUERY).offers().getFirst();
             assertTrue(first.getProductName().toLowerCase().contains("shimano xt"));
         }
 
@@ -144,7 +144,7 @@ class BikeComponentsScraperServiceTest {
         @Test
         @DisplayName("maps the first product's price as non-null positive BigDecimal")
         void mapsFirstProduct_price() {
-            ProductOffer first = service.parseDocument(realDoc, TEST_QUERY).offers().get(0);
+            ProductOffer first = service.parseDocument(realDoc, TEST_QUERY).offers().getFirst();
             assertNotNull(first.getPrice());
             assertTrue(first.getPrice().doubleValue() > 0);
         }
@@ -156,7 +156,7 @@ class BikeComponentsScraperServiceTest {
         @Test
         @DisplayName("sets inStock=true for the first product (isBuyable=true, isSoldOut=false)")
         void mapsFirstProduct_inStock() {
-            assertTrue(service.parseDocument(realDoc, TEST_QUERY).offers().get(0).isInStock());
+            assertTrue(service.parseDocument(realDoc, TEST_QUERY).offers().getFirst().isInStock());
         }
 
         /**

@@ -2,13 +2,11 @@ package com.bikeparts.controller;
 
 import com.bikeparts.entity.*;
 import com.bikeparts.price.service.ScrapingResult;
-import com.bikeparts.service.AccountService;
 import com.bikeparts.service.BikeService;
 import com.bikeparts.service.CartService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,25 +15,20 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
-import java.util.Map;
 
 @Controller
 public class BikeViewController {
     private final BikeService bikeService;
     private final CartService cartService;
-    private final AccountService accountService;
-    private final BikeController bikeController;
     private final Account account;
-    private Logger log = LoggerFactory.getLogger(BikeViewController.class);
+    private final Logger log = LoggerFactory.getLogger(BikeViewController.class);
 
     @Autowired
-    public BikeViewController(BikeService bikeService, CartService cartService, AccountService accountService,
-                              Account account, BikeController bikeController) {
+    public BikeViewController(BikeService bikeService, CartService cartService,
+                              Account account) {
         this.bikeService = bikeService;
         this.cartService = cartService;
-        this.accountService = accountService;
         this.account = account;
-        this.bikeController = bikeController;
     }
 
     @GetMapping("/bikes")
@@ -107,6 +100,7 @@ public class BikeViewController {
     public String searchPrice(
             @PathVariable Long id,
             Model model) {
+        log.debug("searchPrice");
 
         CartItem cartItem = cartService.getCartItem(id);
         List<ScrapingResult> scrapingResults = cartService.searchPrice(cartItem.getBikepart());

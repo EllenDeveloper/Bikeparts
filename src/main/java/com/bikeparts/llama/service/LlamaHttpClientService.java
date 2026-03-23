@@ -72,7 +72,7 @@ public class LlamaHttpClientService {
      * @throws IOException          bei Netzwerkfehlern oder HTTP-Fehlerstatuscodes
      * @throws InterruptedException wenn der HTTP-Aufruf oder der Server-Start unterbrochen wird
      */
-    public String accessTry(String productOffers) throws IOException, InterruptedException {
+    public String rateSearchResult(String productOffers) throws IOException, InterruptedException {
 
         llamaServerManager.startIfNotRunning();
 

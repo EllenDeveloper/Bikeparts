@@ -20,7 +20,6 @@ import com.bikeparts.repository.CartItemRepository;
 import com.bikeparts.repository.CartRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.NonNull;
-import org.hibernate.internal.util.collections.ArrayHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +30,6 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
@@ -71,17 +69,6 @@ public class CartService {
     }
 
     // --- Cart methods
-
-    public Cart getCart(Cart cart) {
-//        Optional<Cart> cartById = cartRepository.findById(cart.getId());
-//        if (cartById == null) {
-//            return createCart(cart);
-//        }
-//        else {
-//            return cartById.orElse();
-//        }
-        return null;
-    }
 
     public Cart createCart(Cart cart) {
         return cartRepository.save(cart);
@@ -161,7 +148,7 @@ public class CartService {
         // TODO: Daten richtig importieren
         //
         String searchQuery = getSearchQuery(bikepart);
-        List<ScrapingResult> results = new ArrayList<ScrapingResult>();
+        List<ScrapingResult> results = new ArrayList<>();
 
         //my extra für suche mit shopName. In produktiv muss das die shopId sein!
         String[] shopNames = {ScrapingConstants.BikeComponents.SHOP_NAME, ScrapingConstants.BikeDiscount.SHOP_NAME};
@@ -237,21 +224,19 @@ public class CartService {
     public String rateSearchResultsWithKI(Long bikepartId) {
         if (bikepartId != null) {
             Bikepart bikepart = bikepartRepository.findBikepartById(bikepartId);
-            String searchQuery1 = getSearchQuery(bikepart);
-            String searchQuery = "Shimano XT Kette 10-fach";
+//            String searchQuery1 = getSearchQuery(bikepart);
+            String searchQuery = getSearchQuery(bikepart);
             List<ProductOffer> bySearchQuery = productOfferRepository.findBySearchQuery(searchQuery);
             String stringForLlama = bySearchQuery.stream()
-                    .map(p -> p.toStringForLlama())
+                    .map(ProductOffer::toStringForLlama)
                     .collect(Collectors.joining("\n"));
             try {
                 if (!stringForLlama.isEmpty()) {
-                    String result = llamaHttpClientService.accessTry(stringForLlama);
-                    System.out.println("**** " + result);
+                    String result = llamaHttpClientService.rateSearchResult(stringForLlama);
+                    log.debug("**** " + result);
                     return result;
                 }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            } catch (InterruptedException e) {
+            } catch (IOException | InterruptedException e) {
                 throw new RuntimeException(e);
             }
 

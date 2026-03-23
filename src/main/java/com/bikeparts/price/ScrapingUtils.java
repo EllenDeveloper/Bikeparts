@@ -60,19 +60,16 @@ public class ScrapingUtils {
 
         // die CS- bezeichnung von shimano herausfiltern: CS-M771-10
         Set<String> searchQuerySet = Arrays.stream(
-                        productName.toLowerCase().split("[\\s/+,]+"))
+                        searchQuery.toLowerCase().split("[\\s/+,]+"))
                 .collect(Collectors.toSet());
 
-        //  TODO: Shomano Abkürzungen in application.properties
+        //  TODO: Shimano Abkürzungen in application.properties
         Optional<String> shimanoAbbreviations = searchQuerySet.stream()
                 .filter(p -> p.contains("cs-")).filter(p -> p.contains("cn-"))
                 .filter(p -> p.contains("st-")).filter(p -> p.contains("sl-"))
                 .findFirst();
 
-        if (shimanoAbbreviations.isPresent()) {
-             return productTokens.contains(shimanoAbbreviations.get());
-        }
-        return false;
+        return shimanoAbbreviations.filter(productTokens::contains).isPresent();
     }
 
     public static boolean containsSomeTerms(String searchQuery, String productName) {

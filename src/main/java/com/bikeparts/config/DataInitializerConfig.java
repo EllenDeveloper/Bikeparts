@@ -1,6 +1,5 @@
 package com.bikeparts.config;
 
-import com.bikeparts.llama.server.LlamaServerManager;
 import com.bikeparts.price.ScrapingConstants;
 import com.bikeparts.price.entity.ShopInfo;
 import com.bikeparts.price.repository.ShopInfoRepository;
@@ -12,7 +11,6 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.context.annotation.Configuration;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 
 /**
