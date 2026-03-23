@@ -69,14 +69,10 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
                                 // Öffentliche URLs
-//                                .requestMatchers("/", "/login").permitAll()
-                        // TODO API ist freigeschaltet. Das entfernen!
-                                .requestMatchers("/", "/login", "/api/**").permitAll()
                                 .requestMatchers("/h2-console/**").permitAll() // H2-Console erlauben
                                 // Admin-Only URLs
-                                .requestMatchers("/admin/**").hasRole("ADMIN")
+//                                .requestMatchers("/admin/**").hasRole("ADMIN")
                                 // Authority-basiert
-//                        .requestMatchers("/api/accounts/delete/**").hasAuthority("DELETE_PRIVILEGES")
                                 // Alle anderen brauchen nur Login
                                 .anyRequest().authenticated()
                 )

@@ -248,7 +248,7 @@ class BikeViewControllerTest {
 
             mockMvc.perform(get("/cart/"))
                     .andExpect(status().isOk())
-                    .andExpect(view().name("cart-cartItems-list"))
+                    .andExpect(view().name("cart"))
                     .andExpect(model().attribute("cart", cart));
         }
     }
@@ -259,40 +259,41 @@ class BikeViewControllerTest {
     // =========================================================
 
     @Nested
-    @DisplayName("searchPriceBikeComponents() - GET /cart/cartItem/{id}/searchPriceBikeComponents")
-    class SearchPriceBikeComponents {
+    @DisplayName("searchPriceBikeComponents() - GET /cart/cartItem/{id}/searchPrice")
+    class SearchPrice {
 
         @Test
         @DisplayName("SUCCESS -> price-search-result view with productOffers in model")
         void search_success_returnsPriceSearchResultView() throws Exception {
-            Cart cart = new Cart();
             Bikepart bikepart = new Bikepart();
+            bikepart.setName("Shimano XT Kette");
             CartItem cartItem = new CartItem();
+            cartItem.setId(1L);
             cartItem.setBikepart(bikepart);
-            when(account.getCart()).thenReturn(cart);
-            when(cartService.getCartItem(cart, 1L)).thenReturn(cartItem);
-            when(cartService.searchPriceBikeComponents(bikepart))
-                    .thenReturn(ScrapingResult.success(List.of()));
+            String shopName = "bike-X";
+            when(cartService.getCartItem(1L)).thenReturn(cartItem);
+            when(cartService.searchPrice(bikepart))
+                    .thenReturn(List.of(ScrapingResult.success(List.of(), shopName)));
 
-            mockMvc.perform(get("/cart/cartItem/1/searchPriceBikeComponents"))
+            mockMvc.perform(get("/cart/cartItem/1/searchPrice"))
                     .andExpect(status().isOk())
                     .andExpect(view().name("price-search-result"))
-                    .andExpect(model().attributeExists("productOffers"))
-                    .andExpect(model().attributeExists("scrapingStatus"));
-
-            verify(cartService).searchPriceBikeComponents(bikepart);
+                    .andExpect(model().attributeExists("cartItem"))
+                    .andExpect(model().attributeExists("bikepartName"))
+                    .andExpect(model().attributeExists("scrapingResults"));
+            verify(cartService).searchPrice(bikepart);
         }
 
         @Test
         @DisplayName("CartItem not found -> throws EntityNotFoundException")
         void search_cartItemNotFound_throwsException() {
             Cart cart = new Cart();
-            when(account.getCart()).thenReturn(cart);
-            when(cartService.getCartItem(cart, 99L))
+
+            when(cartService.getCartItem(99L))
                     .thenThrow(new EntityNotFoundException("CartItem nicht gefunden: 99"));
 
             assertThrows(Exception.class, () ->
-                    mockMvc.perform(get("/cart/cartItem/99/searchPriceBikeComponents")));
+                    mockMvc.perform(get("/cart/cartItem/99/searchPrice")));
         }
     }
 }

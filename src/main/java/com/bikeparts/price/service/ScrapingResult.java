@@ -15,8 +15,10 @@ import java.util.List;
  * @param offers       gefundene Angebote; leer bei {@code NO_RESULTS} und {@code ERROR}
  * @param status       Ergebnis-Status der Scraping-Anfrage
  * @param errorMessage technische Fehlermeldung bei {@code ERROR}, sonst {@code null}
+ * @param shopName     Name des Shops; wird in {@code CartService} via {@link #withShopName(String)} gesetzt
  */
-public record ScrapingResult(List<ProductOffer> offers, ScrapingStatus status, String errorMessage) {
+public record ScrapingResult(List<ProductOffer> offers, ScrapingStatus status,
+                             String errorMessage, String shopName) {
 
     /** Mögliche Ergebnis-Zustände einer Scraping-Anfrage. */
     public enum ScrapingStatus {
@@ -28,15 +30,15 @@ public record ScrapingResult(List<ProductOffer> offers, ScrapingStatus status, S
         ERROR
     }
 
-    public static ScrapingResult success(List<ProductOffer> offers) {
-        return new ScrapingResult(offers, ScrapingStatus.SUCCESS, null);
+    public static ScrapingResult success(List<ProductOffer> offers, String shopName) {
+        return new ScrapingResult(offers, ScrapingStatus.SUCCESS, null, shopName);
     }
 
-    public static ScrapingResult noResults() {
-        return new ScrapingResult(List.of(), ScrapingStatus.NO_RESULTS, null);
+    public static ScrapingResult noResults(String shopName) {
+        return new ScrapingResult(List.of(), ScrapingStatus.NO_RESULTS, null, shopName);
     }
 
-    public static ScrapingResult error(String errorMessage) {
-        return new ScrapingResult(List.of(), ScrapingStatus.ERROR, errorMessage);
+    public static ScrapingResult error(String errorMessage, String shopName) {
+        return new ScrapingResult(List.of(), ScrapingStatus.ERROR, errorMessage, shopName);
     }
 }

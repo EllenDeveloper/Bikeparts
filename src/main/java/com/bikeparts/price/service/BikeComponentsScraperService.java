@@ -49,7 +49,7 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class BikeComponentsScraperService {
+public class BikeComponentsScraperService implements ScraperShopInterface {
 
     /**
      * Jackson {@link ObjectMapper} zum Deserialisieren des JSON aus dem
@@ -103,7 +103,7 @@ public class BikeComponentsScraperService {
             return parseDocument(doc, searchQuery);
         } catch (Exception e) {
             log.error("Fehler beim Scraping von bike-components.de für Query '{}': {}", searchQuery, e.getMessage());
-            return ScrapingResult.error(e.getMessage());
+            return ScrapingResult.error(e.getMessage(), ScrapingConstants.BikeComponents.SHOP_NAME);
         }
     }
 
@@ -136,23 +136,23 @@ public class BikeComponentsScraperService {
         Element catalog = doc.selectFirst("[data-component='ProductCatalog']");
         if (catalog == null) {
             log.warn("ProductCatalog-Element nicht gefunden");
-            return ScrapingResult.error("ProductCatalog-Element nicht gefunden");
+            return ScrapingResult.error("ProductCatalog-Element nicht gefunden", ScrapingConstants.BikeComponents.SHOP_NAME);
         }
         try {
             JsonNode root = objectMapper.readTree(catalog.attr("data-props"));
             JsonNode initialData = root.path("initialData");
             if (initialData.isMissingNode()) {
                 log.warn("API-Struktur geändert? Knoten 'initialData' fehlt im data-props-JSON");
-                return ScrapingResult.error("API-Struktur geändert: 'initialData' fehlt");
+                return ScrapingResult.error("API-Struktur geändert: 'initialData' fehlt", ScrapingConstants.BikeComponents.SHOP_NAME);
             }
             JsonNode products = initialData.path("products");
             if (products.isMissingNode() || !products.isArray()) {
                 log.warn("API-Struktur geändert? Knoten 'initialData.products' fehlt oder ist kein Array");
-                return ScrapingResult.error("API-Struktur geändert: 'initialData.products' fehlt oder kein Array");
+                return ScrapingResult.error("API-Struktur geändert: 'initialData.products' fehlt oder kein Array", ScrapingConstants.BikeComponents.SHOP_NAME);
             }
             if (products.isEmpty()) {
                 log.warn("bike-components.de: Keine Produkte gefunden für diese Suchanfrage");
-                return ScrapingResult.noResults();
+                return ScrapingResult.noResults(ScrapingConstants.BikeComponents.SHOP_NAME);
             }
 
             List<ProductOffer> result = new ArrayList<>();
@@ -175,11 +175,11 @@ public class BikeComponentsScraperService {
             log.debug("bike-components.de: {} Produkte gefunden (Gesamt: {}), gespeichert: {}",
                     products.size(), total, ScrapingConstants.Common.MAX_NUMBER_PRODUCT_OFFERS);
             result.forEach(offer -> log.debug("ProductOffer: {}", offer));
-            return ScrapingResult.success(result);
+            return ScrapingResult.success(result, ScrapingConstants.BikeComponents.SHOP_NAME);
 
         } catch (Exception e) {
             log.error("Fehler beim Parsen des HTML-Dokuments: {}", e.getMessage());
-            return ScrapingResult.error(e.getMessage());
+            return ScrapingResult.error(e.getMessage(), ScrapingConstants.BikeComponents.SHOP_NAME);
         }
     }
 

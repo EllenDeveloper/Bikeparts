@@ -4,6 +4,7 @@ import com.bikeparts.entity.Account;
 import com.bikeparts.entity.Bikepart;
 import com.bikeparts.entity.Cart;
 import com.bikeparts.entity.CartItem;
+import com.bikeparts.repository.AccountRepository;
 import com.bikeparts.repository.BikepartRepository;
 import com.bikeparts.repository.CartItemRepository;
 import com.bikeparts.repository.CartRepository;
@@ -35,7 +36,7 @@ class CartServiceTest {
     private BikepartRepository bikepartRepository;
 
     @Mock
-    private AccountService accountService;
+    private AccountRepository accountRepository;
 
     @Mock
     private Account account;
@@ -294,7 +295,12 @@ class CartServiceTest {
         @DisplayName("null-bikepartId -> keine Repository-Interaktion")
         void addBikepartToCart_nullId_doesNothing() {
             Cart cart = new Cart();
-            when(account.getCart()).thenReturn(cart);
+            cart.setId(1L);
+            Account dbAccount = new Account();
+            dbAccount.setCart(cart);
+
+            when(account.getId()).thenReturn(1L);
+            when(accountRepository.findById(1L)).thenReturn(Optional.of(dbAccount));
 
             cartService.addBikepartToCart(null, 1);
 
@@ -307,7 +313,12 @@ class CartServiceTest {
         @DisplayName("Repository wirft Exception -> wird weitergeleitet")
         void addBikepartToCart_repositoryThrows_propagatesException() {
             Cart cart = new Cart();
-            when(account.getCart()).thenReturn(cart);
+            cart.setId(1L);
+            Account dbAccount = new Account();
+            dbAccount.setCart(cart);
+
+            when(account.getId()).thenReturn(1L);
+            when(accountRepository.findById(1L)).thenReturn(Optional.of(dbAccount));
             when(bikepartRepository.findBikepartById(5L))
                     .thenThrow(new RuntimeException("Bikepart nicht gefunden"));
 
@@ -329,8 +340,11 @@ class CartServiceTest {
 
             Cart cart = new Cart();
             cart.setId(1L);
+            Account dbAccount = new Account();
+            dbAccount.setCart(cart);
 
-            when(account.getCart()).thenReturn(cart);
+            when(account.getId()).thenReturn(1L);
+            when(accountRepository.findById(1L)).thenReturn(Optional.of(dbAccount));
             when(bikepartRepository.findBikepartById(5L)).thenReturn(bikepart);
             when(cartItemRepository.save(any(CartItem.class))).thenReturn(savedItem);
 

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Preissuche - Ergebnisse</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+<div style="display: flex; justify-content: space-between; align-items: center;">
+    <h1>
+        <i class="fa-solid fa-magnifying-glass-dollar" style="font-size: 1.8rem; color: #5659fb;"></i>
+        Preissuche: <span th:text="${bikepartName}">Fahrradteil</span>
+    </h1>
+    <div th:replace="~{fragments/header :: header}"></div>
+</div>
+
+<a th:href="@{/cart}"><i class="fa-solid fa-arrow-left"></i> Zurück zum Warenkorb</a>
+
+<div th:each="scrapingResult : ${scrapingResults}" style="margin-top: 2rem;">
+
+    <h2>
+        <i class="fa-solid fa-shop" style="color: #5659fb;"></i>
+        <span th:text="${scrapingResult.shopName()}"></span>
+        <span th:if="${scrapingResult.status().name() == 'SUCCESS'}"
+              style="font-size: 0.85rem; color: green; font-weight: normal;">
+            - <span th:text="${scrapingResult.offers().size()}"></span> Angebote gefunden
+        </span>
+        <span th:if="${scrapingResult.status().name() == 'NO_RESULTS'}"
+              style="font-size: 0.85rem; color: orange; font-weight: normal;">
+            - Keine Angebote gefunden
+        </span>
+        <span th:if="${scrapingResult.status().name() == 'ERROR'}"
+              style="font-size: 0.85rem; color: red; font-weight: normal;">
+            - Fehler beim Abrufen
+        </span>
+    </h2>
+
+    <p th:if="${scrapingResult.status().name() == 'ERROR'}" style="color: red;">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        Shop nicht erreichbar: <span th:text="${scrapingResult.errorMessage()}"></span>
+    </p>
+
+    <p th:if="${scrapingResult.status().name() == 'NO_RESULTS'}" style="color: orange;">
+        <i class="fa-solid fa-circle-info"></i>
+        Keine passenden Angebote für diese Suchanfrage.
+    </p>
+
+    <table th:if="${scrapingResult.status().name() == 'SUCCESS'}">
+        <thead>
+            <tr>
+                <th>Produkt</th>
+                <th>Preis</th>
+                <th>Verfügbar</th>
+                <th>Abgerufen am</th>
+                <th>Link</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="offer : ${scrapingResult.offers()}">
+                <td th:text="${offer.productName}"></td>
+                <td th:text="${offer.price != null ? #numbers.formatDecimal(offer.price, 1, 2) + ' €' : '-'}"></td>
+                <td th:text="${offer.inStock ? 'verfügbar' : 'nicht verfügbar'}"></td>
+                <td th:text="${#temporals.format(offer.fetchedAt, 'dd.MM.yyyy HH:mm')}"></td>
+                <td onclick="event.stopPropagation()">
+                    <a th:href="${offer.productUrl}" target="_blank">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i> Zum Shop
+                    </a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+</div>
+
+</body>
+<div th:replace="~{fragments/footer :: footer}"></div>
+</html>

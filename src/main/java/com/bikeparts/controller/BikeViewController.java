@@ -1,9 +1,6 @@
 package com.bikeparts.controller;
 
-import com.bikeparts.entity.Account;
-import com.bikeparts.entity.Bike;
-import com.bikeparts.entity.Bikepart;
-import com.bikeparts.entity.CartItem;
+import com.bikeparts.entity.*;
 import com.bikeparts.price.service.ScrapingResult;
 import com.bikeparts.service.AccountService;
 import com.bikeparts.service.BikeService;
@@ -11,6 +8,7 @@ import com.bikeparts.service.CartService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,21 +17,25 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
+import java.util.Map;
 
 @Controller
 public class BikeViewController {
     private final BikeService bikeService;
     private final CartService cartService;
     private final AccountService accountService;
+    private final BikeController bikeController;
     private final Account account;
     private Logger log = LoggerFactory.getLogger(BikeViewController.class);
 
     @Autowired
-    public BikeViewController(BikeService bikeService, CartService cartService, AccountService accountService, Account account) {
+    public BikeViewController(BikeService bikeService, CartService cartService, AccountService accountService,
+                              Account account, BikeController bikeController) {
         this.bikeService = bikeService;
         this.cartService = cartService;
         this.accountService = accountService;
         this.account = account;
+        this.bikeController = bikeController;
     }
 
     @GetMapping("/bikes")
@@ -84,7 +86,7 @@ public class BikeViewController {
 
         cartService.addBikepartToCart(id, quantity);
         Bikepart bikepart = bikeService.getBikepartById(id);
-        model.addAttribute("bikeparts",  bikeService.getAllBikeparts(bikepart.getBike().getId()));
+        model.addAttribute("bikeparts", bikeService.getAllBikeparts(bikepart.getBike().getId()));
         model.addAttribute("accountId", account.getId());
         return "bikeparts-list";
     }
@@ -92,21 +94,25 @@ public class BikeViewController {
     @GetMapping("/cart/")
     public String showCart(
             Model model) {
-          model.addAttribute("cart", account.getCart());
-        return "cart-cartItems-list";
+        Cart cart = account.getCart();
+        // cart.getId() ist auf einem Hibernate-Proxy immer sicher lesbar.
+        // cart.getCartItems() wuerde auf einem detached Proxy eine LazyInitializationException werfen.
+        Long cartId = cart != null ? cart.getId() : null;
+        model.addAttribute("cart", cart);
+        model.addAttribute("cartItems", cartService.getCartItemsByCartId(cartId));
+        return "cart";
     }
 
-    @GetMapping("/cart/cartItem/{id}/searchPriceBikeComponents")
-    public String searchPriceBikeComponents(
+    @GetMapping("/cart/cartItem/{id}/searchPrice")
+    public String searchPrice(
             @PathVariable Long id,
             Model model) {
 
-        // TODO: check
-        CartItem cartItem = cartService.getCartItem(account.getCart(), id);
-        ScrapingResult result = cartService.searchPriceBikeComponents(cartItem.getBikepart());
-        model.addAttribute("productOffers", result.offers());
-        model.addAttribute("scrapingStatus", result.status());
-        model.addAttribute("scrapingError", result.errorMessage());
+        CartItem cartItem = cartService.getCartItem(id);
+        List<ScrapingResult> scrapingResults = cartService.searchPrice(cartItem.getBikepart());
+        model.addAttribute("cartItem", cartItem);
+        model.addAttribute("bikepartName", cartItem.getBikepart().getName());
+        model.addAttribute("scrapingResults", scrapingResults);
         return "price-search-result";
     }
 }

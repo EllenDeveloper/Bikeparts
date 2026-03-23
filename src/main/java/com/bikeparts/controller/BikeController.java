@@ -3,6 +3,7 @@
 package com.bikeparts.controller;
 
 import com.bikeparts.entity.*;
+import com.bikeparts.price.entity.ProductOffer;
 import com.bikeparts.price.service.ScrapingResult;
 import com.bikeparts.service.AccountService;
 import com.bikeparts.service.BikeService;
@@ -16,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import static com.bikeparts.price.service.ScrapingResult.ScrapingStatus.ERROR;
 
 @Slf4j
 @RestController
@@ -154,24 +157,19 @@ public class BikeController {
         return ResponseEntity.ok(bikeService.getAllBikeparts(bikeId));
     }
 
-    @GetMapping("/bike/{bikeId}/bikepart/{bikepartId}/searchPriceBikeComponents")
-    public ResponseEntity<?> searchPriceBikeComponents(
+    @GetMapping("/bike/{bikeId}/bikepart/{bikepartId}/searchPrice")
+    public ResponseEntity<?> searchPrice(
             @PathVariable Long bikeId,
             @PathVariable Long bikepartId) {
         Bike bikeById = bikeService.getBikeById(bikeId);
         Bikepart bikepartById = bikeService.getBikepartById(bikepartId);
+        // check if bikepart belongs to bike
         if (!bikeById.getBikeparts().stream().toList().contains(bikepartById)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(Map.of("error", "Bikepart "+bikepartId + "gehört nicht zum Bike "+bikeId));
         }
 
-        ScrapingResult result = cartService.searchPriceBikeComponents(bikepartById);
-        return switch (result.status()) {
-            case SUCCESS -> ResponseEntity.ok(result.offers());
-            case NO_RESULTS -> ResponseEntity.ok(Map.of("message", "Keine Angebote gefunden", "offers", List.of()));
-            case ERROR -> ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                    .body(Map.of("error", "Shop konnte nicht erreicht werden", "details", result.errorMessage()));
-        };
+        List<ScrapingResult> results = cartService.searchPrice(bikepartById);
+        return ResponseEntity.ok(results);
     }
-
 }

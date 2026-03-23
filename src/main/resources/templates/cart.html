@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Warenkorb</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <!-- include font-awesome images -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+<div style="display: flex; justify-content: space-between; align-items: center;">
+    <h1>Warenkorb</h1>
+    <div th:replace="~{fragments/header :: header}"></div>
+</div>
+
+<p>Anzahl Teile: <span th:text="${cartItems.size()}">0</span></p>
+
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Typ</th>
+            <th>Marke</th>
+            <th>Modell</th>
+            <th>Qualität</th>
+            <th>Alternative Qualitäten</th>
+            <th>Details</th>
+            <th>Reifenbreite</th>
+            <th>Menge</th>
+            <th>Notizen</th>
+            <th>Preissuche</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr th:each="cartItem : ${cartItems}">
+            <td th:text="${cartItem.id}"></td>
+            <td th:text="${cartItem.effectiveProductName}"></td>
+            <td th:text="${cartItem.bikepart?.type}"></td>
+            <td th:text="${cartItem.bikepart?.brand}"></td>
+            <td th:text="${cartItem.bikepart?.model}"></td>
+            <td th:text="${cartItem.bikepart?.quality}"></td>
+            <td th:text="${cartItem.bikepart?.alternativeQualities}"></td>
+            <td th:text="${cartItem.bikepart?.specificDetails}"></td>
+            <td th:text="${cartItem.bikepart?.tireWidth}"></td>
+            <td th:text="${cartItem.quantity}"></td>
+            <td th:text="${cartItem.notes}"></td>
+            <td class="cart-cell">
+                <form th:action="@{/cart/cartItem/{id}/searchPrice(id=${cartItem.id})}" method="get">
+                    <div class="cart-input-group">
+                        <button type="submit" style="width: 2rem;height:2rem;">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <i class="fa-solid fa-money-bill-1-wave"></i>
+                        </button>
+                    </div>
+                </form>
+            </td>
+        </tr>
+    </tbody>
+</table>
+</body>
+<div th:replace="~{fragments/footer :: footer}"></div>
+</html>

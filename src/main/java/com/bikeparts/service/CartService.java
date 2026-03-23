@@ -9,11 +9,16 @@ import com.bikeparts.price.ScrapingConstants;
 import com.bikeparts.price.entity.ProductOffer;
 import com.bikeparts.price.repository.ProductOfferRepository;
 import com.bikeparts.price.service.BikeComponentsScraperService;
+import com.bikeparts.price.service.BikeDiscountScraperService;
+import com.bikeparts.price.service.ScraperShopInterface;
 import com.bikeparts.price.service.ScrapingResult;
+import com.bikeparts.repository.AccountRepository;
 import com.bikeparts.repository.BikepartRepository;
 import com.bikeparts.repository.CartItemRepository;
 import com.bikeparts.repository.CartRepository;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.NonNull;
+import org.hibernate.internal.util.collections.ArrayHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,18 +27,22 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
 public class CartService {
-    /** Logger fuer diese Klasse. */
+    private final BikeDiscountScraperService bikeDiscountScraperService;
+    private final AccountRepository accountRepository;
+    /**
+     * Logger fuer diese Klasse.
+     */
     Logger log = LoggerFactory.getLogger(CartService.class);
 
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
     private final BikepartRepository bikepartRepository;
-    private final AccountService accountService;
     private final Account account;
     private final BikeComponentsScraperService bikeComponentsScraperService;
     private final ProductOfferRepository productOfferRepository;
@@ -41,18 +50,19 @@ public class CartService {
 
     @Autowired
     public CartService(CartRepository cartRepository, CartItemRepository cartItemRepository,
-                       BikepartRepository bikepartRepository, AccountService accountService, Account account,
+                       BikepartRepository bikepartRepository, Account account,
                        BikeComponentsScraperService bikeComponentsScraperService,
                        ProductOfferRepository productOfferRepository,
-                       LlamaHttpClientService llamaHttpClientService) {
+                       LlamaHttpClientService llamaHttpClientService, BikeDiscountScraperService bikeDiscountScraperService, AccountRepository accountRepository) {
         this.cartRepository = cartRepository;
         this.cartItemRepository = cartItemRepository;
         this.bikepartRepository = bikepartRepository;
-        this.accountService = accountService;
         this.account = account;
         this.bikeComponentsScraperService = bikeComponentsScraperService;
         this.productOfferRepository = productOfferRepository;
         this.llamaHttpClientService = llamaHttpClientService;
+        this.bikeDiscountScraperService = bikeDiscountScraperService;
+        this.accountRepository = accountRepository;
     }
 
     // --- Cart methods
@@ -88,9 +98,13 @@ public class CartService {
     @Transactional
     public void addBikepartToCart(Long bikepartId, Integer quantity) {
 
-        Cart cart = account.getCart();
+        Cart cart = accountRepository.findById(account.getId())
+                .map(Account::getCart)
+                .orElse(null);
         if (cart == null) {
             cart = cartRepository.save(new Cart());
+            account.setCart(cart);
+            accountRepository.save(account);  // FK account.cart_id in DB persistieren
         }
 
         if (bikepartId != null) {
@@ -103,6 +117,21 @@ public class CartService {
 
     // --- CartItem methods
 
+    /**
+     * Laedt alle CartItems eines Warenkorbs direkt ueber die Cart-ID aus der DB.
+     *
+     * <p>Vermeidet {@code LazyInitializationException}: statt {@code cart.getCartItems()}
+     * auf einem ggf. detached Proxy, wird direkt per {@code CartItemRepository.findByCartId}
+     * abgefragt. Die Cart-ID ist auf einem Hibernate-Proxy immer sicher lesbar.</p>
+     *
+     * @param cartId ID des Warenkorbs, oder {@code null}
+     * @return Liste der CartItems, oder leere Liste wenn cartId null ist
+     */
+    public List<CartItem> getCartItemsByCartId(Long cartId) {
+        if (cartId == null) return List.of();
+        return cartItemRepository.findByCartIdWithBikepart(cartId);
+    }
+
     public CartItem createCartItem(CartItem cartItem) {
         return cartItemRepository.save(cartItem);
     }
@@ -111,34 +140,49 @@ public class CartService {
         cartItemRepository.deleteById(id);
     }
 
-private String getSearchQuery(Bikepart bikepart) {
-    String searchQuery = bikepart.getBrand() + " " +bikepart.getModel() + " " +bikepart.getSpecificDetails()
-            + " " +bikepart.getType().getLabel();
+    private String getSearchQuery(Bikepart bikepart) {
+        String searchQuery = bikepart.getBrand() + " " + bikepart.getModel() + " " + bikepart.getSpecificDetails()
+                + " " + bikepart.getType().getLabel();
 //        String searchQuery = bikepart.getName();
-    //        später: +bikepart.getAlternativeQualities() != null
-    if (bikepart.getType().toString().contains("TIRE") || bikepart.getType().toString().contains("WHEEL")) {
-        searchQuery += " " + bikepart.getTireWidth();
+        //        später: +bikepart.getAlternativeQualities() != null
+        if (bikepart.getType().toString().contains("TIRE") || bikepart.getType().toString().contains("WHEEL")) {
+            searchQuery += " " + bikepart.getTireWidth();
+        }
+        return searchQuery;
     }
-    return searchQuery;
-}
+
     @Transactional
-    public ScrapingResult searchPriceBikeComponents(Bikepart bikepart) {
+    public List<ScrapingResult> searchPrice(Bikepart bikepart) {
         // TODO: Daten richtig importieren
         //
-         String searchQuery = getSearchQuery(bikepart);
+        String searchQuery = getSearchQuery(bikepart);
+        List<ScrapingResult> results = new ArrayList<ScrapingResult>();
 
+        String[] shopNames = {"bike-components", "bike-discount"};
+        ScraperShopInterface[] scraperShopInterfaces = {bikeComponentsScraperService, bikeDiscountScraperService};
+        for (int i = 0; i < shopNames.length; i++) {
+
+            ScrapingResult scrapingResult = scrapeShopOrGetDataFromDatabase(searchQuery, shopNames[i], scraperShopInterfaces[i]);
+            results.add(scrapingResult);
+        }
+
+        return results;
+    }
+
+    private @NonNull ScrapingResult scrapeShopOrGetDataFromDatabase(
+            String searchQuery, String shopName, ScraperShopInterface scraperShopInterface) {
         //my Für tests. Da der Server für die Entwicklung immer hoch und runterfährt, bringt der Cache mit
         //my Caffeine nichts. Es sollen die Daten in der DB als cache-Ersatz gespeichert werden.
-        List<ProductOffer> cached = productOfferRepository.findBySearchQueryAndFetchedAtAfter(
-                searchQuery,
+        List<ProductOffer> cached = productOfferRepository.findBySearchQueryAndShopNameAndFetchedAtAfter(
+                searchQuery, shopName,
                 LocalDateTime.now().minusDays(ScrapingConstants.Common.CACHE_DAYS));
         if (!cached.isEmpty()) {
             log.debug("*** take productOffers from DB-cache! query = {}", searchQuery);
-            return ScrapingResult.success(cached);
+            return ScrapingResult.success(cached, shopName);
         }
         log.info("*** take productOffers from Website! query = {}", searchQuery);
 
-        ScrapingResult scrapingResult = bikeComponentsScraperService.search(searchQuery);
+        ScrapingResult scrapingResult = scraperShopInterface.search(searchQuery);
 
         if (scrapingResult.status() == ScrapingResult.ScrapingStatus.SUCCESS) {
             productOfferRepository.saveAllAndFlush(scrapingResult.offers());
@@ -155,18 +199,27 @@ private String getSearchQuery(Bikepart bikepart) {
         List<ProductOffer> oldData = productOfferRepository.findBySearchQueryAndFetchedAtBefore(
                 searchQuery, LocalDateTime.now().minusDays(ScrapingConstants.Common.CACHE_DAYS));
         if (!oldData.isEmpty()) {
-            log.warn("Scraping bike-components.de: verwende veraltete DB-Daten für query = {}", searchQuery);
-            return ScrapingResult.success(oldData);
+            log.warn("Scraping {} verwende veraltete DB-Daten für query = {}", shopName, searchQuery);
+            return ScrapingResult.success(oldData, shopName);
         }
 
-        log.warn("Scraping bike-components.de: {} für query = {} - {}", scrapingResult.status(), searchQuery, scrapingResult.errorMessage());
+        log.warn("Scraping {}: {} für query = {} - {}", shopName, scrapingResult.status(), searchQuery, scrapingResult.errorMessage());
         return scrapingResult;
     }
 
-    public CartItem getCartItem(Cart cart, Long cartItemId) {
-        return cart.getCartItems().stream()
-                .filter(item -> item.getId().equals(cartItemId))
-                .findFirst()
+    /**
+     * Laedt ein CartItem mit seinem Bikepart direkt aus der DB (JOIN FETCH).
+     *
+     * <p>Laedt frisch per Repository statt ueber {@code cart.getCartItems()} (Proxy-Zugriff).
+     * Bikepart und CartItem werden in einem SQL-Statement geladen - keine offene
+     * Hibernate-Session danach erforderlich.</p>
+     *
+     * @param cartItemId ID des CartItems
+     * @return CartItem mit vollstaendig geladenem Bikepart
+     * @throws EntityNotFoundException wenn kein CartItem mit dieser ID existiert
+     */
+    public CartItem getCartItem(Long cartItemId) {
+        return cartItemRepository.findByIdWithBikepart(cartItemId)
                 .orElseThrow(() -> new EntityNotFoundException("CartItem nicht gefunden: " + cartItemId));
     }
 
@@ -180,7 +233,6 @@ private String getSearchQuery(Bikepart bikepart) {
             String stringForLlama = bySearchQuery.stream()
                     .map(p -> p.toStringForLlama())
                     .collect(Collectors.joining("\n"));
-//            CartItem cartItem = new CartItem(cart, bikepart, quantity);
             try {
                 if (!stringForLlama.isEmpty()) {
                     String result = llamaHttpClientService.accessTry(stringForLlama);
@@ -196,6 +248,6 @@ private String getSearchQuery(Bikepart bikepart) {
 //            LlamaCompletionRequest llamaCompletionRequest = LlamaCompletionRequest.fromInventory(LlamaHttpClientMain.SYSTEM_PROMPT, stringForLlama);
         }
         // TODO error handling
-        return "no KI result of rateSearchResultsWithKI with bikepartId "+ bikepartId;
+        return "no KI result of rateSearchResultsWithKI with bikepartId " + bikepartId;
     }
 }

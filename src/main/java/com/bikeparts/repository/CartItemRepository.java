@@ -2,6 +2,8 @@ package com.bikeparts.repository;
 
 import com.bikeparts.entity.CartItem;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -17,6 +19,22 @@ public interface CartItemRepository extends JpaRepository<CartItem, Long> {
      * Findet alle Items eines Warenkorbs
      */
     List<CartItem> findByCartId(Long cartId);
+
+    /**
+     * Laedt alle CartItems eines Warenkorbs mit ihrem Bikepart in einem SQL-Statement (JOIN FETCH).
+     * Vermeidet LazyInitializationException beim Zugriff auf cartItem.getBikepart()
+     * ausserhalb einer Hibernate-Session.
+     */
+    @Query("SELECT ci FROM CartItem ci LEFT JOIN FETCH ci.bikepart WHERE ci.cart.id = :cartId")
+    List<CartItem> findByCartIdWithBikepart(@Param("cartId") Long cartId);
+
+    /**
+     * Laedt ein CartItem mit seinem Bikepart in einem SQL-Statement (JOIN FETCH).
+     * Vermeidet LazyInitializationException beim Zugriff auf cartItem.getBikepart()
+     * ausserhalb einer Hibernate-Session.
+     */
+    @Query("SELECT ci FROM CartItem ci LEFT JOIN FETCH ci.bikepart WHERE ci.id = :id")
+    Optional<CartItem> findByIdWithBikepart(@Param("id") Long id);
 
     /**
      * Findet alle Items die ein bestimmtes Bikepart referenzieren

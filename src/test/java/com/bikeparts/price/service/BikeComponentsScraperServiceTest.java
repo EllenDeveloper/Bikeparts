@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * <h2>Teststrategie</h2>
  * <p>Getestet wird ausschließlich die package-private Methode
- * {@link BikeComponentsScraperService#parseDocument(Document)}, die die gesamte
+ * {@link BikeComponentsScraperService#parseDocument(Document, String)}, die die gesamte
  * Parsing-Logik enthält. Der HTTP-Request ({@code Jsoup.connect(...)}) wird
  * bewusst <strong>nicht</strong> ausgeführt – stattdessen wird ein reales
  * HTML-Dokument aus {@code src/test/resources/} per Classpath geladen und direkt
@@ -107,7 +107,7 @@ class BikeComponentsScraperServiceTest {
     class ParseDocument {
 
         /**
-         * Verifiziert, dass die Ergebnisliste auf {@link ScrapingConstants#MAX_NUMBER_PRODUCT_OFFERS}
+         * Verifiziert, dass die Ergebnisliste auf {@link ScrapingConstants.Common#MAX_NUMBER_PRODUCT_OFFERS}
          * begrenzt wird. bike-components.de liefert standardmäßig 24 Produkte pro Seite,
          * der Service gibt jedoch nur die ersten {@code MAX_NUMBER_PRODUCT_OFFERS} zurück.
          * (Gesamttreffer laut Testdatei: 66).

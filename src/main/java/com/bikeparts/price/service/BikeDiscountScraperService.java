@@ -65,7 +65,7 @@ import java.util.regex.Pattern;
  */
 @Slf4j
 @Service
-public class BikeDiscountScraperService {
+public class BikeDiscountScraperService implements ScraperShopInterface {
 
     /** Regex zum Extrahieren der Trefferanzahl aus {@code data-aria-live-text}. */
     private static final Pattern TOTAL_PATTERN = Pattern.compile("\\d+");
@@ -117,7 +117,7 @@ public class BikeDiscountScraperService {
         } catch (Exception e) {
             log.error("Fehler beim Scraping von bike-discount.de für Query '{}': {}",
                     searchQuery, e.getMessage());
-            return ScrapingResult.error(e.getMessage());
+            return ScrapingResult.error(e.getMessage(), ScrapingConstants.BikeDiscount.SHOP_NAME);
         }
     }
 
@@ -151,7 +151,7 @@ public class BikeDiscountScraperService {
         Element listingRow = doc.selectFirst("div.row.cms-listing-row");
         if (listingRow == null) {
             log.warn("Seitenstruktur geändert? Element 'div.row.cms-listing-row' nicht gefunden");
-            return ScrapingResult.error("Listing-Container nicht gefunden");
+            return ScrapingResult.error("Listing-Container nicht gefunden", ScrapingConstants.BikeDiscount.SHOP_NAME);
         }
 
         int total = parseTotal(listingRow.attr("data-aria-live-text"));
@@ -159,7 +159,7 @@ public class BikeDiscountScraperService {
         Elements listItems = listingRow.select("div.cms-listing-col[role=listitem]");
         if (listItems.isEmpty()) {
             log.warn("bike-discount.de: Keine Produkte gefunden für Query '{}'", searchQuery);
-            return ScrapingResult.noResults();
+            return ScrapingResult.noResults(ScrapingConstants.BikeDiscount.SHOP_NAME);
         }
 
         List<ProductOffer> result = new ArrayList<>();
@@ -178,7 +178,7 @@ public class BikeDiscountScraperService {
         log.debug("bike-discount.de: {} Treffer gesamt, {} übernommen (max {})",
                 total, result.size(), ScrapingConstants.Common.MAX_NUMBER_PRODUCT_OFFERS);
         result.forEach(offer -> log.debug("ProductOffer: {}", offer));
-        return ScrapingResult.success(result);
+        return ScrapingResult.success(result, ScrapingConstants.BikeDiscount.SHOP_NAME);
     }
 
     /**

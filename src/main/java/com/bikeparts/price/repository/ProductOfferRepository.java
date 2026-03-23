@@ -19,5 +19,7 @@ public interface ProductOfferRepository extends JpaRepository<ProductOffer, Long
      */
     List<ProductOffer> findBySearchQueryAndFetchedAtAfter(String searchQuery, LocalDateTime fetchedAt);
 
+    List<ProductOffer> findBySearchQueryAndShopNameAndFetchedAtAfter(String searchQuery, String shopName, LocalDateTime fetchedAt);
+
     List<ProductOffer> findBySearchQueryAndFetchedAtBefore(String searchQuery, LocalDateTime fetchedAtBefore);
 }

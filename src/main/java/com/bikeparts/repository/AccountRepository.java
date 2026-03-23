@@ -23,6 +23,14 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
      */
     Optional<Account> findByEmail(String email);
 
+    /**
+     * Laedt Account mit Cart und CartItems in einem SQL-Statement (JOIN FETCH).
+     * Vermeidet LazyInitializationException beim Zugriff auf account.getCart()
+     * und cart.getCartItems() ausserhalb einer Hibernate-Session.
+     */
+    @Query("SELECT a FROM Account a LEFT JOIN FETCH a.cart c LEFT JOIN FETCH c.cartItems WHERE a.email = :email")
+    Optional<Account> findByEmailWithCart(@Param("email") String email);
+
     
 //    /**
 //     * Prüft ob Accountname bereits existiert

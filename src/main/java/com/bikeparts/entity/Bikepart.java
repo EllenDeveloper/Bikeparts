@@ -1,6 +1,7 @@
 package com.bikeparts.entity;
 
 import com.bikeparts.enums.BikepartType;
+import com.bikeparts.validation.SafeText;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -32,21 +33,27 @@ public class Bikepart {
     @Column(length = 100, nullable = false)
     private String name; // z.B. "Shimano XT CN-HG95"
 
+    @SafeText
     @Column(length = 50)
     private String brand; // z.B. "Shimano"
 
+    @SafeText
     @Column(length = 100)
     private String model;
 
+    @SafeText
     @Column(length = 50)
     private String quality; // z.B. "XT", "Deore", "105"
 
+    @SafeText
     @Column(length = 200)
     private String alternativeQualities; // Komma-getrennt: "LX, SLX"
 
+    @SafeText
     @Column(length = 200)
     private String specificDetails; // z.B. "10-fach" bei Kette/Chain
 
+    @SafeText
     @Column
     private String tireWidth; // Mantelbreite in mm (z.B. 2.25, 2.35)
 

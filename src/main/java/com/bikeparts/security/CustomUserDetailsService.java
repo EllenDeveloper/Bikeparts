@@ -1,6 +1,5 @@
 package com.bikeparts.security;
 
-import com.bikeparts.config.AccountConfig;
 import com.bikeparts.entity.Account;
 import com.bikeparts.repository.AccountRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,17 +27,20 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         log.info("Loading user: {}", email);
 
-        Account found = accountRepository.findByEmail(email)
+        // Account mit Cart und CartItems per JOIN FETCH aus der DB laden
+        // kein Lazy-Proxy im Session-Account
+        Account found = accountRepository.findByEmailWithCart(email)
                 .orElseThrow(() -> new UsernameNotFoundException(
                         "User not found: " + email));
 
-        // Felder in den Session-Proxy kopieren 
+        // Felder in den Session-Proxy kopieren
         account.setId(found.getId());
         account.setEmail(found.getEmail());
         account.setFirstName(found.getFirstName());
         account.setLastName(found.getLastName());
         account.setRole(found.getRole());
         account.setIsActive(found.getIsActive());
+        account.setCart(found.getCart());
 
         // Spring Security’s User-Objekt erstellen (NICHT unsere Entity!)
         return org.springframework.security.core.userdetails.User.builder()
