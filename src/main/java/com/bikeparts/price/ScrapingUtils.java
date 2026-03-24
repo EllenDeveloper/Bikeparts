@@ -14,13 +14,6 @@ import java.util.stream.Collectors;
 @Component
 public class ScrapingUtils {
 
-
-    private final ProxyConfig proxyConfig;
-
-    public ScrapingUtils(ProxyConfig proxyConfig) {
-        this.proxyConfig = proxyConfig;
-    }
-
     public static boolean checkTerms(String searchQuery, String productName) {
         return containsAllTerms(searchQuery, productName)
                 || containsSomeTerms(searchQuery, productName);
@@ -95,15 +88,5 @@ public class ScrapingUtils {
         // TODO: Suche verbessern
         return Arrays.stream(searchQuery.toLowerCase().split("\\s+"))
                 .anyMatch(productTokens::contains);
-    }
-
-    public Connection buildConnection(String url) {
-        Connection conn = Jsoup.connect(url)
-                .userAgent(ScrapingConstants.Common.USER_AGENT)
-                .timeout(20_000);
-        if (proxyConfig.isEnabled()) {
-            conn.proxy(proxyConfig.getHost(), proxyConfig.getPort());
-        }
-        return conn;
     }
 }

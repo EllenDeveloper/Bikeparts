@@ -1,13 +1,13 @@
 package com.bikeparts.price.service;
 
 import com.bikeparts.annotation.Timed;
-import com.bikeparts.config.ProxyConfig;
 import com.bikeparts.price.ScrapingConstants;
 import com.bikeparts.price.ScrapingUtils;
 import com.bikeparts.price.entity.ProductOffer;
 import com.bikeparts.price.enums.FetchMethod;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static com.bikeparts.price.ScrapingConstants.Common.TIMEOUT;
 
 /**
  * Scraper-Service für den Online-Shop <a href="https://www.bike-discount.de">bike-discount.de</a>.
@@ -73,7 +75,6 @@ public class BikeDiscountScraperService implements ScraperShopInterface {
 
     /** Regex zum Extrahieren der Trefferanzahl aus {@code data-aria-live-text}. */
     private static final Pattern TOTAL_PATTERN = Pattern.compile("\\d+");
-    private final ScrapingUtils scrapingUtils;
 
     /**
      * Schnelltest-Einstiegspunkt zum manuellen Ausführen des Scrapers
@@ -82,7 +83,7 @@ public class BikeDiscountScraperService implements ScraperShopInterface {
      * @param args Kommandozeilenargumente (werden nicht ausgewertet).
      */
     public static void main(String[] args) {
-        BikeDiscountScraperService service = new BikeDiscountScraperService(new ScrapingUtils(new ProxyConfig()));
+        BikeDiscountScraperService service = new BikeDiscountScraperService();
         ScrapingResult result = service.search("shimano slx kette 10-fach");
         result.offers().forEach(System.out::println);
     }
@@ -116,8 +117,9 @@ public class BikeDiscountScraperService implements ScraperShopInterface {
         log.info("Scraping bike-discount.de: {}", url);
 
         try {
-            Document doc = scrapingUtils.buildConnection(url)
-                    .get();
+            Document doc = Jsoup.connect(url)
+                    .userAgent(ScrapingConstants.Common.USER_AGENT)
+                    .timeout(TIMEOUT).get();
             return parseDocument(doc, searchQuery);
         } catch (Exception e) {
             log.error("Fehler beim Scraping von bike-discount.de für Query '{}': {}",

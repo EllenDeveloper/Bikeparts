@@ -30,6 +30,8 @@ public final class ScrapingConstants {
         /** Anzahl der Tage, nach denen gecachte Daten als veraltet gelten. */
         public static final int CACHE_DAYS = 14;
 
+        public static final int TIMEOUT = 20_000;
+
         /** Maximale Anzahl der zurueckgegebenen Produkte pro Suchanfrage. */
         public static final int MAX_NUMBER_PRODUCT_OFFERS = 6;
     }

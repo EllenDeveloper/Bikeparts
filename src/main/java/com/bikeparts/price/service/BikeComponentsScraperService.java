@@ -10,6 +10,7 @@ import com.bikeparts.price.enums.FetchMethod;
 import com.bikeparts.price.entity.ProductOffer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.springframework.cache.annotation.Cacheable;
@@ -22,6 +23,8 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.bikeparts.price.ScrapingConstants.Common.TIMEOUT;
 
 /**
  * Scraper-Service für den Online-Shop <a href="https://www.bike-components.de">bike-components.de</a>.
@@ -58,7 +61,6 @@ public class BikeComponentsScraperService implements ScraperShopInterface {
      * {@code data-props}-Attribut. Wird per Constructor Injection bereitgestellt.
      */
     private final ObjectMapper objectMapper;
-    private final ScrapingUtils scrapingUtils;
 
     /**
      * Schnelltest-Einstiegspunkt zum manuellen Ausführen des Scrapers
@@ -68,8 +70,8 @@ public class BikeComponentsScraperService implements ScraperShopInterface {
      */
     public static void main(String[] args) {
         ObjectMapper objectMapper1 = new ObjectMapper();
-        BikeComponentsScraperService bikeComponentsScraperService = new BikeComponentsScraperService(
-                objectMapper1, new ScrapingUtils(new ProxyConfig()));
+        BikeComponentsScraperService bikeComponentsScraperService
+                = new BikeComponentsScraperService(objectMapper1);
         ScrapingResult result = bikeComponentsScraperService.search(ScrapingConstants.BikeComponents.SEARCH_URL + "shimano fahrradkette slx");
     }
 
@@ -102,7 +104,9 @@ public class BikeComponentsScraperService implements ScraperShopInterface {
         log.debug("searchQuery: {}", searchQuery);
 
         try {
-            Document doc = scrapingUtils.buildConnection(url)
+            Document doc = Jsoup.connect(url)
+                    .userAgent(ScrapingConstants.Common.USER_AGENT)
+                    .timeout(TIMEOUT)
                     .get();
             return parseDocument(doc, searchQuery);
         } catch (Exception e) {

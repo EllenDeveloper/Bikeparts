@@ -95,7 +95,7 @@ class BikeComponentsScraperServiceTest {
      */
     @BeforeEach
     void setUp() {
-        service = new BikeComponentsScraperService(new ObjectMapper(), new ScrapingUtils(new ProxyConfig()));
+        service = new BikeComponentsScraperService(new ObjectMapper());
     }
 
     // -------------------------------------------------------------------------
