@@ -1,5 +1,7 @@
 package com.bikeparts.price.service;
 
+import com.bikeparts.annotation.Timed;
+import com.bikeparts.config.ProxyConfig;
 import com.bikeparts.price.ScrapingUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -8,10 +10,10 @@ import com.bikeparts.price.enums.FetchMethod;
 import com.bikeparts.price.entity.ProductOffer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -56,6 +58,7 @@ public class BikeComponentsScraperService implements ScraperShopInterface {
      * {@code data-props}-Attribut. Wird per Constructor Injection bereitgestellt.
      */
     private final ObjectMapper objectMapper;
+    private final ScrapingUtils scrapingUtils;
 
     /**
      * Schnelltest-Einstiegspunkt zum manuellen Ausführen des Scrapers
@@ -65,7 +68,8 @@ public class BikeComponentsScraperService implements ScraperShopInterface {
      */
     public static void main(String[] args) {
         ObjectMapper objectMapper1 = new ObjectMapper();
-        BikeComponentsScraperService bikeComponentsScraperService = new BikeComponentsScraperService(objectMapper1);
+        BikeComponentsScraperService bikeComponentsScraperService = new BikeComponentsScraperService(
+                objectMapper1, new ScrapingUtils(new ProxyConfig()));
         ScrapingResult result = bikeComponentsScraperService.search(ScrapingConstants.BikeComponents.SEARCH_URL + "shimano fahrradkette slx");
     }
 
@@ -89,6 +93,8 @@ public class BikeComponentsScraperService implements ScraperShopInterface {
      *              Leerzeichen werden als {@code +} kodiert (URL-Encoding).
      * @return {@link ScrapingResult} mit gefundenen {@link ProductOffer}s, oder Fehlerstatus.
      */
+    @Profile("h2")
+    @Timed
     @Cacheable(value = "bikeComponentsSearch", key = "#searchQuery")
     public ScrapingResult search(String searchQuery) {
         String url = ScrapingConstants.BikeComponents.SEARCH_URL + URLEncoder.encode(searchQuery, StandardCharsets.UTF_8);
@@ -96,9 +102,7 @@ public class BikeComponentsScraperService implements ScraperShopInterface {
         log.debug("searchQuery: {}", searchQuery);
 
         try {
-            Document doc = Jsoup.connect(url)
-                    .userAgent(ScrapingConstants.Common.USER_AGENT)
-                    .timeout(10_000)
+            Document doc = scrapingUtils.buildConnection(url)
                     .get();
             return parseDocument(doc, searchQuery);
         } catch (Exception e) {
@@ -129,7 +133,7 @@ public class BikeComponentsScraperService implements ScraperShopInterface {
      * @param doc         Das von Jsoup geparste HTML-Dokument der Suchergebnisseite.
      * @param searchQuery Suchbegriff, der für Filterung und Mapping weitergereicht wird.
      * @return {@link ScrapingResult} mit extrahierten {@link ProductOffer}s,
-     *         oder Fehlerstatus wenn das {@code ProductCatalog}-Element fehlt
+     *         oder Fehlerstatus, wenn das {@code ProductCatalog}-Element fehlt
      *         oder ein JSON-Fehler auftritt.
      */
     ScrapingResult parseDocument(Document doc, String searchQuery) {
@@ -163,11 +167,11 @@ public class BikeComponentsScraperService implements ScraperShopInterface {
 
                 String productName = product.path("data").path("productName").asText();
 
-//                if (ScrapingUtils.containsShimanoType(searchQuery, productName)) {
-//                    result.add(mapToDto(product.path("data"), searchQuery));
-//                    break;
-//                }
-                // Nur Produkte uebernehmen, deren Name alle Suchbegriffe enthaelt
+                if (ScrapingUtils.containsShimanoAbbreviation(searchQuery, productName)) {
+                    result.add(mapToDto(product.path("data"), searchQuery));
+                    break;
+                }
+                // Nur Produkte übernehmen, deren Name alle Suchbegriffe enthaelt
                 if (ScrapingUtils.checkTerms(searchQuery, productName)) {
                     result.add(mapToDto(product.path("data"), searchQuery));
                 } else {
@@ -200,7 +204,6 @@ public class BikeComponentsScraperService implements ScraperShopInterface {
      *   <li>{@code productUrl}   <- {@link ScrapingConstants.BikeComponents#BASE_URL} + {@code data.link}</li>
      *   <li>{@code inStock}      <- {@code !isSoldOut && isBuyable}</li>
      *   <li>{@code shopName}     <- {@link ScrapingConstants.BikeComponents#SHOP_NAME}</li>
-     *   <li>{@code shopId}       <- {@link ScrapingConstants.BikeComponents#SHOP_ID}</li>
      *   <li>{@code source}       <- immer {@link FetchMethod#WEB_SCRAPING}</li>
      *   <li>{@code fetchedAt}    <- {@link LocalDateTime#now()} zum Zeitpunkt des Mappings</li>
      * </ul>

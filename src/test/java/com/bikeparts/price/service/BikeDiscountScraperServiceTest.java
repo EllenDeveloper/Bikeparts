@@ -1,6 +1,8 @@
 package com.bikeparts.price.service;
 
+import com.bikeparts.config.ProxyConfig;
 import com.bikeparts.price.ScrapingConstants;
+import com.bikeparts.price.ScrapingUtils;
 import com.bikeparts.price.entity.ProductOffer;
 import com.bikeparts.price.enums.FetchMethod;
 import org.jsoup.Jsoup;
@@ -111,7 +113,7 @@ class BikeDiscountScraperServiceTest {
      */
     @BeforeEach
     void setUp() {
-        service = new BikeDiscountScraperService();
+        service = new BikeDiscountScraperService(new ScrapingUtils(new ProxyConfig()));
     }
 
     // -------------------------------------------------------------------------

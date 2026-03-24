@@ -1,15 +1,28 @@
 package com.bikeparts.price;
 
+import com.bikeparts.config.ProxyConfig;
+import org.jsoup.Connection;
+import org.jsoup.Jsoup;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
+
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Component
 public class ScrapingUtils {
+
+
+    private final ProxyConfig proxyConfig;
+
+    public ScrapingUtils(ProxyConfig proxyConfig) {
+        this.proxyConfig = proxyConfig;
+    }
 
     public static boolean checkTerms(String searchQuery, String productName) {
         return containsAllTerms(searchQuery, productName)
-                || containsShimanoAbbreviation(searchQuery, productName)
                 || containsSomeTerms(searchQuery, productName);
     }
 
@@ -82,5 +95,15 @@ public class ScrapingUtils {
         // TODO: Suche verbessern
         return Arrays.stream(searchQuery.toLowerCase().split("\\s+"))
                 .anyMatch(productTokens::contains);
+    }
+
+    public Connection buildConnection(String url) {
+        Connection conn = Jsoup.connect(url)
+                .userAgent(ScrapingConstants.Common.USER_AGENT)
+                .timeout(20_000);
+        if (proxyConfig.isEnabled()) {
+            conn.proxy(proxyConfig.getHost(), proxyConfig.getPort());
+        }
+        return conn;
     }
 }

@@ -1,15 +1,18 @@
 package com.bikeparts.price.service;
 
+import com.bikeparts.annotation.Timed;
+import com.bikeparts.config.ProxyConfig;
 import com.bikeparts.price.ScrapingConstants;
 import com.bikeparts.price.ScrapingUtils;
 import com.bikeparts.price.entity.ProductOffer;
 import com.bikeparts.price.enums.FetchMethod;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -65,10 +68,12 @@ import java.util.regex.Pattern;
  */
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class BikeDiscountScraperService implements ScraperShopInterface {
 
     /** Regex zum Extrahieren der Trefferanzahl aus {@code data-aria-live-text}. */
     private static final Pattern TOTAL_PATTERN = Pattern.compile("\\d+");
+    private final ScrapingUtils scrapingUtils;
 
     /**
      * Schnelltest-Einstiegspunkt zum manuellen Ausführen des Scrapers
@@ -77,7 +82,7 @@ public class BikeDiscountScraperService implements ScraperShopInterface {
      * @param args Kommandozeilenargumente (werden nicht ausgewertet).
      */
     public static void main(String[] args) {
-        BikeDiscountScraperService service = new BikeDiscountScraperService();
+        BikeDiscountScraperService service = new BikeDiscountScraperService(new ScrapingUtils(new ProxyConfig()));
         ScrapingResult result = service.search("shimano slx kette 10-fach");
         result.offers().forEach(System.out::println);
     }
@@ -93,7 +98,7 @@ public class BikeDiscountScraperService implements ScraperShopInterface {
      *   <li>HTTP-GET via Jsoup mit {@link ScrapingConstants.Common#USER_AGENT} und 10 s
      *       Timeout</li>
      *   <li>HTML-Dokument an {@link #parseDocument(Document, String)} delegieren</li>
-     *   <li>Bei Fehler: {@link ScrapingResult#error(String)} zurückgeben</li>
+     *   <li>Bei Fehler: {@link ScrapingResult#error(String, String)} zurückgeben</li>
      * </ol>
      *
      * <p>Das Ergebnis wird pro Query gecacht. Ein erneuter Aufruf mit demselben
@@ -102,6 +107,8 @@ public class BikeDiscountScraperService implements ScraperShopInterface {
      * @param searchQuery Suchbegriff, z. B. {@code "shimano slx kette 10-fach"}.
      * @return {@link ScrapingResult} mit gefundenen {@link ProductOffer}s oder Fehlerstatus.
      */
+    @Profile("h2")
+    @Timed
     @Cacheable(value = "bikeDiscountSearch", key = "#searchQuery")
     public ScrapingResult search(String searchQuery) {
         String url = ScrapingConstants.BikeDiscount.SEARCH_URL
@@ -109,9 +116,7 @@ public class BikeDiscountScraperService implements ScraperShopInterface {
         log.info("Scraping bike-discount.de: {}", url);
 
         try {
-            Document doc = Jsoup.connect(url)
-                    .userAgent(ScrapingConstants.Common.USER_AGENT)
-                    .timeout(10_000)
+            Document doc = scrapingUtils.buildConnection(url)
                     .get();
             return parseDocument(doc, searchQuery);
         } catch (Exception e) {
@@ -132,7 +137,7 @@ public class BikeDiscountScraperService implements ScraperShopInterface {
      * <p>Ablauf:</p>
      * <ol>
      *   <li>{@code div.row.cms-listing-row} selektieren; fehlt das Element, wird
-     *       {@link ScrapingResult#error(String)} zurückgegeben</li>
+     *       {@link ScrapingResult#error(String, String)}  zurückgegeben</li>
      *   <li>Alle {@code div.cms-listing-col[role=listitem]} iterieren</li>
      *   <li>Produktname aus {@code div.product-title a} lesen;
      *       Produkte, die nicht alle Suchbegriffe enthalten, werden übersprungen
@@ -168,10 +173,10 @@ public class BikeDiscountScraperService implements ScraperShopInterface {
 
             String productName = item.select("div.product-title a").text();
 
-//            if (ScrapingUtils.containsShimanoType(searchQuery, productName)) {
-//                result.add(mapToDto(item, searchQuery));
-//                break;
-//            }
+            if (ScrapingUtils.containsShimanoAbbreviation(searchQuery, productName)) {
+                result.add(mapToDto(item, searchQuery));
+                break;
+            }
 
             if (ScrapingUtils.checkTerms(searchQuery, productName)) {
                 result.add(mapToDto(item, searchQuery));
@@ -201,7 +206,6 @@ public class BikeDiscountScraperService implements ScraperShopInterface {
      *   <li>{@code inStock}     <- {@code form.buy-widget} vorhanden (direkt kaufbar)
      *       ODER {@code a.product-button-detail} vorhanden (Varianten-Produkt, ebenfalls verfügbar)</li>
      *   <li>{@code shopName}    <- {@link ScrapingConstants.BikeDiscount#SHOP_NAME}</li>
-     *   <li>{@code shopId}      <- {@link ScrapingConstants.BikeDiscount#SHOP_ID}</li>
      *   <li>{@code source}      <- immer {@link FetchMethod#WEB_SCRAPING}</li>
      *   <li>{@code fetchedAt}   <- {@link LocalDateTime#now()}</li>
      * </ul>

@@ -1,6 +1,8 @@
 package com.bikeparts.price.service;
 
+import com.bikeparts.config.ProxyConfig;
 import com.bikeparts.price.ScrapingConstants;
+import com.bikeparts.price.ScrapingUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.bikeparts.price.entity.ProductOffer;
 import org.jsoup.Jsoup;
@@ -93,7 +95,7 @@ class BikeComponentsScraperServiceTest {
      */
     @BeforeEach
     void setUp() {
-        service = new BikeComponentsScraperService(new ObjectMapper());
+        service = new BikeComponentsScraperService(new ObjectMapper(), new ScrapingUtils(new ProxyConfig()));
     }
 
     // -------------------------------------------------------------------------

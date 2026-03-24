@@ -13,6 +13,7 @@ import java.util.List;
 
 import com.bikeparts.repository.BikepartRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +35,8 @@ public class BikeService {
         this.account = account;
     }
 
+    // Timed ist sehr langsam. deshalb nur in Produktion
+    @Profile("h2")
     @Timed
     public List<Bikepart> getAllBikeparts(Long bikeId) {
         Account accountJPA = accountService.findById(account.getId()).orElseThrow(() -> new RuntimeException("Account nicht gefunden"));
