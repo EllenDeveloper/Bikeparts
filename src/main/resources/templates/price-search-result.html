@@ -16,52 +16,87 @@
     <div th:replace="~{fragments/header :: header}"></div>
 </div>
 
-<a th:href="@{/cart}"><i class="fa-solid fa-arrow-left"></i> Zurück zum Warenkorb</a>
+<p style="margin-bottom: 1.5rem;">
+    <a th:href="@{/cart}"><i class="fa-solid fa-arrow-left"></i> Zurück zum Warenkorb</a>
+</p>
 
-<div th:each="scrapingResult : ${scrapingResults}" style="margin-top: 2rem;">
-
-    <h2>
-        <i class="fa-solid fa-shop" style="color: #5659fb;"></i>
-        <span th:text="${scrapingResult.shopName()}"></span>
-        <span th:if="${scrapingResult.status().name() == 'SUCCESS'}"
-              style="font-size: 0.85rem; color: green; font-weight: normal;">
-            - <span th:text="${scrapingResult.offers().size()}"></span> Angebote gefunden
-        </span>
-        <span th:if="${scrapingResult.status().name() == 'NO_RESULTS'}"
-              style="font-size: 0.85rem; color: orange; font-weight: normal;">
-            - Keine Angebote gefunden
-        </span>
-        <span th:if="${scrapingResult.status().name() == 'ERROR'}"
-              style="font-size: 0.85rem; color: red; font-weight: normal;">
-            - Fehler beim Abrufen
-        </span>
-    </h2>
-
-    <p th:if="${scrapingResult.status().name() == 'ERROR'}" style="color: red;">
-        <i class="fa-solid fa-circle-exclamation"></i>
-        Shop nicht erreichbar: <span th:text="${scrapingResult.errorMessage()}"></span>
+<!-- Keine Ergebnisse überhaupt -->
+<div th:if="${scrapingResults == null or scrapingResults.isEmpty()}"
+     class="alert alert-error fade-in">
+    <strong><i class="fa-solid fa-circle-exclamation"></i> Keine Daten verfügbar</strong>
+    <p style="margin-top: 0.5rem; margin-bottom: 0;">
+        Es konnten keine Shops abgefragt werden.
     </p>
+</div>
 
-    <p th:if="${scrapingResult.status().name() == 'NO_RESULTS'}" style="color: orange;">
-        <i class="fa-solid fa-circle-info"></i>
-        Keine passenden Angebote für diese Suchanfrage.
-    </p>
+<!-- Gemeinsame Tabelle aller Shops -->
+<table th:if="${scrapingResults != null and !scrapingResults.isEmpty()}">
+    <thead>
+        <tr>
+            <th>Produkt</th>
+            <th>Preis</th>
+            <th>Verfügbar</th>
+            <th>Abgerufen am</th>
+            <th>Link</th>
+        </tr>
+    </thead>
+    <tbody>
 
-    <table th:if="${scrapingResult.status().name() == 'SUCCESS'}">
-        <thead>
-            <tr>
-                <th>Produkt</th>
-                <th>Preis</th>
-                <th>Verfügbar</th>
-                <th>Abgerufen am</th>
-                <th>Link</th>
+        <th:block th:each="scrapingResult : ${scrapingResults}">
+
+            <!-- Shop-Trennzeile (blau, fett) -->
+            <tr class="shop-header-row">
+                <td colspan="5">
+                    <i class="fa-solid fa-shop"></i>
+                    <span th:text="${scrapingResult.shopName()}"></span>
+
+                    <span th:if="${scrapingResult.status().name() == 'SUCCESS'}"
+                          class="shop-status-badge shop-status-success">
+                        <i class="fa-solid fa-check"></i>
+                        <span th:text="${scrapingResult.offers().size()}"></span> Angebote
+                    </span>
+                    <span th:if="${scrapingResult.status().name() == 'NO_RESULTS'}"
+                          class="shop-status-badge shop-status-warning">
+                        <i class="fa-solid fa-circle-info"></i> Keine Treffer
+                    </span>
+                    <span th:if="${scrapingResult.status().name() == 'ERROR'}"
+                          class="shop-status-badge shop-status-error">
+                        <i class="fa-solid fa-circle-exclamation"></i> Fehler
+                    </span>
+                </td>
             </tr>
-        </thead>
-        <tbody>
+
+            <!-- Fehlerzeile -->
+            <tr th:if="${scrapingResult.status().name() == 'ERROR'}" class="row-error">
+                <td colspan="5">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    Shop nicht erreichbar:
+                    <span th:text="${scrapingResult.errorMessage() != null
+                                     ? scrapingResult.errorMessage()
+                                     : 'Unbekannter Fehler'}">
+                    </span>
+                </td>
+            </tr>
+
+            <!-- Keine-Treffer-Zeile -->
+            <tr th:if="${scrapingResult.status().name() == 'NO_RESULTS'}" class="row-no-results">
+                <td colspan="5">
+                    <i class="fa-solid fa-circle-info"></i>
+                    Keine passenden Angebote für diese Suchanfrage.
+                </td>
+            </tr>
+
+            <!-- Angebot-Zeilen -->
             <tr th:each="offer : ${scrapingResult.offers()}">
                 <td th:text="${offer.productName}"></td>
-                <td th:text="${offer.price != null ? #numbers.formatDecimal(offer.price, 1, 2) + ' €' : '-'}"></td>
-                <td th:text="${offer.inStock ? 'verfügbar' : 'nicht verfügbar'}"></td>
+                <td th:text="${offer.price != null
+                               ? #numbers.formatDecimal(offer.price, 1, 2) + ' €'
+                               : '-'}">
+                </td>
+                <td>
+                    <span th:if="${offer.inStock}"  class="badge-available">verfügbar</span>
+                    <span th:if="${!offer.inStock}" class="badge-unavailable">nicht verfügbar</span>
+                </td>
                 <td th:text="${#temporals.format(offer.fetchedAt, 'dd.MM.yyyy HH:mm')}"></td>
                 <td onclick="event.stopPropagation()">
                     <a th:href="${offer.productUrl}" target="_blank">
@@ -69,10 +104,11 @@
                     </a>
                 </td>
             </tr>
-        </tbody>
-    </table>
 
-</div>
+        </th:block>
+
+    </tbody>
+</table>
 
 </body>
 <div th:replace="~{fragments/footer :: footer}"></div>
