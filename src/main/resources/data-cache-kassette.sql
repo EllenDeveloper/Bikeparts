@@ -1,0 +1,15 @@
+-- Cache: bike-components.de + bike-discount.de Suchergebnisse fuer "Shimano CS-M771-10 10-fach, 11-36T Kassette"
+-- Abgerufen: 2026-03-23T15:51:15
+-- Quelle: GET /cart/cartItem/{id}/searchPrice
+INSERT INTO product_offer (in_stock, price, cart_item_id, fetched_at, id, shop_id, shop_name, product_name, product_url, search_query, source) VALUES
+(TRUE, 51.99, NULL, TIMESTAMP '2026-03-23 15:51:15.641256', 18, 1, 'bike-components.de', 'Shimano XT Kassette CS-M771-10 10-fach', 'https://www.bike-components.de/de/Shimano/XT-Kassette-CS-M771-10-10-fach-p24985/', 'Shimano CS-M771-10 10-fach, 11-36T Kassette', 'WEB_SCRAPING'),
+(TRUE, 64.99, NULL, TIMESTAMP '2026-03-23 15:51:15.641256', 19, 1, 'bike-components.de', 'Shimano XT Kassette CS-M8000 11-fach', 'https://www.bike-components.de/de/Shimano/XT-Kassette-CS-M8000-11-fach-p43966/', 'Shimano CS-M771-10 10-fach, 11-36T Kassette', 'WEB_SCRAPING'),
+(TRUE, 22.99, NULL, TIMESTAMP '2026-03-23 15:51:15.641256', 20, 1, 'bike-components.de', 'Shimano Kassette CS-HG500-10 10-fach', 'https://www.bike-components.de/de/Shimano/Kassette-CS-HG500-10-10-fach-p43864/', 'Shimano CS-M771-10 10-fach, 11-36T Kassette', 'WEB_SCRAPING'),
+(TRUE, 72.99, NULL, TIMESTAMP '2026-03-23 15:51:15.641256', 21, 1, 'bike-components.de', 'Shimano XT Kassette CS-M771-10 + Kette CN-HG95 10-fach Verschleißset', 'https://www.bike-components.de/de/Shimano/XT-Kassette-CS-M771-10-Kette-CN-HG95-10-fach-Verschleissset-p45501/', 'Shimano CS-M771-10 10-fach, 11-36T Kassette', 'WEB_SCRAPING'),
+(TRUE, 51.99, NULL, TIMESTAMP '2026-03-23 15:51:15.641256', 22, 1, 'bike-components.de', 'Shimano XT Kassette CS-M770 9-fach', 'https://www.bike-components.de/de/Shimano/XT-Kassette-CS-M770-9-fach-p16322/', 'Shimano CS-M771-10 10-fach, 11-36T Kassette', 'WEB_SCRAPING'),
+(TRUE, 14.99, NULL, TIMESTAMP '2026-03-23 15:51:15.641256', 23, 1, 'bike-components.de', 'Shimano Kassette CS-HG400-9 9-fach', 'https://www.bike-components.de/de/Shimano/Kassette-CS-HG400-9-9-fach-p40155/', 'Shimano CS-M771-10 10-fach, 11-36T Kassette', 'WEB_SCRAPING'),
+(TRUE, 72.99, NULL, TIMESTAMP '2026-03-23 15:51:17.215988', 24, 2, 'bike-discount.de', 'Shimano XT CN-HG95+CS-M771 10-fach Verschleissset 11-36', 'https://www.bike-discount.de/de/shimano-xt-cn-hg95-cs-m771-10-fach-verschleissset-11-36-1', 'Shimano CS-M771-10 10-fach, 11-36T Kassette', 'WEB_SCRAPING'),
+(TRUE, 72.99, NULL, TIMESTAMP '2026-03-23 15:51:17.216971', 25, 2, 'bike-discount.de', 'Shimano XT CN-HG95+CS-M771 10-fach Verschleissset 11-34', 'https://www.bike-discount.de/de/shimano-xt-cn-hg95-cs-m771-10-fach-verschleissset-11-34-1', 'Shimano CS-M771-10 10-fach, 11-36T Kassette', 'WEB_SCRAPING'),
+(TRUE, 67.99, NULL, TIMESTAMP '2026-03-23 15:51:17.216971', 26, 2, 'bike-discount.de', 'Shimano XT CN-HG95+CS-M771 10-fach Verschleissset 11-32', 'https://www.bike-discount.de/de/shimano-xt-cn-hg95-cs-m771-10-fach-verschleissset-11-32-1', 'Shimano CS-M771-10 10-fach, 11-36T Kassette', 'WEB_SCRAPING');
+-- Sequence nach manuellem Import zuruecksetzen (letzter manueller ID-Wert: 26)
+ALTER TABLE product_offer ALTER COLUMN id RESTART WITH 27;
