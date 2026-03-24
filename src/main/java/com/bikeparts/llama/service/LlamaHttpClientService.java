@@ -1,17 +1,13 @@
 package com.bikeparts.llama.service;
 
 import com.bikeparts.llama.client.LlamaCompletionRequest;
+import com.bikeparts.llama.client.LlamaHttpUtils;
 import com.bikeparts.llama.server.LlamaServerManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.time.Duration;
 
 /**
  * ACHTUNG:
@@ -39,9 +35,6 @@ import java.time.Duration;
 public class LlamaHttpClientService {
 
     private final LlamaServerManager llamaServerManager;
-
-    /** Timeout fuer die HTTP-Anfrage in Sekunden. */
-    private static final int TIMEOUT_SEKUNDEN = 30;
 
     /**
      * System-Prompt fuer den llama-server.
@@ -88,70 +81,15 @@ public class LlamaHttpClientService {
         System.out.println(request.toJson());
         System.out.println("--- Sende Anfrage ---");
 
-        String antwort = sendeAnfrage(request, llamaServerManager.getServerUrl());
+        String antwort = LlamaHttpUtils.sendeAnfrage(request, llamaServerManager.getServerUrl());
 
         System.out.println("--- Rohantwort vom Server ---");
         System.out.println(antwort);
 
         // Ergebnis-ID aus der JSON-Antwort extrahieren
-        String gefundeneId = extrahiereContent(antwort);
+        String gefundeneId = LlamaHttpUtils.extrahiereContent(antwort);
         System.out.println("--- Gefundene ID ---");
         System.out.println("gefundeneId: " + gefundeneId);
         return gefundeneId;
-    }
-
-    /**
-     * Sendet den {@link LlamaCompletionRequest} per HTTP POST an den llama-server.
-     *
-     * @param request   der vorbereitete LlamaCompletionRequest
-     * @param serverUrl vollstaendige URL des /completion-Endpunkts
-     * @return Rohantwort des Servers als JSON-String
-     * @throws IOException          bei Netzwerkfehlern
-     * @throws InterruptedException wenn der Thread unterbrochen wird
-     */
-    private static String sendeAnfrage(LlamaCompletionRequest request, String serverUrl)
-            throws IOException, InterruptedException {
-        HttpClient client = HttpClient.newBuilder()
-                .connectTimeout(Duration.ofSeconds(TIMEOUT_SEKUNDEN))
-                .build();
-
-        HttpRequest httpRequest = HttpRequest.newBuilder()
-                .uri(URI.create(serverUrl))
-                .timeout(Duration.ofSeconds(TIMEOUT_SEKUNDEN))
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(request.toJson()))
-                .build();
-
-        HttpResponse<String> response = client.send(httpRequest, HttpResponse.BodyHandlers.ofString());
-
-        if (response.statusCode() != 200) {
-            throw new IOException("Unerwarteter HTTP-Statuscode: " + response.statusCode()
-                    + " - Body: " + response.body());
-        }
-
-        return response.body();
-    }
-
-    /**
-     * Extrahiert den "content"-Wert aus der JSON-Antwort des llama-servers.
-     * Beispiel: {"content":"10","...} -> "10"
-     *
-     * <p>Einfaches String-Parsing ohne externe JSON-Bibliothek.
-     *
-     * @param jsonAntwort rohe JSON-Antwort des Servers
-     * @return extrahierter content-Wert oder Fehlermeldung
-     */
-    private static String extrahiereContent(String jsonAntwort) {
-        String schluessel = "\"content\":\"";
-        int start = jsonAntwort.indexOf(schluessel);
-        if (start == -1) {
-            return "(content-Feld nicht gefunden in Antwort)";
-        }
-        start += schluessel.length();
-        int ende = jsonAntwort.indexOf("\"", start);
-        if (ende == -1) {
-            return "(Ende des content-Felds nicht gefunden)";
-        }
-        return jsonAntwort.substring(start, ende).trim();
     }
 }

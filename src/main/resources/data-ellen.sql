@@ -88,9 +88,9 @@ INSERT INTO bikeparts (
     'Fahrradschlauch MTB 29',
     'Continental',
     '62-622',
-    'SV42 (Sclaverand / Französisches Ventil, 42 mm); passend für 28/29 × 1,75 bis 28/29 × 2,5',
-    '1,75 - 2,5',
-    'Fahrradschlauch 29 Zoll. 62-622. Ventil: SV42.',
+    'SV42',
+    '28/29 × 1,75 bis 28/29 × 2,5',
+    'Fahrradschlauch 29 Zoll. 62-622. Ventil: SV42. SV42 (Sclaverand / Französisches Ventil, 42 mm); passend für 28/29 × 1,75 bis 28/29 × 2,5',
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP
 );
@@ -145,13 +145,15 @@ INSERT INTO bikeparts (
     (SELECT id FROM bikes WHERE name = 'mtb1'
         AND account_id = (SELECT id FROM accounts WHERE email = 'ellen@bikeparts.de')),
     'TIRE_29',
-    'Continental X-King 2,4 29"',
+--     'Continental X-King 2,4 29"',
+    -- tut als searchString: Continental X-King 2.4 61-622 29 × 2,4 Zoll Mantel
+    'Continental X-King',
     'Continental',
     'X-King 2.4',
     'Performance',
-    '61-622; 29 × 2,4 Zoll',
+    '61-622 ',
     '2,4',
-    'MTB-Mantel Continental X-King 2,4" für 29-Zoll-Felgen.',
+    'MTB-Mantel Continental X-King 2,4" für 29-Zoll-Felgen. 29 × 2,4 Zoll',
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP
 );
