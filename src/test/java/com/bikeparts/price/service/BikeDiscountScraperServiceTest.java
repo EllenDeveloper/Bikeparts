@@ -131,7 +131,7 @@ class BikeDiscountScraperServiceTest {
         @DisplayName("returns SUCCESS status when matching products are found")
         void returnsSuccess_whenProductsFound() {
             assertEquals(ScrapingResult.ScrapingStatus.SUCCESS,
-                    service.parseDocument(realDoc, TEST_QUERY).status());
+                    service.parseDocument(realDoc, TEST_QUERY).getStatus());
         }
 
         /**
@@ -142,7 +142,7 @@ class BikeDiscountScraperServiceTest {
         @Test
         @DisplayName("returns at most MAX_NUMBER_PRODUCT_OFFERS matching products")
         void limitsResultsToMaxProductOffers() {
-            List<ProductOffer> result = service.parseDocument(realDoc, TEST_QUERY).offers();
+            List<ProductOffer> result = service.parseDocument(realDoc, TEST_QUERY).getOffers();
             assertEquals(ScrapingConstants.Common.MAX_NUMBER_PRODUCT_OFFERS, result.size());
         }
 
@@ -155,7 +155,7 @@ class BikeDiscountScraperServiceTest {
         @Test
         @DisplayName("first product name contains all search terms (shimano, slx)")
         void firstProduct_nameContainsAllSearchTerms() {
-            String name = service.parseDocument(realDoc, TEST_QUERY).offers().getFirst()
+            String name = service.parseDocument(realDoc, TEST_QUERY).getOffers().getFirst()
                     .getProductName().toLowerCase();
             assertTrue(name.contains("shimano"));
             assertTrue(name.contains("slx"));
@@ -168,7 +168,7 @@ class BikeDiscountScraperServiceTest {
         @Test
         @DisplayName("first product has non-null positive price")
         void firstProduct_hasPositivePrice() {
-            ProductOffer first = service.parseDocument(realDoc, TEST_QUERY).offers().getFirst();
+            ProductOffer first = service.parseDocument(realDoc, TEST_QUERY).getOffers().getFirst();
             assertNotNull(first.getPrice());
             assertTrue(first.getPrice().doubleValue() > 0);
         }
@@ -180,7 +180,7 @@ class BikeDiscountScraperServiceTest {
         @Test
         @DisplayName("first product is inStock=true (has buy-widget)")
         void firstProduct_isInStock() {
-            assertTrue(service.parseDocument(realDoc, TEST_QUERY).offers().getFirst().isInStock());
+            assertTrue(service.parseDocument(realDoc, TEST_QUERY).getOffers().getFirst().isInStock());
         }
 
         /**
@@ -190,7 +190,7 @@ class BikeDiscountScraperServiceTest {
         @Test
         @DisplayName("every product has productUrl starting with bike-discount.de base URL")
         void everyProduct_hasCorrectBaseUrl() {
-            service.parseDocument(realDoc, TEST_QUERY).offers().forEach(offer ->
+            service.parseDocument(realDoc, TEST_QUERY).getOffers().forEach(offer ->
                     assertTrue(offer.getProductUrl().startsWith(
                             "https://www.bike-discount.de/")));
         }
@@ -202,7 +202,7 @@ class BikeDiscountScraperServiceTest {
         @Test
         @DisplayName("every product has shopName='bike-discount.de'")
         void everyProduct_hasCorrectShopName() {
-            service.parseDocument(realDoc, TEST_QUERY).offers().forEach(offer ->
+            service.parseDocument(realDoc, TEST_QUERY).getOffers().forEach(offer ->
                     assertEquals("bike-discount.de", offer.getShopName()));
         }
 
@@ -213,7 +213,7 @@ class BikeDiscountScraperServiceTest {
         @Test
         @DisplayName("every product has source=WEB_SCRAPING")
         void everyProduct_hasSourceWebScraping() {
-            service.parseDocument(realDoc, TEST_QUERY).offers().forEach(offer ->
+            service.parseDocument(realDoc, TEST_QUERY).getOffers().forEach(offer ->
                     assertEquals(FetchMethod.WEB_SCRAPING, offer.getSource()));
         }
 
@@ -223,7 +223,7 @@ class BikeDiscountScraperServiceTest {
         @Test
         @DisplayName("every product has non-null fetchedAt")
         void everyProduct_hasFetchedAt() {
-            service.parseDocument(realDoc, TEST_QUERY).offers().forEach(offer ->
+            service.parseDocument(realDoc, TEST_QUERY).getOffers().forEach(offer ->
                     assertNotNull(offer.getFetchedAt()));
         }
 
@@ -234,7 +234,7 @@ class BikeDiscountScraperServiceTest {
         @Test
         @DisplayName("every product has searchQuery set to the passed query")
         void everyProduct_hasCorrectSearchQuery() {
-            service.parseDocument(realDoc, TEST_QUERY).offers().forEach(offer ->
+            service.parseDocument(realDoc, TEST_QUERY).getOffers().forEach(offer ->
                     assertEquals(TEST_QUERY, offer.getSearchQuery()));
         }
     }
@@ -256,7 +256,7 @@ class BikeDiscountScraperServiceTest {
         @DisplayName("returns ERROR status when listing container is absent")
         void returnsError_whenNoListingContainer() {
             ScrapingResult result = service.parseDocument(emptyDoc, TEST_QUERY);
-            assertEquals(ScrapingResult.ScrapingStatus.ERROR, result.status());
+            assertEquals(ScrapingResult.ScrapingStatus.ERROR, result.getStatus());
         }
 
         /**
@@ -267,7 +267,7 @@ class BikeDiscountScraperServiceTest {
         @DisplayName("returns NO_RESULTS status when listing container has no product items")
         void returnsNoResults_whenListingContainerIsEmpty() {
             ScrapingResult result = service.parseDocument(noProductsDoc, TEST_QUERY);
-            assertEquals(ScrapingResult.ScrapingStatus.NO_RESULTS, result.status());
+            assertEquals(ScrapingResult.ScrapingStatus.NO_RESULTS, result.getStatus());
         }
     }
 }

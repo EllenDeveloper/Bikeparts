@@ -36,7 +36,7 @@
     </thead>
     <tbody>
         <tr th:each="bikepart : ${bikeparts}"
-            th:onclick="|window.location='@{/bikes/{bikeId}/bikeparts/{bikepartId}(bikeId=${bikeId},bikepartId=${bikepart.id})}'|"
+            th:onclick="|window.location='@{/bikeparts/{id}(id=${bikepart.id})}'|"
             style="cursor: pointer;">
             <td th:text="${bikepart.id}"></td>
             <td th:text="${bikepart.name}"></td>

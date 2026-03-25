@@ -6,6 +6,7 @@ import com.bikeparts.service.BikeService;
 import com.bikeparts.service.CartService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.aot.hint.annotation.RegisterReflectionForBinding;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,6 +17,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
+/**
+ * MVC-Controller für die View-Layer des BikePartsFinder.
+ *
+ * <p>GraalVM Native Image: {@code @RegisterReflectionForBinding} registriert
+ * {@link ScrapingResult} und das innere Enum {@link ScrapingResult.ScrapingStatus}
+ * für Reflection, damit Thymeleaf/SpEL im Native Image auf Properties wie
+ * {@code shopName}, {@code status} und {@code offers} zugreifen kann.</p>
+ */
+@RegisterReflectionForBinding({ScrapingResult.class, ScrapingResult.ScrapingStatus.class})
 @Controller
 public class BikeViewController {
     private final BikeService bikeService;

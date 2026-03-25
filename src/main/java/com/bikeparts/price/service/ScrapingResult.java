@@ -1,6 +1,8 @@
 package com.bikeparts.price.service;
 
 import com.bikeparts.price.entity.ProductOffer;
+import lombok.Builder;
+import lombok.Data;
 
 import java.util.List;
 
@@ -12,13 +14,84 @@ import java.util.List;
  * technischen Fehler unterscheidet. Wird nicht persistiert - dient nur
  * als Rückgabewert im Anwendungs-Layer.</p>
  *
- * @param offers       gefundene Angebote; leer bei {@code NO_RESULTS} und {@code ERROR}
- * @param status       Ergebnis-Status der Scraping-Anfrage
- * @param errorMessage technische Fehlermeldung bei {@code ERROR}, sonst {@code null}
- * @param shopName     Name des Shops; wird in {@code CartService}
+ * <p>GraalVM Native Image: Die Reflection-Registrierung dieser Klasse erfolgt
+ * über {@code @RegisterReflectionForBinding} in
+ * {@link com.bikeparts.controller.BikeViewController}, da Spring AOT
+ * Reflection-Hints nur für Spring-Beans (nicht für Plain-POJOs) automatisch
+ * verarbeitet. Damit kann Thymeleaf/SpEL auf {@code shopName}, {@code status}
+ * und {@code offers} zugreifen.</p>
+ *
+ * @see ScrapingStatus
+ * @see ProductOffer
  */
-public record ScrapingResult(List<ProductOffer> offers, ScrapingStatus status,
-                             String errorMessage, String shopName) {
+@Data
+@Builder
+public class ScrapingResult {
+
+    /** Gefundene Angebote; leer bei {@code NO_RESULTS} und {@code ERROR}. */
+    private List<ProductOffer> offers;
+
+    /** Ergebnis-Status der Scraping-Anfrage. */
+    private ScrapingStatus status;
+
+    /** Technische Fehlermeldung bei {@code ERROR}, sonst {@code null}. */
+    private String errorMessage;
+
+    /** Name des Shops, z.B. {@code "bike-components.de"}. */
+    private String shopName;
+
+    // -------------------------------------------------------------------------
+    // Factory-Methoden
+    // -------------------------------------------------------------------------
+
+    /**
+     * Erzeugt ein erfolgreiches Ergebnis mit mindestens einem Angebot.
+     *
+     * @param offers   gefundene Angebote
+     * @param shopName Name des Shops
+     * @return {@code ScrapingResult} mit Status {@link ScrapingStatus#SUCCESS}
+     */
+    public static ScrapingResult success(List<ProductOffer> offers, String shopName) {
+        return ScrapingResult.builder()
+                .offers(offers)
+                .status(ScrapingStatus.SUCCESS)
+                .shopName(shopName)
+                .build();
+    }
+
+    /**
+     * Erzeugt ein Ergebnis ohne Treffer.
+     *
+     * @param shopName Name des Shops
+     * @return {@code ScrapingResult} mit Status {@link ScrapingStatus#NO_RESULTS}
+     */
+    public static ScrapingResult noResults(String shopName) {
+        return ScrapingResult.builder()
+                .offers(List.of())
+                .status(ScrapingStatus.NO_RESULTS)
+                .shopName(shopName)
+                .build();
+    }
+
+    /**
+     * Erzeugt ein Fehler-Ergebnis.
+     *
+     * @param errorMessage technische Fehlermeldung
+     * @param shopName     Name des Shops
+     * @return {@code ScrapingResult} mit Status {@link ScrapingStatus#ERROR}
+     */
+    public static ScrapingResult error(String errorMessage, String shopName) {
+        return ScrapingResult.builder()
+                .offers(List.of())
+                .status(ScrapingStatus.ERROR)
+                .errorMessage(errorMessage)
+                .shopName(shopName)
+                .build();
+    }
+
+    // -------------------------------------------------------------------------
+    // Enum
+    // -------------------------------------------------------------------------
 
     /** Mögliche Ergebnis-Zustände einer Scraping-Anfrage. */
     public enum ScrapingStatus {
@@ -28,17 +101,5 @@ public record ScrapingResult(List<ProductOffer> offers, ScrapingStatus status,
         NO_RESULTS,
         /** Technischer Fehler - Shop nicht erreichbar oder Parsing fehlgeschlagen. */
         ERROR
-    }
-
-    public static ScrapingResult success(List<ProductOffer> offers, String shopName) {
-        return new ScrapingResult(offers, ScrapingStatus.SUCCESS, null, shopName);
-    }
-
-    public static ScrapingResult noResults(String shopName) {
-        return new ScrapingResult(List.of(), ScrapingStatus.NO_RESULTS, null, shopName);
-    }
-
-    public static ScrapingResult error(String errorMessage, String shopName) {
-        return new ScrapingResult(List.of(), ScrapingStatus.ERROR, errorMessage, shopName);
     }
 }

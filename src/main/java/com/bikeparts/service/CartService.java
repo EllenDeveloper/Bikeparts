@@ -1,6 +1,5 @@
 package com.bikeparts.service;
 
-import com.bikeparts.annotation.Timed;
 import com.bikeparts.entity.Account;
 import com.bikeparts.entity.Bikepart;
 import com.bikeparts.entity.Cart;
@@ -24,7 +23,6 @@ import lombok.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -180,12 +178,12 @@ public class CartService {
 
         ScrapingResult scrapingResult = scraperShopInterface.search(searchQuery);
 
-        if (scrapingResult.status() == ScrapingResult.ScrapingStatus.SUCCESS) {
+        if (scrapingResult.getStatus() == ScrapingResult.ScrapingStatus.SUCCESS) {
             ShopInfo shopInfo = shopInfoRepository.findByShopName(shopName).orElseThrow(() -> new IllegalArgumentException(
                     "Shop nicht gefunden: " + shopName));
             // set shopId to the offers
-            scrapingResult.offers().forEach(o -> o.setShopId(shopInfo.getId()));
-            productOfferRepository.saveAllAndFlush(scrapingResult.offers());
+            scrapingResult.getOffers().forEach(o -> o.setShopId(shopInfo.getId()));
+            productOfferRepository.saveAllAndFlush(scrapingResult.getOffers());
             List<ProductOffer> oldData = productOfferRepository.findBySearchQueryAndFetchedAtBefore(
                     searchQuery, LocalDateTime.now().minusDays(ScrapingConstants.Common.CACHE_DAYS));
             if (!oldData.isEmpty()) {
@@ -203,7 +201,7 @@ public class CartService {
             return ScrapingResult.success(oldData, shopName);
         }
 
-        log.warn("Scraping {}: {} für query = {} - {}", shopName, scrapingResult.status(), searchQuery, scrapingResult.errorMessage());
+        log.warn("Scraping {}: {} für query = {} - {}", shopName, scrapingResult.getStatus(), searchQuery, scrapingResult.getErrorMessage());
         return scrapingResult;
     }
 

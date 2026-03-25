@@ -85,7 +85,7 @@ public class BikeDiscountScraperService implements ScraperShopInterface {
     public static void main(String[] args) {
         BikeDiscountScraperService service = new BikeDiscountScraperService();
         ScrapingResult result = service.search("shimano slx kette 10-fach");
-        result.offers().forEach(System.out::println);
+        result.getOffers().forEach(System.out::println);
     }
 
     /**

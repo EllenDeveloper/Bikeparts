@@ -117,7 +117,7 @@ class BikeComponentsScraperServiceTest {
         @Test
         @DisplayName("returns at most MAX_NUMBER_PRODUCT_OFFERS products (total=66, 24 per page)")
         void returns8Products_limitedByMaxNumberProductOffers() {
-            List<ProductOffer> result = service.parseDocument(realDoc, TEST_QUERY).offers();
+            List<ProductOffer> result = service.parseDocument(realDoc, TEST_QUERY).getOffers();
             Long id = 10L;
             for (ProductOffer productOffer : result) {
                 productOffer.setId(id--);
@@ -134,7 +134,7 @@ class BikeComponentsScraperServiceTest {
         @Test
         @DisplayName("maps the first product's name from JSON correctly")
         void mapsFirstProduct_name() {
-            ProductOffer first = service.parseDocument(realDoc, TEST_QUERY).offers().getFirst();
+            ProductOffer first = service.parseDocument(realDoc, TEST_QUERY).getOffers().getFirst();
             assertTrue(first.getProductName().toLowerCase().contains("shimano xt"));
         }
 
@@ -146,7 +146,7 @@ class BikeComponentsScraperServiceTest {
         @Test
         @DisplayName("maps the first product's price as non-null positive BigDecimal")
         void mapsFirstProduct_price() {
-            ProductOffer first = service.parseDocument(realDoc, TEST_QUERY).offers().getFirst();
+            ProductOffer first = service.parseDocument(realDoc, TEST_QUERY).getOffers().getFirst();
             assertNotNull(first.getPrice());
             assertTrue(first.getPrice().doubleValue() > 0);
         }
@@ -158,7 +158,7 @@ class BikeComponentsScraperServiceTest {
         @Test
         @DisplayName("sets inStock=true for the first product (isBuyable=true, isSoldOut=false)")
         void mapsFirstProduct_inStock() {
-            assertTrue(service.parseDocument(realDoc, TEST_QUERY).offers().getFirst().isInStock());
+            assertTrue(service.parseDocument(realDoc, TEST_QUERY).getOffers().getFirst().isInStock());
         }
 
         /**
@@ -170,7 +170,7 @@ class BikeComponentsScraperServiceTest {
         @Test
         @DisplayName("sets productUrl with bike-components.de base URL for every product")
         void setsProductUrl_withBaseUrl() {
-            service.parseDocument(realDoc, TEST_QUERY).offers().forEach(dto ->
+            service.parseDocument(realDoc, TEST_QUERY).getOffers().forEach(dto ->
                     assertTrue(dto.getProductUrl().startsWith("https://www.bike-components.de/")));
         }
 
@@ -182,7 +182,7 @@ class BikeComponentsScraperServiceTest {
         @Test
         @DisplayName("sets shopName='bike-components.de' and shopId=1 on every product")
         void setsShopMetadata() {
-            service.parseDocument(realDoc, TEST_QUERY).offers().forEach(dto -> {
+            service.parseDocument(realDoc, TEST_QUERY).getOffers().forEach(dto -> {
                 assertEquals("bike-components.de", dto.getShopName());
             });
         }
@@ -195,7 +195,7 @@ class BikeComponentsScraperServiceTest {
         @Test
         @DisplayName("sets non-null fetchedAt on every product")
         void setsFetchedAt_nonNull() {
-            service.parseDocument(realDoc, TEST_QUERY).offers().forEach(dto ->
+            service.parseDocument(realDoc, TEST_QUERY).getOffers().forEach(dto ->
                     assertNotNull(dto.getFetchedAt()));
         }
 
@@ -206,7 +206,7 @@ class BikeComponentsScraperServiceTest {
         @Test
         @DisplayName("sets searchQuery on every product from the passed query parameter")
         void setsSearchQuery_onEveryProduct() {
-            service.parseDocument(realDoc, TEST_QUERY).offers().forEach(dto ->
+            service.parseDocument(realDoc, TEST_QUERY).getOffers().forEach(dto ->
                     assertEquals(TEST_QUERY, dto.getSearchQuery()));
         }
     }
@@ -230,8 +230,8 @@ class BikeComponentsScraperServiceTest {
         @DisplayName("returns ERROR status when ProductCatalog element is absent from HTML")
         void returnsError_whenNoCatalogElement() {
             ScrapingResult result = service.parseDocument(emptyDoc, TEST_QUERY);
-            assertEquals(ScrapingResult.ScrapingStatus.ERROR, result.status());
-            assertTrue(result.offers().isEmpty());
+            assertEquals(ScrapingResult.ScrapingStatus.ERROR, result.getStatus());
+            assertTrue(result.getOffers().isEmpty());
         }
     }
 }
