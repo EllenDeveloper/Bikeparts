@@ -2,6 +2,7 @@ package com.bikeparts.entity;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Proxy;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
@@ -12,6 +13,10 @@ import java.util.Objects;
 /**
  * Cart entity (Warenkorb)
  */
+// GraalVM Native Image: BytecodeProvider ist 'none' - Hibernate kann keine
+// HibernateProxy-Instanzen zur Laufzeit erzeugen. @Proxy(lazy = false) deaktiviert
+// die Proxy-Generierung fuer diese Entity und verhindert den Laufzeitfehler.
+@Proxy(lazy = false)
 @Entity
 @Table(name = "carts")
 public class Cart {

@@ -16,7 +16,7 @@
     <div th:replace="~{fragments/header :: header}"></div>
 </div>
 
-<p>Anzahl Teile: <span th:text="${bikeparts.size()}">0</span></p>
+<p>Anzahl Teile: <span th:text="${bikepartsSize}">0</span></p>
 
 <table>
     <thead>
@@ -36,7 +36,7 @@
     </thead>
     <tbody>
         <tr th:each="bikepart : ${bikeparts}"
-            th:onclick="|window.location='@{/bikes/{bikeId}/bikeparts/{bikepartId}(bikeId=${bike},bikepart=${bikepart.id})}'|"
+            th:onclick="|window.location='@{/bikes/{bikeId}/bikeparts/{bikepartId}(bikeId=${bikeId},bikepartId=${bikepart.id})}'|"
             style="cursor: pointer;">
             <td th:text="${bikepart.id}"></td>
             <td th:text="${bikepart.name}"></td>

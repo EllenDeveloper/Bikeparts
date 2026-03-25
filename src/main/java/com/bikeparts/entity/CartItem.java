@@ -4,6 +4,7 @@ import com.bikeparts.price.entity.ProductOffer;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Proxy;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
@@ -14,6 +15,10 @@ import java.util.List;
  * CartItem entity (Warenkorb-Artikel)
  * Zwischentabelle für N:M Beziehung zwischen Cart und Bikepart
  */
+// GraalVM Native Image: BytecodeProvider ist 'none' - Hibernate kann keine
+// HibernateProxy-Instanzen zur Laufzeit erzeugen. @Proxy(lazy = false) deaktiviert
+// die Proxy-Generierung fuer diese Entity und verhindert den Laufzeitfehler.
+@Proxy(lazy = false)
 @Entity
 @Table(name = "cart_items")
 public class CartItem {

@@ -5,6 +5,7 @@ import com.bikeparts.validation.SafeText;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Proxy;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
@@ -13,6 +14,10 @@ import java.util.Objects;
 /**
  * Bikepart entity (Fahrradteil)
  */
+// GraalVM Native Image: BytecodeProvider ist 'none' - Hibernate kann keine
+// HibernateProxy-Instanzen zur Laufzeit erzeugen. @Proxy(lazy = false) deaktiviert
+// die Proxy-Generierung fuer diese Entity und verhindert den Laufzeitfehler.
+@Proxy(lazy = false)
 @Entity
 @Table(name = "bikeparts")
 public class Bikepart {

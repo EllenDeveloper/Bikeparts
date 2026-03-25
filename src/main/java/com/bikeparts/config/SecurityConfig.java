@@ -71,6 +71,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                                 // Öffentliche URLs
                                 .requestMatchers("/h2-console/**").permitAll() // H2-Console erlauben
+                                .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
                                 // Admin-Only URLs
 //                                .requestMatchers("/admin/**").hasRole("ADMIN")
                                 // Authority-basiert

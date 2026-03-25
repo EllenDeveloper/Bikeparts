@@ -4,6 +4,7 @@ import com.bikeparts.entity.CartItem;
 import com.bikeparts.price.enums.FetchMethod;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import org.hibernate.annotations.Proxy;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -32,6 +33,10 @@ import java.time.LocalDateTime;
  * @see FetchMethod
  * @see com.bikeparts.price.service.BikeComponentsScraperService
  */
+// GraalVM Native Image: BytecodeProvider ist 'none' - Hibernate kann keine
+// HibernateProxy-Instanzen zur Laufzeit erzeugen. @Proxy(lazy = false) deaktiviert
+// die Proxy-Generierung fuer diese Entity und verhindert den Laufzeitfehler.
+@Proxy(lazy = false)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

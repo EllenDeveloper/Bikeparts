@@ -198,11 +198,15 @@ class BikeViewControllerTest {
         @Test
         @DisplayName("bikepart added with default quantity -> bikeparts-list view")
         void addBikepartToCart_defaultQuantity_returnsBikepartsListView() throws Exception {
+            Account bikeOwner = new Account();
+            bikeOwner.setId(1L);
             Bike bike = new Bike();
             bike.setId(3L);
+            bike.setAccount(bikeOwner);
             Bikepart bikepart = new Bikepart();
             bikepart.setBike(bike);
             when(bikeService.getBikepartById(2L)).thenReturn(bikepart);
+            when(bikeService.getBikeById(3L)).thenReturn(bike);
             when(bikeService.getAllBikeparts(3L)).thenReturn(List.of(bikepart));
             when(account.getId()).thenReturn(1L);
 
@@ -218,11 +222,15 @@ class BikeViewControllerTest {
         @Test
         @DisplayName("custom quantity param -> passed to cartService")
         void addBikepartToCart_withQuantity_passesQuantityToService() throws Exception {
+            Account bikeOwner = new Account();
+            bikeOwner.setId(1L);
             Bike bike = new Bike();
             bike.setId(3L);
+            bike.setAccount(bikeOwner);
             Bikepart bikepart = new Bikepart();
             bikepart.setBike(bike);
             when(bikeService.getBikepartById(2L)).thenReturn(bikepart);
+            when(bikeService.getBikeById(3L)).thenReturn(bike);
             when(bikeService.getAllBikeparts(3L)).thenReturn(List.of(bikepart));
             when(account.getId()).thenReturn(1L);
 

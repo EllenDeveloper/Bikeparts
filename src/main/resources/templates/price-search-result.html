@@ -21,7 +21,7 @@
 </p>
 
 <!-- Keine Ergebnisse überhaupt -->
-<div th:if="${scrapingResults == null or scrapingResults.isEmpty()}"
+<div th:if="${scrapingResults == null or scrapingResults.isEmpty}"
      class="alert alert-error fade-in">
     <strong><i class="fa-solid fa-circle-exclamation"></i> Keine Daten verfügbar</strong>
     <p style="margin-top: 0.5rem; margin-bottom: 0;">
@@ -30,7 +30,7 @@
 </div>
 
 <!-- Gemeinsame Tabelle aller Shops -->
-<table th:if="${scrapingResults != null and !scrapingResults.isEmpty()}">
+<table th:if="${scrapingResults != null and !scrapingResults.isEmpty}">
     <thead>
         <tr>
             <th>Produkt</th>
@@ -48,18 +48,18 @@
             <tr class="shop-header-row">
                 <td colspan="5">
                     <i class="fa-solid fa-shop"></i>
-                    <span th:text="${scrapingResult.shopName()}"></span>
+                    <span th:text="${scrapingResult.shopName}"></span>
 
-                    <span th:if="${scrapingResult.status().name() == 'SUCCESS'}"
+                    <span th:if="${#strings.equals(scrapingResult.status, 'SUCCESS')}"
                           class="shop-status-badge shop-status-success">
                         <i class="fa-solid fa-check"></i>
-                        <span th:text="${scrapingResult.offers().size()}"></span> Angebote
+                        <span th:text="${scrapingResult.offers.size}"></span> Angebote
                     </span>
-                    <span th:if="${scrapingResult.status().name() == 'NO_RESULTS'}"
+                    <span th:if="${#strings.equals(scrapingResult.status, 'NO_RESULTS')}"
                           class="shop-status-badge shop-status-warning">
                         <i class="fa-solid fa-circle-info"></i> Keine Treffer
                     </span>
-                    <span th:if="${scrapingResult.status().name() == 'ERROR'}"
+                    <span th:if="${#strings.equals(scrapingResult.status, 'ERROR')}"
                           class="shop-status-badge shop-status-error">
                         <i class="fa-solid fa-circle-exclamation"></i> Fehler
                     </span>
@@ -67,19 +67,19 @@
             </tr>
 
             <!-- Fehlerzeile -->
-            <tr th:if="${scrapingResult.status().name() == 'ERROR'}" class="row-error">
+            <tr th:if="${#strings.equals(scrapingResult.status, 'ERROR')}" class="row-error">
                 <td colspan="5">
                     <i class="fa-solid fa-triangle-exclamation"></i>
                     Shop nicht erreichbar:
-                    <span th:text="${scrapingResult.errorMessage() != null
-                                     ? scrapingResult.errorMessage()
+                    <span th:text="${scrapingResult.errorMessage != null
+                                     ? scrapingResult.errorMessage
                                      : 'Unbekannter Fehler'}">
                     </span>
                 </td>
             </tr>
 
             <!-- Keine-Treffer-Zeile -->
-            <tr th:if="${scrapingResult.status().name() == 'NO_RESULTS'}" class="row-no-results">
+            <tr th:if="${#strings.equals(scrapingResult.status, 'NO_RESULTS')}" class="row-no-results">
                 <td colspan="5">
                     <i class="fa-solid fa-circle-info"></i>
                     Keine passenden Angebote für diese Suchanfrage.
@@ -87,7 +87,7 @@
             </tr>
 
             <!-- Angebot-Zeilen -->
-            <tr th:each="offer : ${scrapingResult.offers()}">
+            <tr th:each="offer : ${scrapingResult.offers}">
                 <td th:text="${offer.productName}"></td>
                 <td th:text="${offer.price != null
                                ? #numbers.formatDecimal(offer.price, 1, 2) + ' €'

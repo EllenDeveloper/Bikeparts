@@ -80,3 +80,6 @@ http://localhost:8080/bikeparts/2/addBikepartToCart
 Daten aus der DB exportieren
   SCRIPT TABLE shop_info;
   SCRIPT TABLE product_offer;
+
+Native bauen ohne tests:
+mvn -Pnative package -DskipTests

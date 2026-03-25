@@ -58,8 +58,14 @@ public class BikeViewController {
         if (!bike.getAccount().getId().equals(account.getId())) {
             throw new RuntimeException("Zugriff verweigert");
         }
-        model.addAttribute("bikeparts", bikeService.getAllBikeparts(bikeId));
+//        model.addAttribute("bikeparts", bikeService.getAllBikeparts(bikeId));
+//        model.addAttribute("accountId", account.getId());
+//        Bikepart bikepart = bikeService.getBikepartById(bikeId);
+        List<Bikepart> allBikeparts = bikeService.getAllBikeparts(bikeId);
+        model.addAttribute("bikeparts", allBikeparts);
         model.addAttribute("accountId", account.getId());
+        model.addAttribute("bikeId", bikeId);
+        model.addAttribute("bikepartsSize", allBikeparts.size());
         return "bikeparts-list";
     }
 
@@ -79,9 +85,14 @@ public class BikeViewController {
 
         cartService.addBikepartToCart(id, quantity);
         Bikepart bikepart = bikeService.getBikepartById(id);
-        model.addAttribute("bikeparts", bikeService.getAllBikeparts(bikepart.getBike().getId()));
+        Long bikeId = bikepart.getBike().getId();
+        List<Bikepart> allBikeparts = bikeService.getAllBikeparts(bikeId);
+        model.addAttribute("bikeparts", allBikeparts);
         model.addAttribute("accountId", account.getId());
-        return "bikeparts-list";
+        model.addAttribute("bikeId", bikeId);
+        model.addAttribute("bikepartsSize", allBikeparts.size());
+        return showBikeparts(bikeId, model);
+//        return "bikeparts-list";
     }
 
     @GetMapping("/cart")

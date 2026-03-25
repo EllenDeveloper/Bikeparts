@@ -2,6 +2,7 @@ package com.bikeparts.price.entity;
 
 import com.bikeparts.price.enums.FetchMethod;
 import jakarta.persistence.*;
+import org.hibernate.annotations.Proxy;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -35,6 +36,10 @@ import java.time.LocalDateTime;
  * @see com.bikeparts.price.service.BikeComponentsShippingCostScraperService
  * @see com.bikeparts.price.service.BikeDiscountShippingCostScraperService
  */
+// GraalVM Native Image: BytecodeProvider ist 'none' - Hibernate kann keine
+// HibernateProxy-Instanzen zur Laufzeit erzeugen. @Proxy(lazy = false) deaktiviert
+// die Proxy-Generierung fuer diese Entity und verhindert den Laufzeitfehler.
+@Proxy(lazy = false)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
