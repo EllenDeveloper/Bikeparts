@@ -124,23 +124,4 @@ public class ProductOffer {
     @Column(nullable = false)
     private LocalDateTime fetchedAt;
 
-    /**
-     * Gibt eine kompakte Textdarstellung dieses Angebots zurück.
-     *
-     * <p>Enthält die für einen schnellen Überblick relevanten Felder:
-     * ID, Produktname, Shopname, Preis und Verfügbarkeit.</p>
-     *
-     * <p>Beispielausgabe:</p>
-     * <pre>{@code
-     * id=42, productName=Shimano XT Kette, shopName=bike-components.de, price=19.99, inStock=true
-     * }</pre>
-     *
-     * @return kompakte Darstellung des Angebots
-     */
-    public String toStringForLlama() {
-        return "id=\"" + id
-             + "\", productName=\"" + productName
-             + "\", price=\"" + String.format("%.2f", price)
-             + "\"  \n";
-    }
 }

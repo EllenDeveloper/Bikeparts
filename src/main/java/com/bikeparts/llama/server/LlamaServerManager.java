@@ -68,7 +68,7 @@ public class LlamaServerManager {
     /** Basis-URL des Servers ohne Port und Pfad, z.B. {@code http://localhost}. */
     private final String serverBaseUrl;
 
-    /** Vollstaendige URL des {@code /completion}-Endpunkts, z.B. {@code http://localhost:8085/completion}. */
+    /** Vollstaendige URL des {@code /completion}-Endpunkts, z.B. {@code http://localhost:8099/completion}. */
     private final String serverUrl;
 
     /** Pfad zur GGUF-Modelldatei, die der llama-server laedt. */
@@ -156,7 +156,7 @@ public class LlamaServerManager {
     /**
      * Gibt die vollstaendige URL des {@code /completion}-Endpunkts zurueck.
      *
-     * @return Server-URL, z.B. {@code http://localhost:8085/completion}
+     * @return Server-URL, z.B. {@code http://localhost:8099/completion}
      */
     public String getServerUrl() {
         return serverUrl;

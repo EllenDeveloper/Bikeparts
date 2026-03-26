@@ -27,7 +27,7 @@ import java.io.IOException;
  * Manueller Start z.B. mit:
  * <pre>
  *   llama-server.exe -m "DIRECTORY_KI_MODELS\qwen2.5-1.5b-instruct-q4_k_m.gguf"
- *                    --port 8085 -c 2048 --threads 4
+ *                    --port 8099 -c 2048 --threads 4
  * </pre>
  * Zuvor muss fuer Windows llama.cpp heruntergeladen werden.</p>
  *

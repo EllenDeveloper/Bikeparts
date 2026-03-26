@@ -69,7 +69,7 @@ public class ScrapingUtils {
                         searchQuery.toLowerCase().split("[\\s/+,]+"))
                 .collect(Collectors.toSet());
 
-        //  TODO: Shimano Abkürzungen in application.properties
+        //  TODO: Shimano Abkürzungen nach application.properties verschieben
         Optional<String> shimanoAbbreviations = searchQuerySet.stream()
                 .filter(p -> p.contains("cs-")).filter(p -> p.contains("cn-"))
                 .filter(p -> p.contains("st-")).filter(p -> p.contains("sl-"))

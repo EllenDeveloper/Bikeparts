@@ -1,6 +1,7 @@
 package com.bikeparts.llama.client;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * <p>Repraesentiert den JSON-Payload fuer eine POST-Anfrage an den llama-server /completion-Endpunkt.
@@ -67,6 +68,8 @@ public class LlamaCompletionRequest {
      */
     private final boolean enableThinking;
 
+    private final boolean cachePrompt;
+
     /**
      * Privater Konstruktor - wird ausschliesslich von {@link Builder#build()} aufgerufen.
      *
@@ -80,44 +83,46 @@ public class LlamaCompletionRequest {
         this.seed = builder.seed;
         this.stop = builder.stop;
         this.enableThinking = builder.enableThinking;
+        this.cachePrompt = builder.cachePrompt;
     }
 
     /**
      * Erstellt eine vorkonfigurierte Anfrage fuer die ProductOffers-Filterung.
      *
      * @param systemPrompt  Systembeschreibung fuer das Modell
-     * @param productOffers ProductOffers-Liste im Format "id=X, productName=..., price=..., inStock=..."
+     * @param chatMLToken_UserPart Produktangebotsliste im Format "id=X, productName=..., price=..., inStock=..."
      * @return LlamaCompletionRequest mit Standardkonfiguration
      */
-    public static LlamaCompletionRequest fromProductOffers(String systemPrompt, String productOffers) {
+    public static LlamaCompletionRequest buildRequest(String systemPrompt, String chatMLToken_UserPart) {
         return new Builder()
-                .productOffers(systemPrompt, productOffers)
+                .productOffers(systemPrompt, chatMLToken_UserPart)
                 .build();
     }
 
     /**
      * Serialisiert den Request als JSON-String fuer den llama-server /completion-Endpunkt.
      *
+     * <p>Bewusst ohne {@code org.json.JSONObject} oder Jackson implementiert, da beide
+     * Bibliotheken Reflection verwenden und dadurch mit GraalVM Native Image inkompatibel sind.
+     * Stattdessen wird der JSON-String manuell zusammengebaut und alle Feldwerte
+     * werden per {@link #escapeJson(String)} abgesichert.</p>
+     *
      * @return JSON-Payload als String
      */
     public String toJson() {
-        StringBuilder stopArray = new StringBuilder("[");
-        for (int i = 0; i < stop.size(); i++) {
-            stopArray.append("\"").append(escapeJson(stop.get(i))).append("\"");
-            if (i < stop.size() - 1) {
-                stopArray.append(",");
-            }
-        }
-        stopArray.append("]");
+        String stopJson = stop.stream()
+                .map(s -> "\"" + escapeJson(s) + "\"")
+                .collect(Collectors.joining(", ", "[", "]"));
 
         return "{"
-                + "\"prompt\":\"" + escapeJson(prompt) + "\","
-                + "\"temperature\":" + temperature + ","
-                + "\"n_predict\":" + nPredict + ","
-                + "\"repeat_penalty\":" + repeatPenalty + ","
-                + "\"seed\":" + seed + ","
-                + "\"stop\":" + stopArray + ","
-                + "\"enable_thinking\":" + enableThinking
+                + "\"prompt\":\""        + escapeJson(this.prompt) + "\","
+                + "\"temperature\":"     + this.temperature        + ","
+                + "\"n_predict\":"       + this.nPredict           + ","
+                + "\"cache_prompt\":"    + this.cachePrompt        + ","
+                + "\"repeat_penalty\":"  + this.repeatPenalty      + ","
+                + "\"seed\":"            + this.seed               + ","
+                + "\"stop\":"            + stopJson                + ","
+                + "\"enable_thinking\":" + this.enableThinking
                 + "}";
     }
 
@@ -136,11 +141,6 @@ public class LlamaCompletionRequest {
                 .replace("\t", "\\t");
     }
 
-    /**
-     * Gibt den vollstaendigen Prompt im Qwen-ChatML-Format zurueck.
-     *
-     * @return Prompt-String (System + User + Assistant-Prefix)
-     */
     public String getPrompt() {
         return prompt;
     }
@@ -200,6 +200,10 @@ public class LlamaCompletionRequest {
         return enableThinking;
     }
 
+    public boolean isCachePrompt() {
+        return cachePrompt;
+    }
+
     /**
      * Builder fuer {@link LlamaCompletionRequest}.
      *
@@ -222,7 +226,10 @@ public class LlamaCompletionRequest {
         private float temperature = 0.0f;
 
         /** Maximale Anzahl generierter Tokens in der Antwort. */
-        private int nPredict = 10;
+        private int nPredict = 150;
+        
+        // die Antwort des letzten requests nicht einfach wiederholen
+        private boolean cachePrompt = false;
 
         /** Wiederholungsstrafe: 1.0 = keine Strafe, &gt; 1.0 = Wiederholungen unterdruecken. */
         private float repeatPenalty = 1.0f;
@@ -231,7 +238,8 @@ public class LlamaCompletionRequest {
         private int seed = -1;
 
         /** Stop-Sequenzen: Generierung endet beim ersten Auftreten eines dieser Tokens. */
-        private List<String> stop = List.of("<|im_end|>", "\n");
+        // Ersetze \n durch \n\n (Stoppt erst bei einer echten Leerzeile)
+        private List<String> stop = List.of("<|im_end|>", "\n\n");
 
         /** Steuert den Thinking-Modus (Chain-of-Thought). false = deaktiviert (Standard). */
         private boolean enableThinking = false;
@@ -241,11 +249,11 @@ public class LlamaCompletionRequest {
          * Ueberschreibt einen zuvor gesetzten Prompt.
          *
          * @param systemPrompt  Systembeschreibung fuer das Modell
-         * @param productOffers ProductOffers-Liste als String
+         * @param chatMLToken_UserPart Produktangebotsliste als String
          * @return this Builder
          */
-        public Builder productOffers(String systemPrompt, String productOffers) {
-            this.prompt = buildPrompt(systemPrompt, productOffers);
+        public Builder productOffers(String systemPrompt, String chatMLToken_UserPart) {
+            this.prompt = buildPrompt(systemPrompt, chatMLToken_UserPart);
             return this;
         }
 
@@ -317,6 +325,18 @@ public class LlamaCompletionRequest {
             this.enableThinking = enableThinking;
             return this;
         }
+/**
+         * Aktiviert oder deaktiviert den Prompt-Cache des llama-servers.
+         * Bei true werden gleiche Prompt-Prefixe gecacht und Folgeanfragen beschleunigt.
+         * Standard: false.
+         *
+         * @param cachePrompt true = Cache aktiv, false = kein Cache
+         * @return this Builder
+         */
+        public Builder cachePrompt(boolean cachePrompt) {
+            this.cachePrompt = cachePrompt;
+            return this;
+        }
 
         /**
          * Erstellt den {@link LlamaCompletionRequest}.
@@ -336,18 +356,19 @@ public class LlamaCompletionRequest {
          * Struktur identisch zu QwenOnePrompt: System -> User (ProductOffers) -> Assistant-Prefix "ID=".
          *
          * @param systemPrompt  Systembeschreibung fuer das Modell
-         * @param productOffers ProductOffers-Liste als String
+         * @param chatMLToken_UserPart Produktangebotsliste als String
          * @return fertiger ChatML-Prompt
          */
-        private String buildPrompt(String systemPrompt, String productOffers) {
+        private String buildPrompt(String systemPrompt, String chatMLToken_UserPart) {
             return "<|im_start|>system\n"
                     + systemPrompt + "<|im_end|>\n"
                     + "<|im_start|>user\n"
-                    + productOffers
+                    + chatMLToken_UserPart
 //my                    + " /no_think"
                     + "<|im_end|>\n"
-                    + "<|im_start|>assistant\n"
-                    + "ID=";
+                    + "<|im_start|>assistant\n";
+                    // Wichtig hier kein id= da das modell sonst durcheinander kommt
+//                    + "id=";
         }
     }
 }

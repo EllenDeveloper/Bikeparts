@@ -78,6 +78,7 @@ public class SecurityConfig {
                                 // Alle anderen brauchen nur Login
                                 .anyRequest().authenticated()
                 )
+                // Für Login im Browser
                 .formLogin(form -> form
                         .loginPage("/login")
                         // default parameter ist username!
@@ -92,9 +93,10 @@ public class SecurityConfig {
                 // frames in h2-console erlauben
                 .headers(headers -> headers
                         .frameOptions(frame -> frame.sameOrigin())
-                );
-//                .httpBasic(basic -> {
-//                })
+                )
+                // für Bruno/Postman. Basic Auth
+                .httpBasic(basic -> {
+                });
 
         return http.build();
     }

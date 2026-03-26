@@ -1,6 +1,7 @@
 package com.bikeparts.price.service;
 
 import com.bikeparts.config.ProxyConfig;
+import com.bikeparts.llama.LlamaPromptUtils;
 import com.bikeparts.price.ScrapingConstants;
 import com.bikeparts.price.ScrapingUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -121,7 +122,7 @@ class BikeComponentsScraperServiceTest {
             Long id = 10L;
             for (ProductOffer productOffer : result) {
                 productOffer.setId(id--);
-                System.out.println(productOffer.toStringForLlama());
+                System.out.println(LlamaPromptUtils.toStringForLlama(productOffer));
             }
             assertEquals(ScrapingConstants.Common.MAX_NUMBER_PRODUCT_OFFERS, result.size());
         }

@@ -222,20 +222,17 @@ public class CartService {
     }
 
     @Transactional
-    public String rateSearchResultsWithKI(Long bikepartId) {
+    public ProductOffer rateSearchResultsWithKI(Long bikepartId) {
         if (bikepartId != null) {
             Bikepart bikepart = bikepartRepository.findBikepartById(bikepartId);
-//            String searchQuery1 = getSearchQuery(bikepart);
             String searchQuery = getSearchQuery(bikepart);
-            List<ProductOffer> bySearchQuery = productOfferRepository.findBySearchQuery(searchQuery);
-            String stringForLlama = bySearchQuery.stream()
-                    .map(ProductOffer::toStringForLlama)
-                    .collect(Collectors.joining("\n"));
+            List<ProductOffer> productOfferBySearchQuery = productOfferRepository.findBySearchQuery(searchQuery);
+
             try {
-                if (!stringForLlama.isEmpty()) {
-                    String result = llamaHttpClientService.rateSearchResult(stringForLlama);
+                if (!productOfferBySearchQuery.isEmpty()) {
+                    String result = llamaHttpClientService.rateSearchResult(searchQuery, productOfferBySearchQuery);
                     log.debug("**** " + result);
-                    return result;
+                    return productOfferRepository.findById(Long.parseLong(result)).orElse(null);
                 }
             } catch (IOException | InterruptedException e) {
                 throw new RuntimeException(e);
@@ -244,6 +241,6 @@ public class CartService {
 //            LlamaCompletionRequest llamaCompletionRequest = LlamaCompletionRequest.fromInventory(LlamaHttpClientMain.SYSTEM_PROMPT, stringForLlama);
         }
         // TODO error handling
-        return "no KI result of rateSearchResultsWithKI with bikepartId " + bikepartId;
+        return null;
     }
 }

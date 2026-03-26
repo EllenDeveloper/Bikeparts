@@ -1,16 +1,19 @@
 package com.bikeparts.llama.client;
 
+import com.bikeparts.llama.LlamaPromptUtils;
 import com.bikeparts.llama.server.LlamaServerManager;
+import com.bikeparts.price.entity.ProductOffer;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Properties;
 
 /**
  * ACHTUNG:
  * Diese Klasse funktioniert auch unter Java SE! Da die HTTP-klassen von java.net verwendet werden.
  * Es wurden absichtlich nicht die Klassen von SpringBoot (spring-ai-starter-model-ollama) verwendet.
- *
+ * <p>
  * Testprogramm fuer die REST-Kommunikation mit dem llama-server.
  *
  * <p><b>Architektur - zwei Schichten:</b>
@@ -39,11 +42,7 @@ import java.util.Properties;
  * </pre>
  */
 public class LlamaHttpClientMain {
-
-    /** System-Prompt: KI als deterministischer Filter-Algorithmus (identisch zu QwenOnePrompt). */
-    public static final String SYSTEM_PROMPT =
-            "Du bist ein Filter-Algorithmus. Gib NUR die numerische ID aus. "
-            + "Bedingungen: Kette, SLX, 10-fach, inStock=true. Günstigster Preis gewinnt.";
+//    Logger log = LoggerFactory.getLogger(LlamaHttpClientMain.class.toString());
 
     /**
      * Einstiegspunkt des Testprogramms.
@@ -69,10 +68,10 @@ public class LlamaHttpClientMain {
         String serverExe = props.getProperty("llama.server.exe");
         String serverBaseUrl = props.getProperty("llama.server.serverBaseUrl");
         String modelPath = props.getProperty("llama.model.path");
-        int port         = Integer.parseInt(props.getProperty("llama.server.port", "8080"));
-        int threads      = Integer.parseInt(props.getProperty("llama.server.threads", "4"));
-        int context      = Integer.parseInt(props.getProperty("llama.server.context", "2048"));
-        int timeout      = Integer.parseInt(props.getProperty("llama.server.timeout", "100"));
+        int port = Integer.parseInt(props.getProperty("llama.server.port", "8099"));
+        int threads = Integer.parseInt(props.getProperty("llama.server.threads", "4"));
+        int context = Integer.parseInt(props.getProperty("llama.server.context", "2048"));
+        int timeout = Integer.parseInt(props.getProperty("llama.server.timeout", "100"));
         String serverUrl = "http://localhost:" + port + "/completion";
 
         // llama-server pruefen und ggf. starten
@@ -80,6 +79,7 @@ public class LlamaHttpClientMain {
                 .serverExe(serverExe)
                 .modelPath(modelPath)
                 .serverBaseUrl(serverBaseUrl)
+                .serverUrl(serverUrl)
                 .port(port)
                 .threads(threads)
                 .contextGroesse(context)
@@ -88,35 +88,20 @@ public class LlamaHttpClientMain {
         serverManager.startIfNotRunning();
 
         // Test-ProductOffers aus QwenOnePrompt
-        String productOffers = "id=8, productName=Shimano 105 / SLX / CN-HG601-11 11-fach E-Bike Quick-Link Kette, shopName=bike-components.de, price=24.99, inStock=true \n"
-                + "id=7, productName=Shimano SLX / 105 / E-Bike Quick-Link Kette CN-M7100 12-fach, shopName=bike-components.de, price=20.990053, inStock=true \n"
-                + "id=6, productName=Shimano SLX Kassette CS-M7000-11 11-fach, shopName=bike-components.de, price=49.989996000000005, inStock=true \n"
-                + "id=10, productName=Shimano XT / XTR / SLX CN-HG95 10-fach Kette , shopName=bike-components.de, price=19.989977000000003, inStock=true \n"
-                + "id=5, productName=Shimano SLX Kassette CS-M7100-12 12-fach, shopName=bike-components.de, price=77.989982, inStock=true \n"
-                + "id=4, productName=Shimano SLX Schaltgriff SL-M7100 mit Klemmschelle 12-fach, shopName=bike-components.de, price=24.99, inStock=true \n"
-                + "id=9, productName=Shimano 105 / SLX / E-Bike Kette CN-HG601-11 11-fach, shopName=bike-components.de, price=19.989977000000003, inStock=false \n"
-                + "id=3, productName=Shimano SLX Kassette CS-M7100-12 + Kette CN-M7100 12-fach Verschleißset, shopName=bike-components.de, price=72.989959, inStock=true \n";
+        String productOffersString = "id=8, productName=Shimano 105 / SLX / CN-HG601-11 11-fach E-Bike Quick-Link Kette, price=24.99 \n"
+                + "id=7, productName=Shimano SLX / 105 / E-Bike Quick-Link Kette CN-M7100 12-fach, price=20.990053 \n"
+                + "id=6, productName=Shimano SLX Kassette CS-M7000-11 11-fach, price=49.989996000000005 \n"
+                + "id=10, productName=Shimano XT / XTR / SLX CN-HG95 10-fach Kette , price=19.989977000000003 \n"
+                + "id=5, productName=Shimano SLX Kassette CS-M7100-12 12-fach, price=77.989982 \n"
+                + "id=4, productName=Shimano SLX Schaltgriff SL-M7100 mit Klemmschelle 12-fach, price=24.99 \n"
+                + "id=9, productName=Shimano 105 / SLX / E-Bike Kette CN-HG601-11 11-fach, price=19.989977000000003 \n"
+                + "id=3, productName=Shimano SLX Kassette CS-M7100-12 + Kette CN-M7100 12-fach Verschleißset, price=72.989959 \n";
+        List<ProductOffer> productOffers = LlamaPromptUtils.getProductOffersFromString(productOffersString);
 
-        // LlamaCompletionRequest mit Standardkonfiguration (Thinking deaktiviert)
-        LlamaCompletionRequest request = LlamaCompletionRequest.fromProductOffers(SYSTEM_PROMPT, productOffers);
+        String searchQuery = "Kette Shimano SLX 10-fach";
 
-        System.out.println("=== LlamaRequest Test ===");
-        System.out.println("serverUrl: " + serverUrl);
-        System.out.println("temperature: " + request.getTemperature());
-        System.out.println("nPredict: " + request.getNPredict());
-        System.out.println("enableThinking: " + request.isEnableThinking());
-        System.out.println("--- JSON-Payload ---");
-        System.out.println(request.toJson());
-        System.out.println("--- Sende Anfrage ---");
 
-        String antwort = LlamaHttpUtils.sendeAnfrage(request, serverUrl);
-
-        System.out.println("--- Rohantwort vom Server ---");
-        System.out.println(antwort);
-
-        // Ergebnis-ID aus der JSON-Antwort extrahieren
-        String gefundeneId = LlamaHttpUtils.extrahiereContent(antwort);
-        System.out.println("--- Gefundene ID ---");
-        System.out.println("gefundeneId: " + gefundeneId);
+        LlamaHttpUtils.callLlama(searchQuery, productOffers);
     }
+
 }

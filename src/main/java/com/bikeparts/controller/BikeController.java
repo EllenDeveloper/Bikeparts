@@ -142,7 +142,7 @@ public class BikeController {
             @PathVariable Long bikepartId) {
 
         log.info("***** rateSearchResultsWithKI");
-        String result = cartService.rateSearchResultsWithKI(bikepartId);
+        String result = cartService.rateSearchResultsWithKI(bikepartId).toString();
         return ResponseEntity.ok(result);
     }
 
