@@ -2,7 +2,7 @@ name: GraalVM Native Build (Linux)
 
 on:
   push:
-    branches: [ master ]
+    tags: [ 'v*' ]
   workflow_dispatch:
 
 jobs:
@@ -30,9 +30,7 @@ jobs:
       - name: Build native image
         run: mvn -Pnative -DskipTests package
 
-      - name: Upload native binary
-        uses: actions/upload-artifact@v4
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: bikeparts-linux
-          path: target/bikeparts
-          if-no-files-found: error
+          files: target/bikeparts
