@@ -138,9 +138,9 @@ public class ProductOffer {
      * @return kompakte Darstellung des Angebots
      */
     public String toStringForLlama() {
-        return "id=" + id
-             + ", productName=" + productName
-             + ", price=" + price
-             + ", inStock=" + inStock + " \n";
+        return "id=\"" + id
+             + "\", productName=\"" + productName
+             + "\", price=\"" + String.format("%.2f", price)
+             + "\"  \n";
     }
 }
