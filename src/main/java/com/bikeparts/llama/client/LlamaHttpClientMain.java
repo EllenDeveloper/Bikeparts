@@ -38,7 +38,7 @@ import java.util.Properties;
  * Starten mit:
  * <pre>
  *   ./llama-server.exe -m "./models/qwen2.5-1.5b-instruct-q4_k_m.gguf"
- *                      --port 8080 -c 2048 --threads 4
+ *                      --port 8099 -c 2048 --threads 4
  * </pre>
  */
 public class LlamaHttpClientMain {
@@ -47,7 +47,7 @@ public class LlamaHttpClientMain {
     /**
      * Einstiegspunkt des Testprogramms.
      *
-     * <p>Laedt die Konfiguration aus {@code application.properties}, stellt sicher dass
+     * <p>Laedt die Konfiguration aus {@code application.properties}, stellt sicher, dass
      * der llama-server laeuft, baut einen {@link LlamaCompletionRequest} mit einer
      * festen Test-ProductOffers-Liste und gibt die vom Modell gefundene Produkt-ID aus.</p>
      *
@@ -66,6 +66,7 @@ public class LlamaHttpClientMain {
         }
 
         String serverExe = props.getProperty("llama.server.exe");
+        String serverModel = props.getProperty("llama.server.model");
         String serverBaseUrl = props.getProperty("llama.server.serverBaseUrl");
         String modelPath = props.getProperty("llama.model.path");
         int port = Integer.parseInt(props.getProperty("llama.server.port", "8099"));
@@ -77,6 +78,7 @@ public class LlamaHttpClientMain {
         // llama-server pruefen und ggf. starten
         LlamaServerManager serverManager = new LlamaServerManager.Builder()
                 .serverExe(serverExe)
+                .serverModel(serverModel)
                 .modelPath(modelPath)
                 .serverBaseUrl(serverBaseUrl)
                 .serverUrl(serverUrl)
@@ -101,7 +103,8 @@ public class LlamaHttpClientMain {
         String searchQuery = "Kette Shimano SLX 10-fach";
 
 
-        LlamaHttpUtils.callLlama(searchQuery, productOffers);
+        String result = LlamaHttpUtils.callLlama(searchQuery, productOffers);
+        System.out.println("callLlama result: " + result);
     }
 
 }

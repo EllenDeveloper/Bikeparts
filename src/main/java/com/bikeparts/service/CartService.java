@@ -30,7 +30,6 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class CartService {
@@ -222,7 +221,7 @@ public class CartService {
     }
 
     @Transactional
-    public ProductOffer rateSearchResultsWithKI(Long bikepartId) {
+    public ProductOffer kiSuggestionsForBikepart(Long bikepartId) {
         if (bikepartId != null) {
             Bikepart bikepart = bikepartRepository.findBikepartById(bikepartId);
             String searchQuery = getSearchQuery(bikepart);
@@ -230,8 +229,11 @@ public class CartService {
 
             try {
                 if (!productOfferBySearchQuery.isEmpty()) {
-                    String result = llamaHttpClientService.rateSearchResult(searchQuery, productOfferBySearchQuery);
+                    String result = llamaHttpClientService.getKiSuggestions(searchQuery, productOfferBySearchQuery);
                     log.debug("**** " + result);
+                    if (result == null) {
+                        return null;
+                    }
                     return productOfferRepository.findById(Long.parseLong(result)).orElse(null);
                 }
             } catch (IOException | InterruptedException e) {

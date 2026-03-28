@@ -73,6 +73,9 @@ public class LlamaHttpUtils {
         List<ProductOffer> filteredOffers = LlamaPromptUtils.preFilterAndSort(searchQuery, productOffers);
 
         log.debug("filteredOffers: {}", filteredOffers);
+        if (filteredOffers.isEmpty()) {
+            return null;
+        }
         String systemPrompt = LlamaPromptUtils.getSystemPrompt(searchQuery, filteredOffers);
 
         // LlamaCompletionRequest mit Standardkonfiguration (Thinking deaktiviert)

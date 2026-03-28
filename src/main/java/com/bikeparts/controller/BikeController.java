@@ -3,6 +3,7 @@
 package com.bikeparts.controller;
 
 import com.bikeparts.entity.*;
+import com.bikeparts.price.entity.ProductOffer;
 import com.bikeparts.price.service.ScrapingResult;
 import com.bikeparts.service.AccountService;
 import com.bikeparts.service.BikeService;
@@ -137,13 +138,16 @@ public class BikeController {
     }
 
     // Werte von Bikepart productOffer bewerten lassen
-    @PostMapping("/cart/bikeparts/{bikepartId}/rateSearchResultsWithKI")
-    public ResponseEntity<?> rateSearchResultsWithKI(
+    @PostMapping("/cart/bikeparts/{bikepartId}/kiSuggestionsForBikepart")
+    public ResponseEntity<?> kiSuggestionsForBikepart(
             @PathVariable Long bikepartId) {
 
-        log.info("***** rateSearchResultsWithKI");
-        String result = cartService.rateSearchResultsWithKI(bikepartId).toString();
-        return ResponseEntity.ok(result);
+        log.info("***** kiSuggestionsForBikepart");
+        ProductOffer result = cartService.kiSuggestionsForBikepart(bikepartId);
+        if (result == null) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(result.toString());
     }
 
     @GetMapping("/bike/{bikeId}")

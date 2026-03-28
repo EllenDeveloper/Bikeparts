@@ -1,11 +1,11 @@
 info:
-  name: rateSearchResultsWithKI
+  name: kiSuggestionsForBikepart
   type: http
   seq: 4
 
 http:
   method: POST
-  url: http://localhost:8080/api/accounts/cart/bikeparts/2/rateSearchResultsWithKI
+  url: http://localhost:8080/api/accounts/cart/bikeparts/2/kiSuggestionsForBikepart
   headers:
     - name: Content-Type
       value: application/x-www-form-urlencoded

@@ -65,6 +65,9 @@ public class LlamaServerManager {
     /** Pfad zur llama-server.exe auf dem lokalen Dateisystem. */
     private final String serverExe;
 
+    /** Alias-Name des Modells, unter dem es vom llama-server per API angesprochen wird. */
+    private final String serverModel;
+
     /** Basis-URL des Servers ohne Port und Pfad, z.B. {@code http://localhost}. */
     private final String serverBaseUrl;
 
@@ -103,6 +106,7 @@ public class LlamaServerManager {
      * Spring-Konstruktor - Werte werden automatisch aus {@code application.properties} geladen.
      *
      * @param serverExe            Pfad zur llama-server.exe ({@code llama.server.exe})
+     * @param serverModel          Alias-Name des Modells ({@code llama.server.model})
      * @param serverBaseUrl        Basis-URL des Servers ({@code llama.server.serverBaseUrl})
      * @param modelPath            Pfad zur GGUF-Modelldatei ({@code llama.model.path})
      * @param port                 HTTP-Port ({@code llama.server.port})
@@ -117,6 +121,7 @@ public class LlamaServerManager {
     @Autowired
     public LlamaServerManager(
             @Value("${llama.server.exe}") String serverExe,
+            @Value("${llama.server.model}") String serverModel,
             @Value("${llama.server.serverBaseUrl}") String serverBaseUrl,
             @Value("${llama.model.path}") String modelPath,
             @Value("${llama.server.port}") int port,
@@ -126,6 +131,7 @@ public class LlamaServerManager {
             @Value("${llama.server.timeout}") int startTimeoutSekunden,
             @Value("${llama.server.lifecycle.auto-shutdown:false}") boolean autoShutdown) {
         this.serverExe = serverExe;
+        this.serverModel = serverModel;
         this.serverBaseUrl = serverBaseUrl;
         this.modelPath = modelPath;
         this.port = port;
@@ -143,6 +149,7 @@ public class LlamaServerManager {
      */
     private LlamaServerManager(Builder builder) {
         this.serverExe = builder.serverExe;
+        this.serverModel = builder.serverModel;
         this.serverBaseUrl = builder.serverBaseUrl;
         this.modelPath = builder.modelPath;
         this.port = builder.port;
@@ -218,7 +225,7 @@ public class LlamaServerManager {
     private void start() throws IOException {
         ProcessBuilder pb = new ProcessBuilder(
                 serverExe,
-                "-m", modelPath,
+                "-m", serverModel,
                 "--port", String.valueOf(port),
                 "-c", String.valueOf(contextGroesse),
                 "--threads", String.valueOf(threads)
@@ -276,6 +283,7 @@ public class LlamaServerManager {
     public static class Builder {
 
         private String serverExe;
+        private String serverModel;
         private String serverBaseUrl;
         private String serverUrl;
         private String modelPath;
@@ -291,6 +299,15 @@ public class LlamaServerManager {
          */
         public Builder serverExe(String serverExe) {
             this.serverExe = serverExe;
+            return this;
+        }
+
+        /**
+         * @param serverModel Alias-Name des Modells, z.B. {@code qwen2.5-1.5b-instruct-q4_k_m.gguf}
+         * @return this Builder
+         */
+        public Builder serverModel(String serverModel) {
+            this.serverModel = serverModel;
             return this;
         }
 

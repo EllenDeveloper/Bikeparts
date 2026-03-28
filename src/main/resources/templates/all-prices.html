@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Alle Preise</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+<div style="display: flex; justify-content: space-between; align-items: center;">
+    <h1>
+        <i class="fa-solid fa-magnifying-glass-dollar" style="font-size: 1.8rem; color: #5659fb;"></i>
+        Alle Preise
+    </h1>
+    <div th:replace="~{fragments/header :: header}"></div>
+</div>
+
+<p style="margin-bottom: 1.5rem;">
+    <a th:href="@{/cart}"><i class="fa-solid fa-arrow-left"></i> Zurück zum Warenkorb</a>
+</p>
+
+<div th:if="${cartItems == null or cartItems.isEmpty}" class="alert alert-error fade-in">
+    <strong><i class="fa-solid fa-circle-exclamation"></i> Warenkorb ist leer</strong>
+</div>
+
+<!-- Ein Abschnitt pro CartItem -->
+<th:block th:each="cartItem : ${cartItems}">
+
+    <h2 style="margin-top: 2rem;">
+        <i class="fa-solid fa-gear"></i>
+        <span th:text="${cartItem.effectiveProductName}">Artikel</span>
+    </h2>
+
+    <!-- Scraping-Ergebnisse -->
+    <div th:with="scrapingResults=${scrapingResultsByCartItemId[cartItem.id]}">
+
+        <div th:if="${scrapingResults == null or scrapingResults.isEmpty}" class="alert alert-error fade-in">
+            <strong><i class="fa-solid fa-circle-exclamation"></i> Keine Shop-Daten verfügbar</strong>
+        </div>
+
+        <table th:if="${scrapingResults != null and !scrapingResults.isEmpty}">
+            <thead>
+                <tr>
+                    <th>Produkt</th>
+                    <th>Preis</th>
+                    <th>Verfügbar</th>
+                    <th>Abgerufen am</th>
+                    <th>Link</th>
+                </tr>
+            </thead>
+            <tbody>
+                <th:block th:each="scrapingResult : ${scrapingResults}">
+
+                    <!-- Shop-Trennzeile -->
+                    <tr class="shop-header-row">
+                        <td colspan="5">
+                            <i class="fa-solid fa-shop"></i>
+                            <span th:text="${scrapingResult.shopName}"></span>
+                            <span th:if="${#strings.equals(scrapingResult.status, 'SUCCESS')}"
+                                  class="shop-status-badge shop-status-success">
+                                <i class="fa-solid fa-check"></i>
+                                <span th:text="${scrapingResult.offers.size}"></span> Angebote
+                            </span>
+                            <span th:if="${#strings.equals(scrapingResult.status, 'NO_RESULTS')}"
+                                  class="shop-status-badge shop-status-warning">
+                                <i class="fa-solid fa-circle-info"></i> Keine Treffer
+                            </span>
+                            <span th:if="${#strings.equals(scrapingResult.status, 'ERROR')}"
+                                  class="shop-status-badge shop-status-error">
+                                <i class="fa-solid fa-circle-exclamation"></i> Fehler
+                            </span>
+                        </td>
+                    </tr>
+
+                    <!-- Fehlerzeile -->
+                    <tr th:if="${#strings.equals(scrapingResult.status, 'ERROR')}" class="row-error">
+                        <td colspan="5">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                            Shop nicht erreichbar:
+                            <span th:text="${scrapingResult.errorMessage != null
+                                             ? scrapingResult.errorMessage
+                                             : 'Unbekannter Fehler'}">
+                            </span>
+                        </td>
+                    </tr>
+
+                    <!-- Keine-Treffer-Zeile -->
+                    <tr th:if="${#strings.equals(scrapingResult.status, 'NO_RESULTS')}" class="row-no-results">
+                        <td colspan="5">
+                            <i class="fa-solid fa-circle-info"></i>
+                            Keine passenden Angebote für diese Suchanfrage.
+                        </td>
+                    </tr>
+
+                    <!-- Angebot-Zeilen -->
+                    <tr th:each="offer : ${scrapingResult.offers}">
+                        <td th:text="${offer.productName}"></td>
+                        <td th:text="${offer.price != null
+                                       ? #numbers.formatDecimal(offer.price, 1, 2) + ' €'
+                                       : '-'}">
+                        </td>
+                        <td>
+                            <span th:if="${offer.inStock}"  class="badge-available">verfügbar</span>
+                            <span th:if="${!offer.inStock}" class="badge-unavailable">nicht verfügbar</span>
+                        </td>
+                        <td th:text="${#temporals.format(offer.fetchedAt, 'dd.MM.yyyy HH:mm')}"></td>
+                        <td onclick="event.stopPropagation()">
+                            <a th:href="${offer.productUrl}" target="_blank">
+                                <i class="fa-solid fa-arrow-up-right-from-square"></i> Zum Shop
+                            </a>
+                        </td>
+                    </tr>
+
+                </th:block>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- KI-Vorschlag -->
+    <div th:with="kiSuggestion=${kiSuggestionsByCartItemId[cartItem.id]}"
+         style="margin-top: 1rem; margin-bottom: 2rem; padding: 0.75rem 1rem;
+                border-left: 4px solid #5659fb; background: #f4f4ff;">
+        <strong><i class="fa-solid fa-robot" style="color: #5659fb;"></i> KI-Vorschlag</strong>
+        <span th:if="${kiSuggestion == null}" style="margin-left: 0.5rem; color: #888;">
+            Kein Vorschlag verfügbar
+        </span>
+        <span th:if="${kiSuggestion != null}" style="margin-left: 0.5rem;">
+            <span th:text="${kiSuggestion.productName}"></span>
+            &nbsp;&mdash;&nbsp;
+            <strong th:text="${kiSuggestion.price != null
+                               ? #numbers.formatDecimal(kiSuggestion.price, 1, 2) + ' €'
+                               : '-'}">
+            </strong>
+            &nbsp;|&nbsp;
+            <span th:text="${kiSuggestion.shopName}"></span>
+            &nbsp;
+            <a th:if="${kiSuggestion.productUrl != null}"
+               th:href="${kiSuggestion.productUrl}" target="_blank">
+                <i class="fa-solid fa-arrow-up-right-from-square"></i> Zum Shop
+            </a>
+        </span>
+    </div>
+
+</th:block>
+
+</body>
+<div th:replace="~{fragments/footer :: footer}"></div>
+</html>

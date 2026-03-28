@@ -1,6 +1,5 @@
 package com.bikeparts.llama.service;
 
-import com.bikeparts.llama.LlamaPromptUtils;
 import com.bikeparts.llama.client.LlamaCompletionRequest;
 import com.bikeparts.llama.client.LlamaHttpUtils;
 import com.bikeparts.llama.server.LlamaServerManager;
@@ -11,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * ACHTUNG:
@@ -62,7 +60,7 @@ public class LlamaHttpClientService {
      * @throws IOException          bei Netzwerkfehlern oder HTTP-Fehlerstatuscodes
      * @throws InterruptedException wenn der HTTP-Aufruf oder der Server-Start unterbrochen wird
      */
-    public String rateSearchResult(String searchQuery, List<ProductOffer> productOfferBySearchQuery) throws IOException, InterruptedException {
+    public String getKiSuggestions(String searchQuery, List<ProductOffer> productOfferBySearchQuery) throws IOException, InterruptedException {
 
         llamaServerManager.startIfNotRunning();
         return LlamaHttpUtils.callLlama(searchQuery, productOfferBySearchQuery);

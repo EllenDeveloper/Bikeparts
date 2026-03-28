@@ -38,9 +38,9 @@ public class LlamaPromptUtils {
                 PFLICHT-BEGRIFFE: %s
                 
                 ### PRÜFUNG:
-                1. Sortierung: Der niedrigste 'price' muss in der ersten Zeile stehen.
-                2. Der 'product_name' MUSS die begriffe aus "PFLICHT-BEGRIFFE enthalten. 
-                3. Die Kette MUSS exakt "10-fach" sein. Wenn "10-fach" in der SUCHANFRAGE steht. (Ignoriere "11-fach", "12-fach" oder andere Zahlen).
+                1. Der 'product_name' MUSS die begriffe aus "PFLICHT-BEGRIFFE enthalten. 
+                2. Die Kette MUSS exakt "10-fach" sein. Wenn "10-fach" in der SUCHANFRAGE steht. (Ignoriere "11-fach", "12-fach" oder andere Zahlen).
+                3. Sortierung: Der niedrigste 'price' muss in der ersten Zeile stehen.
 
                 ### AUSGABEFORMAT:
                 1. Erstelle eine interne Liste der IDs, sortiert nach Preis. Niedrigster Preis zuerst.
