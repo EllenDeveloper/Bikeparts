@@ -34,3 +34,4 @@ build/
 /documentation/
 /logs/
 /EO_Security.md
+/bruno/.env

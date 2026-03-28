@@ -1,0 +1,38 @@
+info:
+  name: createAccountBikeBikeParts
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: http://localhost:8080/api/accounts
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "firstName": "Marion",
+        "lastName": "Mayer",
+        "email": "marion@example.com",
+        "bikes": [
+          {
+            "name": "bike1",
+            "type": "MTB",
+            "bikeparts": [
+              {
+                "name": "bikepart1",
+                "type": "CHAIN"
+              }
+            ]
+          }
+        ]
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

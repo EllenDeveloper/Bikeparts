@@ -1,0 +1,4 @@
+name: local-dev
+variables:
+  - secret: true
+    name: password

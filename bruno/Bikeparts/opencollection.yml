@@ -1,0 +1,32 @@
+opencollection: 1.0.0
+
+info:
+  name: Bikeparts
+config:
+  proxy:
+    inherit: true
+    config:
+      protocol: http
+      hostname: ""
+      port: ""
+      auth:
+        username: ""
+        password: ""
+      bypassProxy: ""
+
+request:
+  auth:
+    type: basic
+    username: ellen@bikeparts.de
+    password: admin123
+  variables:
+    - name: password
+      value: "{{process.env.MY_PASSWORD}}"
+    - name: email
+      value: "{{process.env.MY_EMAIL}}"
+bundled: false
+extensions:
+  bruno:
+    ignore:
+      - node_modules
+      - .git

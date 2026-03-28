@@ -1,0 +1,26 @@
+info:
+  name: createAccount
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: http://localhost:8080/api/accounts
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "firstName": "Max",
+        "lastName": "Mustermann",
+        "email": "max@example.com"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
