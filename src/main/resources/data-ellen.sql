@@ -22,7 +22,7 @@ INSERT INTO accounts (
     created_at,
     updated_at
 ) VALUES (
-    'ellen@bikeparts.de',
+    'demo@bikeparts.de',
     '$2a$10$4Ncv9pvRiyMwFRvYHGumWegEjTSkFzsyczwqdG3Mp73iEtyQZNb0.',
     'Ellen',
     NULL,
@@ -48,7 +48,7 @@ INSERT INTO bikes (
     created_at,
     updated_at
 ) VALUES (
-    (SELECT id FROM accounts WHERE email = 'ellen@bikeparts.de'),
+    (SELECT id FROM accounts WHERE email = 'demo@bikeparts.de'),
     'MTB',
     FALSE,
     'mtb1',
@@ -83,7 +83,7 @@ INSERT INTO bikeparts (
     updated_at
 ) VALUES (
     (SELECT id FROM bikes WHERE name = 'mtb1'
-        AND account_id = (SELECT id FROM accounts WHERE email = 'ellen@bikeparts.de')),
+        AND account_id = (SELECT id FROM accounts WHERE email = 'demo@bikeparts.de')),
     'INNER_TUBE',
     'Fahrradschlauch MTB 29',
     'Continental',
@@ -112,7 +112,7 @@ INSERT INTO bikeparts (
     updated_at
 ) VALUES (
     (SELECT id FROM bikes WHERE name = 'mtb1'
-        AND account_id = (SELECT id FROM accounts WHERE email = 'ellen@bikeparts.de')),
+        AND account_id = (SELECT id FROM accounts WHERE email = 'demo@bikeparts.de')),
     'CHAIN',
     'Shimano XT Kette 10-fach',
     'Shimano',
@@ -143,7 +143,7 @@ INSERT INTO bikeparts (
     updated_at
 ) VALUES (
     (SELECT id FROM bikes WHERE name = 'mtb1'
-        AND account_id = (SELECT id FROM accounts WHERE email = 'ellen@bikeparts.de')),
+        AND account_id = (SELECT id FROM accounts WHERE email = 'demo@bikeparts.de')),
     'TIRE_29',
 --     'Continental X-King 2,4 29"',
     -- tut als searchString: Continental X-King 2.4 61-622 29 × 2,4 Zoll Mantel
@@ -175,7 +175,7 @@ INSERT INTO bikeparts (
     updated_at
 ) VALUES (
     (SELECT id FROM bikes WHERE name = 'mtb1'
-        AND account_id = (SELECT id FROM accounts WHERE email = 'ellen@bikeparts.de')),
+        AND account_id = (SELECT id FROM accounts WHERE email = 'demo@bikeparts.de')),
     'DISC_BRAKE',
     'Shimano Disc Brake Pads G03A',
     'Shimano',
@@ -203,7 +203,7 @@ INSERT INTO bikeparts (
     updated_at
 ) VALUES (
     (SELECT id FROM bikes WHERE name = 'mtb1'
-        AND account_id = (SELECT id FROM accounts WHERE email = 'ellen@bikeparts.de')),
+        AND account_id = (SELECT id FROM accounts WHERE email = 'demo@bikeparts.de')),
     'CASSETTE',
     'Shimano XT Kassette CS-M771-10',
     'Shimano',
@@ -231,7 +231,7 @@ INSERT INTO bikeparts (
     updated_at
 ) VALUES (
     (SELECT id FROM bikes WHERE name = 'mtb1'
-        AND account_id = (SELECT id FROM accounts WHERE email = 'ellen@bikeparts.de')),
+        AND account_id = (SELECT id FROM accounts WHERE email = 'demo@bikeparts.de')),
     'PEDAL',
     'Shimano XT Pedale PD-M780',
     'Shimano',
@@ -261,7 +261,7 @@ INSERT INTO carts (
 -- FK in accounts.cart_id setzen
 UPDATE accounts
 SET cart_id = (SELECT id FROM carts WHERE name = 'Frühjahrs-Wartung 2026')
-WHERE email = 'ellen@bikeparts.de';
+WHERE email = 'demo@bikeparts.de';
 
 
 -- ============================================================
@@ -280,10 +280,10 @@ INSERT INTO cart_items (
     created_at,
     updated_at
 ) VALUES (
-    (SELECT cart_id FROM accounts WHERE email = 'ellen@bikeparts.de'),
+    (SELECT cart_id FROM accounts WHERE email = 'demo@bikeparts.de'),
     (SELECT id FROM bikeparts WHERE model = '62-622'
         AND bike_id = (SELECT id FROM bikes WHERE name = 'mtb1'
-            AND account_id = (SELECT id FROM accounts WHERE email = 'ellen@bikeparts.de'))),
+            AND account_id = (SELECT id FROM accounts WHERE email = 'demo@bikeparts.de'))),
     'Fahrradschlauch MTB 29',
     2,
     'Immer 2 Schläuche auf Vorrat',
@@ -301,10 +301,10 @@ INSERT INTO cart_items (
     created_at,
     updated_at
 ) VALUES (
-    (SELECT cart_id FROM accounts WHERE email = 'ellen@bikeparts.de'),
+    (SELECT cart_id FROM accounts WHERE email = 'demo@bikeparts.de'),
     (SELECT id FROM bikeparts WHERE model = 'CN-HG95'
         AND bike_id = (SELECT id FROM bikes WHERE name = 'mtb1'
-            AND account_id = (SELECT id FROM accounts WHERE email = 'ellen@bikeparts.de'))),
+            AND account_id = (SELECT id FROM accounts WHERE email = 'demo@bikeparts.de'))),
     'Shimano XT Kette 10-fach',
     1,
     NULL,
@@ -322,10 +322,10 @@ INSERT INTO cart_items (
     created_at,
     updated_at
 ) VALUES (
-    (SELECT cart_id FROM accounts WHERE email = 'ellen@bikeparts.de'),
+    (SELECT cart_id FROM accounts WHERE email = 'demo@bikeparts.de'),
     (SELECT id FROM bikeparts WHERE model = 'X-King 2.4'
         AND bike_id = (SELECT id FROM bikes WHERE name = 'mtb1'
-            AND account_id = (SELECT id FROM accounts WHERE email = 'ellen@bikeparts.de'))),
+            AND account_id = (SELECT id FROM accounts WHERE email = 'demo@bikeparts.de'))),
     'Continental X-King 2,4 29"',
     2,
     'Vorder- und Hinterreifen ersetzen',
@@ -343,10 +343,10 @@ INSERT INTO cart_items (
     created_at,
     updated_at
 ) VALUES (
-    (SELECT cart_id FROM accounts WHERE email = 'ellen@bikeparts.de'),
+    (SELECT cart_id FROM accounts WHERE email = 'demo@bikeparts.de'),
     (SELECT id FROM bikeparts WHERE model = 'G03A'
         AND bike_id = (SELECT id FROM bikes WHERE name = 'mtb1'
-            AND account_id = (SELECT id FROM accounts WHERE email = 'ellen@bikeparts.de'))),
+            AND account_id = (SELECT id FROM accounts WHERE email = 'demo@bikeparts.de'))),
     'Shimano Disc Brake Pads G03A',
     2,
     'Vorder- und Hinterbremse',
@@ -364,10 +364,10 @@ INSERT INTO cart_items (
     created_at,
     updated_at
 ) VALUES (
-    (SELECT cart_id FROM accounts WHERE email = 'ellen@bikeparts.de'),
+    (SELECT cart_id FROM accounts WHERE email = 'demo@bikeparts.de'),
     (SELECT id FROM bikeparts WHERE model = 'CS-M771-10'
         AND bike_id = (SELECT id FROM bikes WHERE name = 'mtb1'
-            AND account_id = (SELECT id FROM accounts WHERE email = 'ellen@bikeparts.de'))),
+            AND account_id = (SELECT id FROM accounts WHERE email = 'demo@bikeparts.de'))),
     'Shimano XT Kassette CS-M771-10',
     1,
     NULL,
@@ -385,10 +385,10 @@ INSERT INTO cart_items (
     created_at,
     updated_at
 ) VALUES (
-    (SELECT cart_id FROM accounts WHERE email = 'ellen@bikeparts.de'),
+    (SELECT cart_id FROM accounts WHERE email = 'demo@bikeparts.de'),
     (SELECT id FROM bikeparts WHERE model = 'PD-M780'
         AND bike_id = (SELECT id FROM bikes WHERE name = 'mtb1'
-            AND account_id = (SELECT id FROM accounts WHERE email = 'ellen@bikeparts.de'))),
+            AND account_id = (SELECT id FROM accounts WHERE email = 'demo@bikeparts.de'))),
     'Shimano XT Pedale PD-M780',
     1,
     NULL,

@@ -79,7 +79,7 @@ class BikeControllerTest {
         @DisplayName("gibt alle Accounts zurück – 200 OK")
         void getAllAccounts_returnsListAnd200() throws Exception {
             Account a1 = new Account();
-            a1.setEmail("ellen@bikeparts.de");
+            a1.setEmail("demo@bikeparts.de");
             Account a2 = new Account();
             a2.setEmail("max@bikeparts.de");
             when(accountService.findAll()).thenReturn(List.of(a1, a2));
@@ -124,12 +124,12 @@ class BikeControllerTest {
         @DisplayName("Account gefunden -> 200 OK mit Account")
         void getAccountById_found_returns200() throws Exception {
             Account account = new Account();
-            account.setEmail("ellen@bikeparts.de");
+            account.setEmail("demo@bikeparts.de");
             when(accountService.findById(1L)).thenReturn(Optional.of(account));
 
             mockMvc.perform(get("/api/accounts/1"))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.email").value("ellen@bikeparts.de"));
+                    .andExpect(jsonPath("$.email").value("demo@bikeparts.de"));
         }
 
         @Test
@@ -155,14 +155,14 @@ class BikeControllerTest {
         @DisplayName("gültige Email -> 201 Created")
         void createAccount_validEmail_returns201() throws Exception {
             Account account = new Account();
-            account.setEmail("ellen@bikeparts.de");
+            account.setEmail("demo@bikeparts.de");
             when(accountService.createAccount(any(Account.class))).thenReturn(account);
 
             mockMvc.perform(post("/api/accounts")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(account)))
                     .andExpect(status().isCreated())
-                    .andExpect(jsonPath("$.email").value("ellen@bikeparts.de"));
+                    .andExpect(jsonPath("$.email").value("demo@bikeparts.de"));
         }
 
         @Test
@@ -218,21 +218,21 @@ class BikeControllerTest {
         @DisplayName("erfolgreiches Update -> 200 OK")
         void updateAccount_success_returns200() throws Exception {
             Account account = new Account();
-            account.setEmail("ellen@bikeparts.de");
+            account.setEmail("demo@bikeparts.de");
             when(accountService.updateAccount(any(Account.class))).thenReturn(account);
 
             mockMvc.perform(put("/api/accounts/1")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(account)))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.email").value("ellen@bikeparts.de"));
+                    .andExpect(jsonPath("$.email").value("demo@bikeparts.de"));
         }
 
         @Test
         @DisplayName("Account nicht gefunden -> 404 Not Found")
         void updateAccount_notFound_returns404() throws Exception {
             Account account = new Account();
-            account.setEmail("ellen@bikeparts.de");
+            account.setEmail("demo@bikeparts.de");
             when(accountService.updateAccount(any(Account.class)))
                     .thenThrow(new RuntimeException("Account nicht gefunden"));
 
@@ -287,7 +287,7 @@ class BikeControllerTest {
         @DisplayName("Account gefunden -> Bike hinzugefügt, 200 OK")
         void addBike_accountFound_returns200() throws Exception {
             Account account = new Account();
-            account.setEmail("ellen@bikeparts.de");
+            account.setEmail("demo@bikeparts.de");
             Bike bike = new Bike();
             when(accountService.findById(1L)).thenReturn(Optional.of(account));
             when(accountService.updateAccount(account)).thenReturn(account);
@@ -325,7 +325,7 @@ class BikeControllerTest {
         @DisplayName("Cart set on session account -> 200 OK")
         void addCart_returns200() throws Exception {
             Account updatedAccount = new Account();
-            updatedAccount.setEmail("ellen@bikeparts.de");
+            updatedAccount.setEmail("demo@bikeparts.de");
             Cart cart = new Cart();
             cart.setName("Frühjahrs-Wartung 2026");
             when(accountService.updateAccount(account)).thenReturn(updatedAccount);
@@ -334,7 +334,7 @@ class BikeControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(cart)))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.email").value("ellen@bikeparts.de"));
+                    .andExpect(jsonPath("$.email").value("demo@bikeparts.de"));
 
             verify(account).addCart(any(Cart.class));
             verify(accountService).updateAccount(account);

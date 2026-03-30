@@ -18,7 +18,7 @@ POST http://localhost:8080/api/accounts
 Content-Type: application/json
 
 {
-  "email": "ellen@bikeparts.de",
+  "email": "demo@bikeparts.de",
   "firstName": "Ellen",
   "lastName": "Mustermann"
 }
