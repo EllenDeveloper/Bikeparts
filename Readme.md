@@ -20,11 +20,19 @@ startet eine Scraping-Web-Suche nach Preisen in Online-Shops. Die Ergebnisse wer
 - Proxy: Squid (via Docker) - wurde wieder entfernt, da HTTPS-Seiten nicht gecacht
   werden können. Stattdessen wird Caching in der Anwendung selbst verwendet (`@Cacheable`).
 
+## Pflichtenheft
+Siehe [Pflichtenheft_BikePartsFinder_v6.md](docs/Pflichtenheft_BikePartsFinder_v6.md) <br>
+Das Projekt wurde als Lernprojekt der IBB als Referenzprojekt innerhalb von einem Monat realisiert. Unter Benutzung 
+von Argentic coding (Claude code).  
+---
+## Pflichtenheft
+Siehe [Projektstrukturplan_BikePartsFinder_v1.md](docs/Projektstrukturplan_BikePartsFinder_v1.md)
+
 ---
 
 ## Installation unter Linux
 
-Siehe [docs/Installation_Linux.md](docs/Installation_Linux.md)
+Siehe [Installation_Linux.md](docs/Installation_Linux.md)
 
 ---
 
