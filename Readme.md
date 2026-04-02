@@ -21,11 +21,13 @@ startet eine Scraping-Web-Suche nach Preisen in Online-Shops. Die Ergebnisse wer
   werden können. Stattdessen wird Caching in der Anwendung selbst verwendet (`@Cacheable`).
 
 ## Pflichtenheft
+
 Siehe [Pflichtenheft_BikePartsFinder_v6.md](docs/Pflichtenheft_BikePartsFinder_v6.md) <br>
-Das Projekt wurde als Lernprojekt der IBB als Referenzprojekt innerhalb von einem Monat realisiert. Unter Benutzung 
-von Argentic coding (Claude code).  
+**Das Projekt wurde als Lernprojekt der IBB als Referenzprojekt innerhalb von einem Monat realisiert. Unter Benutzung von Argentic coding (Claude code).**
+
 ---
-## Pflichtenheft
+## Projektstrukturplan
+
 Siehe [Projektstrukturplan_BikePartsFinder_v1.md](docs/Projektstrukturplan_BikePartsFinder_v1.md)
 
 ---

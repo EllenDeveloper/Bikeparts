@@ -217,7 +217,7 @@ Für die Variante 3 muss man llama.cpp von der Webseite herunterladen und auspac
 von der Applikation gestartet. Siehe Readme.md  -> Diese Variante habe ich implementiert (-> fertig)
 
 Analyse der Preis-Suche siehe 
-[Pflichtenheft_Preisermittlung_Amazon_Idealo_BraveSearch_ebay_Scraping_v3.md](docs/Pflichtenheft_Preisermittlung_Amazon_Idealo_BraveSearch_ebay_Scraping_v3.md)
+[Pflichtenheft_Preisermittlung_Amazon_Idealo_BraveSearch_ebay_Scraping_v3.md](Pflichtenheft_Preisermittlung_Amazon_Idealo_BraveSearch_ebay_Scraping_v3.md)
 
 
 
@@ -252,7 +252,7 @@ Analyse der Preis-Suche siehe
 ---
 
 # 5. Produktdaten
-Siehe [Datenmodell_Entities_v4.md](docs/Datenmodell_Entities_v4.md)
+Siehe [Datenmodell_Entities_v4.md](Datenmodell_Entities_v4.md)
 Das sind Nummerierungen wie /D10/,....
 
 # 6. Produktleistungen
@@ -402,7 +402,7 @@ HTML-Response enthalten. Kein JavaScript-Rendering nötig. Jsoup ist ausreichend
 | **Implementierungsreihenfolge** | **Phase 1 - MVP** | **Phase 2 - nur für Privatnutzung** |
 
 Technische Details, Parsing-Code, JSON-Felder und robots.txt-Bewertung:
-siehe [Pflichtenheft_Zusatz_Scraping_Shop_Analyse_v1.md](docs/Pflichtenheft_Zusatz_Scraping_Shop_Analyse_v1.md).
+siehe [Pflichtenheft_Zusatz_Scraping_Shop_Analyse_v1.md](Pflichtenheft_Zusatz_Scraping_Shop_Analyse_v1.md).
 
 
 ### 10.3.2 Externe APIs (Phase 2)
