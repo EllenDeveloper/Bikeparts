@@ -185,7 +185,7 @@ Die Anwendung besteht aus folgenden zentralen Modulen:
 (Search Injection).
 Da Bikepart-Felder direkt als Suchbegriff an externe Shops gesendet werden, muss verhindert werden, dass in diesen Feldern JavaScript-Code steht.
 Beim Speichern des Entities werden über Validierung HTML-Tags und nicht erlaubte Sonderzeichen erst garn nicht gespeichert. 
-*  **Proxy:**  Es wurde getestet, ob der Proxy Squid eingesetzt werden konnte.  Um die Server der Bikeshops zu entlasten. Detail-Ausführungen siehe HTTP_Proxy_Squid.md. Das resultat war: er wird nicht eingesetzt, da er für HTTPS nicht verwendet werden kann. => code wurde 24.3.2026 wieder entfernt
+*  **Proxy:**  Es wurde getestet, ob der Proxy Squid eingesetzt werden konnte.  Um die Server der Bikeshops zu entlasten. Detail-Ausführungen siehe Siehe [HTTP_Proxy_Squid.md](HTTP_Proxy_Squid.md). Das resultat war: er wird nicht eingesetzt, da er für HTTPS nicht verwendet werden kann. => code wurde 24.3.2026 wieder entfernt
 
 
 * **Testdaten für die Entwicklung:** Aktuell werden die Daten in der Datenbank h2 gespeichert, dass nicht bei jedem Hochfahren die Preise gescraped werden. 
