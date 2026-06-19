@@ -70,13 +70,44 @@ llama-server.exe -m "C:\dev\...\ki_models\qwen2.5-1.5b-instruct-q4_k_m.gguf" --p
 Alternativ startet die Anwendung den llama-server automatisch beim Hochfahren
 (`llama.server.lifecycle.auto-start=true` in application.properties).
 
-### Anwendung starten
+### Konfiguration der Anwendung für HTTPS mit Aufruf in der Powershell
+*Erstellen eines PKCS12 keystore mit keytool*
 
-```bash
-mvn spring-boot:run
+In jedem Java JDK ist innerhalb des bin Verzeichnisses, das Komandozeilentool keytool zu finden. Mit diesem Tool 
+kann ein Keystore im Format PKCS#12 oder JKS angelegt werden. Es kann lesend und schreibend zugegriffen werden.
+Ich habe lokal den keystore mit dem Kommando erstellt:
+```cmd
+keytool -genkeypair -alias BikePartsFinder -keyalg RSA -keysize 4096 -sigalg SHA256withRSA -dname „cn=example.com,ou=example,dc=example,dc=com“ -startdate "2026/06/19 00:00:00" -validity 365 -storetype PKCS12 -storepass  changeit -keystore C:\dev\keytool_Zertifikate_HTTPS_License\BikePartsFinder.p12
 ```
 
-Erreichbar unter: http://localhost:8080
+*Erstellen Sie im Hauptverzeichnis des Projekts eine Datei .env (gitignore)
+mit dem folgenden Inhalt:*
+```
+SSL_KEYSTORE_PATH=<pathKeystore>/BikePartsFinder.p12
+SSL_KEYSTORE_PASSWORD=<secretPassword>
+# SSL_KEY_PASSWORD = option -keypass wird bei PKCS12 ignoriert
+# SSL_KEY_PASSWORD=<secretPassword>
+SSL_KEYSTORE_TYPE=PKCS12
+```
+
+### Anwendung mit HTTPS starten
+
+```bash
+start.ps1
+```
+Info: Das script liesst die environment variablen aus der datei .env und startet automatisch das 
+maven kommando:  _mvn spring-boot:run --% -Dspring-boot.run.profiles=h2_
+
+( --% bewirkt, dass von der powershell alles danach an maven weitergegeben wird)
+
+### Anwendung aufrufen
+Erreichbar mit HTTPS unter: https://localhost:8443
+
+Browser-Warnung: Da es sich um ein selbstsigniertes Zertifikat handelt, warnt der Browser möglicherweise vor der Verbindung. Dies ist normal. Bestätigen Sie die Ausnahme 
+("Erweitert" -> "Weiter zur Seite (nicht sicher)"), um die Anwendung zu nutzen.
+
+Info ohne HTTPS:
+Erreichbar unter: http://localhost:8080  
 
 ### Natives Binary bauen (GraalVM)
 
