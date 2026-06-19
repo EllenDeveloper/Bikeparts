@@ -1,6 +1,13 @@
 
 in Powershell:
 mvn spring-boot:run "-Dspring-boot.run.profiles=h2"
+mvn spring-boot:run "-Dspring-boot.run.profiles=test"
+mvn spring-boot:run -Dspring.profiles.active=dev   
+
+https nutzen alternativ:
+  start.ps1   -> liesst die Environment variablen aus .env
+mvn spring-boot:run --% -Dspring-boot.run.profiles=h2 -Dspring-boot.run.jvmArguments="-DSSL_KEYSTORE_PATH=C:\dev\keytool_Zertifikate_HTTPS_License\BikePartsFinder.p12 -DSSL_KEYSTORE_PASSWORD=<secretPassword> -DSSL_KEYSTORE_TYPE=PKCS12"
 
 native image mit graalVM bauen
 mvn -Pnative package
+

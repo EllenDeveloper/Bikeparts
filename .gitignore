@@ -31,7 +31,10 @@ build/
 
 ### VS Code ###
 .vscode/
+
+
 /documentation/
 /logs/
 /EO_Security.md
 /bruno/.env
+/.env
