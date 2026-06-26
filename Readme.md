@@ -106,6 +106,11 @@ Erreichbar mit HTTPS unter: https://localhost:8443
 Browser-Warnung: Da es sich um ein selbstsigniertes Zertifikat handelt, warnt der Browser möglicherweise vor der Verbindung. Dies ist normal. Bestätigen Sie die Ausnahme 
 ("Erweitert" -> "Weiter zur Seite (nicht sicher)"), um die Anwendung zu nutzen.
 
+### curl-Befehl um z.B. bike mit der Id 1 anzuzeigen
+```bash
+ curl -X GET https://localhost:8443/api/accounts/bike/1 -u "demo@bikeparts.de:admin123" --insecure
+```
+
 Info ohne HTTPS:
 Erreichbar unter: http://localhost:8080  
 
