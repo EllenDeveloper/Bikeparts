@@ -27,8 +27,10 @@ public final class ScrapingConstants {
         /** Landesbezeichnung fuer Deutschland (Teilstring-Match in Versandkostentabellen). */
         public static final String COUNTRY_GERMANY = "Deutschland";
 
-        /** Anzahl der Tage, nach denen gecachte Daten als veraltet gelten. */
-        public static final int CACHE_DAYS = 14;
+        /** Anzahl der Tage, nach denen gecachte Daten als veraltet gelten.
+         * TODO: CACHE_DAYS in Konfiguration mitaufnehmen. Es sollten nur 14 Tage für
+         Produktivbetrieb sein. */
+        public static final int CACHE_DAYS = 1_000;
 
         public static final int TIMEOUT = 20_000;
 
