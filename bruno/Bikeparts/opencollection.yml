@@ -4,7 +4,7 @@ info:
   name: Bikeparts
 config:
   proxy:
-    inherit: true
+    inherit: false
     config:
       protocol: http
       hostname: ""
@@ -13,6 +13,7 @@ config:
         username: ""
         password: ""
       bypassProxy: ""
+    disabled: true
 
 request:
   auth:

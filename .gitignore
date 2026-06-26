@@ -38,3 +38,5 @@ build/
 /EO_Security.md
 /bruno/.env
 /.env
+/bikeparts-cacert.pem
+/bikeparts-cacert-localhost.pem
