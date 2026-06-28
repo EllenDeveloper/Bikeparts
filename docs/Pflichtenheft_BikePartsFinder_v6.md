@@ -377,8 +377,8 @@ API-Keys für externe Dienste werden ebenfalls verschlüsselt abgelegt.
 
 
   - **Filter:** `JwtAuthenticationFilter` validiert bei jedem Request
-    den Token und setzt den `SecurityContext`. Die Session ist
-    `STATELESS`. D.h. es wird kein Cookie und kein Session-Speicher verwendet.
+    den Token und setzt den `SecurityContext`. Session-Policy ist `IF_REQUIRED`:
+    Browser-Login (Thymeleaf) nutzt Session, API-Zugriff (curl/Bruno) nutzt JWT-Token.
 
 
 ---

@@ -80,7 +80,7 @@ Ich habe lokal den keystore mit dem Kommando erstellt:
 keytool -genkeypair -alias BikePartsFinder -keyalg RSA -keysize 4096 -sigalg SHA256withRSA -dname „cn=example.com,ou=example,dc=example,dc=com“ -startdate "2026/06/19 00:00:00" -validity 365 -storetype PKCS12 -storepass  changeit -keystore C:\dev\keytool_Zertifikate_HTTPS_License\BikePartsFinder.p12
 ```
 
-### SSL und JWT konfigurieren
+### Security: HTTPS mit SSL und JWT (JSON Web Token) konfigurieren
 
 Sensible Werte (Keystore-Pfad, Passwörter, JWT-Secret) dürfen nicht eingecheckt werden.
 Die Konfiguration unterscheidet sich je nach Umgebung:
@@ -110,8 +110,14 @@ SSL_KEYSTORE_PASSWORD=<passwort>
 SSL_KEYSTORE_TYPE=PKCS12
 ```
 
-### Anwendung mit HTTPS starten
+### Anwendung starten
 
+**Lokale Entwicklung** (H2 + HTTPS + JWT):
+```bash
+mvn spring-boot:run "-Dspring-boot.run.profiles=dev,local"
+```
+
+**Windows Prod-Test** (Prod-Konfiguration + Windows llama-Pfade, liest `.env`):
 ```bash
 scripts/win/start.ps1
 ```

@@ -47,7 +47,7 @@ public class SecurityConfig {
                         // TODO later: "/register"
                         .requestMatchers("/api/auth/**").permitAll() //  JWT Login ohne Auth erlauben
                         .requestMatchers("/", "/login").permitAll()
-                        .requestMatchers("/h2-console/**").permitAll() // H2-Console erlauben
+                        .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
                         // Admin-Only URLs
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         // Alle anderen brauchen nur Login
@@ -55,9 +55,12 @@ public class SecurityConfig {
                 )
                 // JWT Filter hinzufügen
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-                // Session Management soll durch JWT STATELESS sein!
+                // IF_REQUIRED: Session fuer Browser-Login (Thymeleaf), JwtAuthenticationFilter.doFilterInternal() wird immer aufgerufen
+                //        curl:    Header vorhanden → Token validieren → User setzen
+                //        Browser: Header fehlt     → macht nichts, ruft filterChain.doFilter() auf
+                //                                  → Spring prüft Session → User gefunden
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                 )
                 .formLogin(form -> form
                         .loginPage("/login")

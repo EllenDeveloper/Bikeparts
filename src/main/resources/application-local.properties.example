@@ -1,15 +1,22 @@
 # Kopiere diese Datei nach application-local.properties und trage echte Werte ein.
 # application-local.properties ist in .gitignore und wird NICHT committet.
 #
-# Starten mit lokalem Profil:
-#   mvn spring-boot:run "-Dspring-boot.run.profiles=h2,local"
-
-# HTTPS parameter
-SSL_KEYSTORE_PATH=C:/dev/keytool_Zertifikate_HTTPS_License/BikePartsFinder_LicenseFile.p12
-SSL_KEYSTORE_PASSWORD=MySecretKeystorePassword
-# SSL_KEY_PASSWORD = option -keypass wird bei PKCS12 ignoriert
-SSL_KEY_PASSWORD=MySecretPassword
-SSL_KEYSTORE_TYPE=PKCS12
+# Starten mit lokalem Profil (H2 + HTTPS + JWT):
+#   mvn spring-boot:run "-Dspring-boot.run.profiles=dev,local"
 
 # JWT Secret Key (mind. 32 Zeichen, z.B. per: openssl rand -base64 48)
 app.jwt.secret=HIER_MINDESTENS_32_ZEICHEN_LANGEN_ZUFALLSKEY_EINTRAGEN
+
+# HTTPS / SSL (Keystore mit keytool erstellen, siehe Readme.md)
+SSL_KEYSTORE_PATH=<pfad>/BikePartsFinder.p12
+SSL_KEYSTORE_PASSWORD=<passwort>
+# SSL_KEY_PASSWORD = option -keypass wird bei PKCS12 ignoriert
+SSL_KEY_PASSWORD=<passwort>
+SSL_KEYSTORE_TYPE=PKCS12
+
+server.ssl.key-store=file:${SSL_KEYSTORE_PATH}
+server.ssl.key-store-password=${SSL_KEYSTORE_PASSWORD}
+server.ssl.key-store-type=${SSL_KEYSTORE_TYPE}
+server.ssl.key-alias=BikePartsFinder
+server.port=8443
+server.http2.enabled=true
