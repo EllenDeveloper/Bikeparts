@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
  *
  * <p>Beim Start wird geprueft, ob fuer bike-components.de + bike-discount.de noch aktuelle Versandkosten
  * in der DB vorhanden sind (Alter < 14 Tage). Falls nicht, werden die Versandkosten
- * neu gescrapt und in der DB gespeichert.</p>
+ * neu gescraped und in der DB gespeichert.</p>
  */
 @Slf4j
 @Configuration

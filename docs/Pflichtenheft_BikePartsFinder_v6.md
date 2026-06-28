@@ -335,8 +335,48 @@ API-Keys für externe Dienste werden ebenfalls verschlüsselt abgelegt.
 
 /N70/ **Native image:** Verwendung von GraalVM um ein natives Binary zu erzeugen. Dadurch benötigt man keine Java VM, um das Programm auszuführen. -> fertig 27.3.2026
 
-
 /N80/ **Deploy und Ausführung unter Linux** Auf github bauen und Bikeparts auf einem Linux Server per wget holen und ausführen. Die dafür notwendigen Scripte schreiben.  -> fertig 28.3.2026
+
+/N90/ **HTTPS und JWT** Die Anwendung ist mit HTTPS geschützt und das Bearer Token (JWT) wird für die API-Authentifizierung verwendet.
+
+### Beschreibung /N90/
+  - **HTTPS:** Der Server läuft auf Port 8443 mit TLS (PKCS12-Keystore).
+    Das Zertifikat wird mit `keytool` vom JDK erzeugt. 
+
+    Beispiel für eine generierung für localhost:
+
+    `keytool -genkeypair -alias BikePartsFinder-localhost -keyalg RSA -keysize 4096 -sigalg SHA256withRSA -dname CN=dns:localhost -ext SAN=dns:localhost,ip:127.0.0.1  -validity 365 -keypass XY123456 -storetype PKCS12 -storepass XY123456  -storepass bergmannStorePass2026 -keypass bergmannKeyPass2026 -keystore C:\dev\keytool_Zertifikate_HTTPS_License\BikePartsFinder-localhost.p12`
+
+    Konfiguration über
+    `application-h2.properties` (`server.ssl.*`).
+
+    Und aktivieren von HTTP2 mit `server.http2.enabled`.
+
+- **JWT Secret:** Der geheime Schlüssel (Secret Key) `app.jwt.secret` steht in den application.properties. Er wird verwendet um das JWT Token zu signieren und Integrität
+  zu überprüfen. Da dieser nicht eingecheckt werden darf, wird die Variable `JWT_SECRET_KEY` verwendet, die in application-local.properties definiert wird.
+
+  - **JWT:** Nach erfolgreichem Login unter `POST /api/auth/login`
+    (mit `username` + `password` als JSON) wird ein signiertes JWT
+    zurückgegeben. Alle weiteren API-Requests senden den Token im
+    `Authorization: Bearer <token>`-Header.
+
+    Beispiel für login mit curl:
+    `curl -X POST https://localhost:8443/api/auth/login     -H "Content-Type: application/json"     -d '{"username":"demo@bikeparts.de","password":"admin123"}'     -k`
+
+    Die Anwort:
+
+    `
+{"token":"eyJhbGci...","type":"Bearer"}` <br/>
+  Nun das Token beim Request mitgeben. z.B.: <br/>
+  `curl -X GET https://localhost:8443/api/accounts/bike/1 \
+    -H "Authorization: Bearer eyJhbGci..." \
+    -k`
+
+
+  - **Filter:** `JwtAuthenticationFilter` validiert bei jedem Request
+    den Token und setzt den `SecurityContext`. Die Session ist
+    `STATELESS`. D.h. es wird kein Cookie und kein Session-Speicher verwendet.
+
 
 ---
 
@@ -471,7 +511,6 @@ siehe [Pflichtenheft_Zusatz_Scraping_Shop_Analyse_v1.md](Pflichtenheft_Zusatz_Sc
 |---|---|
 | - | JavaMailSender: Warenkorb per E-Mail an Benutzer versenden |
 | - | Mehrsprachigkeit (i18n: DE/EN) |
-| - | Aktuell ist der REST-Controller ungeschützt. Hierfür muss eine separate Authentifizierung eingebaut werden. (SessionScope funktioniert hier nicht) Authentifizierung mit JWT einbauen. Man bekommt ein Token. |
 | - | Registrierung eines neuen Users |
 
 ---

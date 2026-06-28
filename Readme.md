@@ -89,6 +89,12 @@ SSL_KEYSTORE_PASSWORD=<secretPassword>
 # SSL_KEY_PASSWORD=<secretPassword>
 SSL_KEYSTORE_TYPE=PKCS12
 ```
+### JWT konfigurieren
+Das JWT Token wird mit dem Schlüssel JWT_SECRET_KEY verschlüsselt bzw. überprüft.
+Kopiere src/main/resources/application-local.properties.example nach application-local.properties und
+trage den secret key JWT_SECRET_KEY ein
+Dann starten mit mvn spring-boot:run "-Dspring-boot.run.profiles=prod,local".
+In der IDE muss auch das Profil local geladen werden.
 
 ### Anwendung mit HTTPS starten
 

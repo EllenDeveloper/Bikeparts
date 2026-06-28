@@ -1,0 +1,8 @@
+# Kopiere diese Datei nach application-local.properties und trage echte Werte ein.
+# application-local.properties ist in .gitignore und wird NICHT committet.
+#
+# Starten mit lokalem Profil:
+#   mvn spring-boot:run "-Dspring-boot.run.profiles=h2,local"
+
+# JWT Secret Key (mind. 32 Zeichen, z.B. per: openssl rand -base64 48)
+app.jwt.secret=HIER_MINDESTENS_32_ZEICHEN_LANGEN_ZUFALLSKEY_EINTRAGEN

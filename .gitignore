@@ -40,3 +40,4 @@ build/
 /.env
 /bikeparts-cacert.pem
 /bikeparts-cacert-localhost.pem
+/src/main/resources/application-local.properties
