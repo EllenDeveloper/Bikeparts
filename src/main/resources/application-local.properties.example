@@ -4,5 +4,12 @@
 # Starten mit lokalem Profil:
 #   mvn spring-boot:run "-Dspring-boot.run.profiles=h2,local"
 
+# HTTPS parameter
+SSL_KEYSTORE_PATH=C:/dev/keytool_Zertifikate_HTTPS_License/BikePartsFinder_LicenseFile.p12
+SSL_KEYSTORE_PASSWORD=MySecretKeystorePassword
+# SSL_KEY_PASSWORD = option -keypass wird bei PKCS12 ignoriert
+SSL_KEY_PASSWORD=MySecretPassword
+SSL_KEYSTORE_TYPE=PKCS12
+
 # JWT Secret Key (mind. 32 Zeichen, z.B. per: openssl rand -base64 48)
 app.jwt.secret=HIER_MINDESTENS_32_ZEICHEN_LANGEN_ZUFALLSKEY_EINTRAGEN

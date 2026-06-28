@@ -36,7 +36,7 @@ public class BikeService {
     }
 
     // Timed ist sehr langsam. deshalb nur in Produktion
-    @Profile("h2")
+    @Profile("dev")
     @Timed
     public List<Bikepart> getAllBikeparts(Long bikeId) {
         Account accountJPA = accountService.findById(account.getId()).orElseThrow(() -> new RuntimeException("Account nicht gefunden"));

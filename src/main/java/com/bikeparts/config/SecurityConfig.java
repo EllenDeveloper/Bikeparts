@@ -79,9 +79,9 @@ public class SecurityConfig {
     }
 
     @Bean
-    @Profile("h2")
+    @Profile("dev")
     public SecurityFilterChain filterChainForDevelopment(HttpSecurity http) throws Exception {
-        log.debug("******** use application-h2.properties");
+        log.debug("******** use application-dev.properties");
         http
                 .csrf(csrf -> csrf.disable()) // Später aktivieren
 

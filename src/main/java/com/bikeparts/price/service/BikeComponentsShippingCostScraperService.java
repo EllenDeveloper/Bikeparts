@@ -91,6 +91,7 @@ public class BikeComponentsShippingCostScraperService {
                     .userAgent(ScrapingConstants.Common.USER_AGENT)
                     .timeout(10_000)
                     .get();
+
             return parseDocument(doc);
         } catch (Exception e) {
             log.error("Fehler beim Scraping der Versandkosten: {}", e.getMessage());

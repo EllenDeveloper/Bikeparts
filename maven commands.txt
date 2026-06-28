@@ -1,7 +1,7 @@
 
 in Powershell:
-mvn spring-boot:run "-Dspring-boot.run.profiles=h2,local"
-mvn spring-boot:run "-Dspring-boot.run.profiles=prod,local"
+mvn spring-boot:run "-Dspring-boot.run.profiles=dev,local"
+mvn spring-boot:run "-Dspring-boot.run.profiles=prod,prodWin" -> eher start.ps1 aufrufen um die .env zu definieren
 #mvn spring-boot:run "-Dspring-boot.run.profiles=test"
 #mvn spring-boot:run -Dspring.profiles.active=dev
 

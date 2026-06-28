@@ -16,5 +16,5 @@ if (Test-Path .env) {
 
 # 2. Maven starten
 # WICHTIG: Nutzen Sie '--%' auch hier im Skript, um PowerShell-Parsing zu verhindern
-Write-Host "Starte Maven mit Profil h2..."
-mvn spring-boot:run --% -Dspring-boot.run.profiles=h2
+Write-Host "Starte Maven mit Profil prod,prodWin..."
+mvn spring-boot:run --% -Dspring-boot.run.profiles=prod,prodWin

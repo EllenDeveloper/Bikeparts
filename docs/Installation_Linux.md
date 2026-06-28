@@ -42,19 +42,32 @@ mv bikepartsSoftware bikepartsSoftware_v1.0.1
 
 ---
 
-## Schritt 4 - Anwendung starten
+## Schritt 4 - .env anlegen
+
+Im Arbeitsverzeichnis eine `.env`-Datei anlegen (wird nicht eingecheckt):
+```
+JWT_SECRET_KEY=<mindestens-32-zeichen-langer-zufallskey>
+SSL_KEYSTORE_PATH=<pfad>/BikePartsFinder.p12
+SSL_KEYSTORE_PASSWORD=<passwort>
+SSL_KEYSTORE_TYPE=PKCS12
+```
+
+---
+
+## Schritt 5 - Anwendung starten
 
 ```bash
 ./3_start.sh
 ```
 
 Startet:
+- Liest `.env` und setzt Umgebungsvariablen
 - `llama-server` auf Port 8099
 - `bikeparts` mit Spring-Profil `prod`
 
 Beide Prozesse laufen im Hintergrund. Die Anwendung ist danach erreichbar unter:
 ```
-http://<server-ip>:8080
+https://<server-ip>:8443
 ```
 
 ---

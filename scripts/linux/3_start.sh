@@ -4,6 +4,16 @@
 
 set -e
 
+# .env laden und alle Variablen exportieren
+if [ -f .env ]; then
+    set -a
+    source .env
+    set +a
+    echo ".env geladen."
+else
+    echo "Warnung: .env nicht gefunden – Umgebungsvariablen müssen manuell gesetzt sein."
+fi
+
 BASE_DIR="$(pwd)/bikepartsSoftware"
 LLAMA_DIR="$BASE_DIR/llama.cpp-server"
 MODELS_DIR="$BASE_DIR/ki_models"

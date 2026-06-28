@@ -95,7 +95,7 @@ public class BikeComponentsScraperService implements ScraperShopInterface {
      *              Leerzeichen werden als {@code +} kodiert (URL-Encoding).
      * @return {@link ScrapingResult} mit gefundenen {@link ProductOffer}s, oder Fehlerstatus.
      */
-    @Profile("h2")
+    @Profile("dev")
     @Timed
     @Cacheable(value = "bikeComponentsSearch", key = "#searchQuery")
     public ScrapingResult search(String searchQuery) {

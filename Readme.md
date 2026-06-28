@@ -80,29 +80,43 @@ Ich habe lokal den keystore mit dem Kommando erstellt:
 keytool -genkeypair -alias BikePartsFinder -keyalg RSA -keysize 4096 -sigalg SHA256withRSA -dname „cn=example.com,ou=example,dc=example,dc=com“ -startdate "2026/06/19 00:00:00" -validity 365 -storetype PKCS12 -storepass  changeit -keystore C:\dev\keytool_Zertifikate_HTTPS_License\BikePartsFinder.p12
 ```
 
-*Erstellen Sie im Hauptverzeichnis des Projekts eine Datei .env (gitignore)
-mit dem folgenden Inhalt:*
+### SSL und JWT konfigurieren
+
+Sensible Werte (Keystore-Pfad, Passwörter, JWT-Secret) dürfen nicht eingecheckt werden.
+Die Konfiguration unterscheidet sich je nach Umgebung:
+
+**Lokale Entwicklung:**
+Kopiere `src/main/resources/application-local.properties.example` nach `application-local.properties`
+(Datei ist in `.gitignore`) und trage die echten Werte ein:
+```properties
+app.jwt.secret=<mindestens-32-zeichen-langer-zufallskey>
+server.ssl.key-store=file:<pfad>/BikePartsFinder.p12
+server.ssl.key-store-password=<passwort>
+server.ssl.key-store-type=PKCS12
+server.ssl.key-alias=BikePartsFinder
+server.port=8443
+server.http2.enabled=true
 ```
-SSL_KEYSTORE_PATH=<pathKeystore>/BikePartsFinder.p12
-SSL_KEYSTORE_PASSWORD=<secretPassword>
-# SSL_KEY_PASSWORD = option -keypass wird bei PKCS12 ignoriert
-# SSL_KEY_PASSWORD=<secretPassword>
+Starten mit: `mvn spring-boot:run "-Dspring-boot.run.profiles=dev,local"`
+In der IDE muss ebenfalls das Profil `local` aktiviert sein.
+
+**Produktion:**
+In `application-prod.properties` stehen Platzhalter mit Env-Variablen.
+Auf dem Server eine `.env`-Datei (in `.gitignore`) anlegen:
+```
+JWT_SECRET_KEY=<mindestens-32-zeichen-langer-zufallskey>
+SSL_KEYSTORE_PATH=<pfad>/BikePartsFinder.p12
+SSL_KEYSTORE_PASSWORD=<passwort>
 SSL_KEYSTORE_TYPE=PKCS12
 ```
-### JWT konfigurieren
-Das JWT Token wird mit dem Schlüssel JWT_SECRET_KEY verschlüsselt bzw. überprüft.
-Kopiere src/main/resources/application-local.properties.example nach application-local.properties und
-trage den secret key JWT_SECRET_KEY ein
-Dann starten mit mvn spring-boot:run "-Dspring-boot.run.profiles=prod,local".
-In der IDE muss auch das Profil local geladen werden.
 
 ### Anwendung mit HTTPS starten
 
 ```bash
-start.ps1
+scripts/win/start.ps1
 ```
 Info: Das script liesst die environment variablen aus der datei .env und startet automatisch das 
-maven kommando:  _mvn spring-boot:run --% -Dspring-boot.run.profiles=h2_
+maven kommando:  _mvn spring-boot:run --% -Dspring-boot.run.profiles=dev_
 
 ( --% bewirkt, dass von der powershell alles danach an maven weitergegeben wird)
 

@@ -59,6 +59,7 @@ Deshalb wird der User seine Fahrradteile und Fahrräder nicht selbst eintragen k
 - Authentifizierung und Autorisierung mit den Rollen USER und ADMIN
 - Logging über Aspektorientierte Programmierung (AOP)
 - ExceptionHandling über Aspektorientierte Programmierung (AOP)
+- Security mit HTTPS, HTTP2 und JWT Token
 
 ## 1.2 Wunschkriterien
 - Benutzer können eigene Fahrräder mit kompatiblen Ersatzteilen anlegen, bearbeiten und löschen = CRUD
@@ -102,6 +103,8 @@ Benutzer der Anwendung gliedern sich in:
 # 3. Produktübersicht
 
 Die Anwendung besteht aus folgenden zentralen Modulen:
+
+**Security:** HTTPS, HTTP2 und JWT Token
 
 **Benutzerverwaltung:** Registrierung, Login (Spring Security), Rollenverwaltung (USER/ADMIN), (Spätere Version: Profilverwaltung).
 
@@ -315,15 +318,15 @@ Das sind Nummerierungen wie /D10/,....
 ---
 
 # 9. Nichtfunktionale Anforderungen
-/N00/ **Profile**:  Profile für verschiedene Umgebungen nutzen. z.B. die H2 Datenbank zur Entwicklungszeit. Konfiguration mit application-h2.properties. (-> fertig)
+/N00/ **Profile**:  Profile für verschiedene Umgebungen nutzen. z.B. die H2 Datenbank zur Entwicklungszeit. Konfiguration mit application-dev.properties. (-> fertig)
 
 Profil für prod mit Einstellungen für den Linux-Server (-> fertig)
 
-/N10/ **Sicherheit:** Spring Security wird für Authentifizierung und Autorisierung eingesetzt. Passwörter werden verschlüsselt gespeichert. (-> fertig) Ggf Security mit AOP verwenden um einzelne Methoden zu schützen. (-> fertig. Verwendet für das h2 Profil)
+/N10/ **Sicherheit:** Spring Security wird für Authentifizierung und Autorisierung eingesetzt. Passwörter werden verschlüsselt gespeichert. (-> fertig) Ggf Security mit AOP verwenden um einzelne Methoden zu schützen. (-> fertig. Verwendet für das dev Profil)
 
 API-Keys für externe Dienste werden ebenfalls verschlüsselt abgelegt. 
 
-/N20/ **Logging + Performance:** Logging wird mit SLF4J eingerichtet. AOP wird für einheitliches Exception-Handling und Logging eingesetzt (`@Aspect`, `@Around`)  (-> fertig). <br> Für Performance Messungen kann `@Around` verwendet werden. Es soll nicht bei allen Methoden die Performance gemessen werden. Es wird mit der selbst definierten `@Timed`  Annotation gesteuert, welche Methoden mit PerformanceAspect gemessen werden sollen. Bei der Verwendung von @Timed wird konfiguriert, dass das nur im Profil h2/dev (`@Profile("h2") und @Timed`) verwendet werden soll, Nicht in Prod, da dies die Performance verschlechtert.  (-> fertig)
+/N20/ **Logging + Performance:** Logging wird mit SLF4J eingerichtet. AOP wird für einheitliches Exception-Handling und Logging eingesetzt (`@Aspect`, `@Around`)  (-> fertig). <br> Für Performance Messungen kann `@Around` verwendet werden. Es soll nicht bei allen Methoden die Performance gemessen werden. Es wird mit der selbst definierten `@Timed`  Annotation gesteuert, welche Methoden mit PerformanceAspect gemessen werden sollen. Bei der Verwendung von @Timed wird konfiguriert, dass das nur im Profil dev (`@Profile("dev") und @Timed`) verwendet werden soll, Nicht in Prod, da dies die Performance verschlechtert.  (-> fertig)
 
 /N30/ **Spring Actuator:** Monitoring mit Spring Boot Actuator aufbauen.
 
@@ -347,13 +350,13 @@ API-Keys für externe Dienste werden ebenfalls verschlüsselt abgelegt.
 
     `keytool -genkeypair -alias BikePartsFinder-localhost -keyalg RSA -keysize 4096 -sigalg SHA256withRSA -dname CN=dns:localhost -ext SAN=dns:localhost,ip:127.0.0.1  -validity 365 -keypass XY123456 -storetype PKCS12 -storepass XY123456  -storepass bergmannStorePass2026 -keypass bergmannKeyPass2026 -keystore C:\dev\keytool_Zertifikate_HTTPS_License\BikePartsFinder-localhost.p12`
 
-    Konfiguration über
-    `application-h2.properties` (`server.ssl.*`).
+    Konfiguration der SSL- und HTTP2-Parameter:
+    - **Lokal:** In `application-local.properties` (gitignored) werden die echten Werte direkt eingetragen (`server.ssl.key-store=file:<pfad>`, `server.ssl.key-store-password`, `server.ssl.key-store-type`, `server.port=8443`, `server.http2.enabled=true`).
+    - **Produktion:** `application-prod.properties` liest Env-Variablen ein. Diese werden in einer `.env`-Datei (gitignored) auf dem Server hinterlegt: `SSL_KEYSTORE_PATH`, `SSL_KEYSTORE_PASSWORD`, `SSL_KEYSTORE_TYPE`.
 
-    Und aktivieren von HTTP2 mit `server.http2.enabled`.
-
-- **JWT Secret:** Der geheime Schlüssel (Secret Key) `app.jwt.secret` steht in den application.properties. Er wird verwendet um das JWT Token zu signieren und Integrität
-  zu überprüfen. Da dieser nicht eingecheckt werden darf, wird die Variable `JWT_SECRET_KEY` verwendet, die in application-local.properties definiert wird.
+- **JWT Secret:** Der geheime Schlüssel (Secret Key) `app.jwt.secret` wird zum Signieren und Verifizieren des JWT Tokens verwendet und darf nicht eingecheckt werden.
+  - **Lokal:** In `application-local.properties` wird `app.jwt.secret` direkt gesetzt (Datei ist in `.gitignore`).
+  - **Produktion:** Die Umgebungsvariable `JWT_SECRET_KEY` wird in der `.env`-Datei (gitignored) auf dem Server hinterlegt. `application.properties` liest sie automatisch ein via `app.jwt.secret=${JWT_SECRET_KEY}`.
 
   - **JWT:** Nach erfolgreichem Login unter `POST /api/auth/login`
     (mit `username` + `password` als JSON) wird ein signiertes JWT
@@ -410,7 +413,7 @@ Die Anwendung sollte die folgenden Anforderungen erfüllen:
 7. Die Java Faker-Bibliothek nutzen, um Testdaten für Fahrräder und Fahrradteile zu generieren.
 8. Session Scope wird für die Verwaltung der Benutzersitzung (Spring Security) genutzt. Persistente Daten werden via Spring Data JPA in der Datenbank gespeichert.
 9. Spring Data JPA zur Anbindung an eine relationale Datenbank (z.B. H2, MySQL, PostgreSQL) verwenden.
-10. Es sollen Profile für verschiedene Umgebungen genutzt werden. z.B. die H2 Datenbank zur Entwicklungszeit. Konfiguration mit application-h2.properties.
+10. Es sollen Profile für verschiedene Umgebungen genutzt werden. z.B. die H2 Datenbank zur Entwicklungszeit. Konfiguration mit application-dev.properties.
 11. AccountId und Cart sollen in der Session gespeichert werden.
 12. Verwendung von GraalVM um ein native image / Natives Binary zu erzeugen. Hiermit benötigt man keine Java VM um das Programm auszuführen.
 

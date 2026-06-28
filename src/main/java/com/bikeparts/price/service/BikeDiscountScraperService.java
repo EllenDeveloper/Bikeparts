@@ -108,7 +108,7 @@ public class BikeDiscountScraperService implements ScraperShopInterface {
      * @param searchQuery Suchbegriff, z. B. {@code "shimano slx kette 10-fach"}.
      * @return {@link ScrapingResult} mit gefundenen {@link ProductOffer}s oder Fehlerstatus.
      */
-    @Profile("h2")
+    @Profile("dev")
     @Timed
     @Cacheable(value = "bikeDiscountSearch", key = "#searchQuery")
     public ScrapingResult search(String searchQuery) {
