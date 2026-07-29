@@ -19,6 +19,8 @@ startet eine Scraping-Web-Suche nach Preisen in Online-Shops. Die Ergebnisse wer
 - GraalVM Native Image (kein JVM auf dem Server nötig)
 - Proxy: Squid (via Docker) - wurde wieder entfernt, da HTTPS-Seiten nicht gecacht
   werden können. Stattdessen wird Caching in der Anwendung selbst verwendet (`@Cacheable`).
+- Info: Eine erste Version von Security mit OAuth2 ist unter https://github.com/EllenDeveloper zu finden.
+
 
 ## Pflichtenheft
 
@@ -70,7 +72,7 @@ llama-server.exe -m "C:\dev\...\ki_models\qwen2.5-1.5b-instruct-q4_k_m.gguf" --p
 Alternativ startet die Anwendung den llama-server automatisch beim Hochfahren
 (`llama.server.lifecycle.auto-start=true` in application.properties).
 
-### Konfiguration der Anwendung für HTTPS mit Aufruf in der Powershell
+### Konfiguration der Anwendung für HTTPS
 *Erstellen eines PKCS12 keystore mit keytool*
 
 In jedem Java JDK ist innerhalb des bin Verzeichnisses, das Komandozeilentool keytool zu finden. Mit diesem Tool 
