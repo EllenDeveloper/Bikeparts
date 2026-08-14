@@ -19,7 +19,7 @@ startet eine Scraping-Web-Suche nach Preisen in Online-Shops. Die Ergebnisse wer
 - GraalVM Native Image (kein JVM auf dem Server nötig)
 - Proxy: Squid (via Docker) - wurde wieder entfernt, da HTTPS-Seiten nicht gecacht
   werden können. Stattdessen wird Caching in der Anwendung selbst verwendet (`@Cacheable`).
-- Info: Eine erste Version von Security mit OAuth2 ist unter https://github.com/EllenDeveloper zu finden. Tests mit Deycloak (Start innerhalb eines Docker-Containers)
+- Info: Eine erste Version von Security mit OAuth2 ist unter https://github.com/EllenDeveloper zu finden. Tests mit Keycloak (Start innerhalb eines Docker-Containers)
 
 
 ## Pflichtenheft
