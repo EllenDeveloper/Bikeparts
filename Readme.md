@@ -14,7 +14,7 @@ startet eine Scraping-Web-Suche nach Preisen in Online-Shops. Die Ergebnisse wer
 - Architektur: Controller -> Service -> Repository
 - AOP, Caching, JPA, Thymeleaf, Spring Security
 - Web-Scraping (Jsoup)
-- Profile: `h2` (Entwicklung), `prod` (Produktion)
+- Profile: `dev` (Entwicklung), `prod` (Produktion), `local` (Für lokale Konfigurationen wie SSL_KEY_PASSWORD) 
 - KI: llama.cpp mit Qwen-Modell (lokal, sehr klein und passt in den Hauptspeicher, keine Cloud) - LLM Engineering
 - GraalVM Native Image (kein JVM auf dem Server nötig)
 - Proxy: Squid (via Docker) - wurde wieder entfernt, da HTTPS-Seiten nicht gecacht
