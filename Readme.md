@@ -89,7 +89,7 @@ Die Konfiguration unterscheidet sich je nach Umgebung:
 
 **Lokale Entwicklung:**
 Kopiere `src/main/resources/application-local.properties.example` nach `application-local.properties`
-(Datei ist in `.gitignore`) und trage die echten Werte ein:
+(Die Datei sollte in `.gitignore` aufgenommen werden.) und trage die echten Werte ein:
 ```properties
 app.jwt.secret=<mindestens-32-zeichen-langer-zufallskey>
 server.ssl.key-store=file:<pfad>/BikePartsFinder.p12
