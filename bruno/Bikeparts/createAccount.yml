@@ -15,7 +15,8 @@ http:
       {
         "firstName": "Max",
         "lastName": "Mustermann",
-        "email": "max@example.com"
+        "email": "max@example.com",
+        "password": "myPassword"
       }
   auth: inherit
 

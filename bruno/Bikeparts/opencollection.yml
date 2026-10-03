@@ -1,7 +1,7 @@
 opencollection: 1.0.0
 
 info:
-  name: Bikeparts
+  name: Bikeparts HTTP Requests
 config:
   proxy:
     inherit: false

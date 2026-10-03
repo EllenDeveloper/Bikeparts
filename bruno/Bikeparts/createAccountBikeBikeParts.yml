@@ -16,6 +16,7 @@ http:
         "firstName": "Marion",
         "lastName": "Mayer",
         "email": "marion@example.com",
+        "password": "myPassword",
         "bikes": [
           {
             "name": "bike1",
